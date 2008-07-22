@@ -1,0 +1,74 @@
+project(cudatemplates CXX CUDA)
+set(CMAKE_BUILD_TYPE Debug)
+cmake_minimum_required(VERSION 2.4)
+find_package(Cuda REQUIRED)
+add_subdirectory(include)
+add_subdirectory(testing)
+
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_NAME "cudatemplates")
+set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+
+configure_file(${CPACK_PACKAGE_NAME}.spec.in ${CPACK_PACKAGE_NAME}.spec)
+configure_file(Doxyfile.in Doxyfile)
+
+set(CPACK_IGNORE_FILES
+  ".depend"
+  "/#.*#$"
+  "/a.out/"
+  "/doc/"
+  "/src/"
+  "/log"
+  "CMakeCache\\\\.txt"
+  "CMakeFiles"
+  "CPack.*Config\\\\.cmake"
+  "CVS"
+  "Makefile"
+  "\\\\.#"
+  "\\\\.a$"
+  "\\\\.aux$"
+  "\\\\.bz2$"
+  "\\\\.dsp$"
+  "\\\\.dvi$"
+  "\\\\.eps$"
+  "\\\\.gz$"
+  "\\\\.iv$"
+  "\\\\.log$"
+  "\\\\.o$"
+  "\\\\.out"
+  "\\\\.pdf$"
+  "\\\\.pgm$"
+  "\\\\.pro$"
+  "\\\\.ps$"
+  "\\\\.save"
+  "\\\\.so"
+  "\\\\.svn"
+  "\\\\.swp$"
+  "\\\\.tbz$"
+  "\\\\.tex$"
+  "\\\\.tgz$"
+  "^/box.cpp"
+  "_CPack_Packages"
+  "build"
+  "cgparams$"
+  "cmake_install.cmake"
+  "cvs_import"
+  "install.sh"
+  "install_manifest.txt"
+  "makedist.sh"
+  "moc_"
+  "progress.make"
+  "~$"
+)
+
+set(CPACK_SOURCE_IGNORE_FILES ${CPACK_IGNORE_FILES})
+set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
+set(CPACK_GENERATOR "TBZ2")
+set(CPACK_SOURCE_GENERATOR "TBZ2")
+
+include(CPack)
+add_custom_target(dist COMMAND make package_source)
+add_custom_target(doc COMMAND doxygen)
+add_custom_target(clean-all COMMAND find \\\( -name CMakeFiles -or -name CMakeCache.txt -or -name Makefile -or -name '*.cmake' -or -name 'CPack*.cmake' -or -name _CPack_Packages -or -name '*~' \\\) -prune -exec rm -rf {} '\;')
