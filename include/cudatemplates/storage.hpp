@@ -31,13 +31,13 @@
   }									\
   inline Name ## Dim ## D(const Size<Dim> &_size):			\
     Layout<Type, Dim>(_size),						\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(_size),)			\
+    CUDA_INIT_POINTER(Pointer<Type, Dim>(_size))			\
     Name<Type, Dim>(_size)						\
   {									\
   }									\
   inline Name ## Dim ## D(const Layout<Type, Dim> &layout):		\
     Layout<Type, Dim>(layout),						\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(layout),)			\
+    CUDA_INIT_POINTER(Pointer<Type, Dim>(layout))			\
     Name<Type, Dim>(layout)						\
   {									\
   }									\
@@ -54,7 +54,7 @@
     CUDA_SPECIALIZE_DIM_COMMON(Name, 1)					\
     inline Name ## 1D(size_t s0):					\
       Layout<Type, 1>(Size<1>(s0)),					\
-      CUDA_INIT_POINTER(Pointer<Type, 1>(Size<1>(s0)),)			\
+      CUDA_INIT_POINTER(Pointer<Type, 1>(Size<1>(s0)))			\
       Name<Type, 1>(Size<1>(s0))					\
     {									\
     }									\
@@ -70,7 +70,7 @@
     CUDA_SPECIALIZE_DIM_COMMON(Name, 2)					\
     inline Name ## 2D(size_t s0, size_t s1):				\
       Layout<Type, 2>(Size<2>(s0, s1)),					\
-      CUDA_INIT_POINTER(Pointer<Type, 2>(Size<2>(s0, s1)),)		\
+      CUDA_INIT_POINTER(Pointer<Type, 2>(Size<2>(s0, s1)))		\
       Name<Type, 2>(Size<2>(s0, s1))					\
     {									\
     }									\
@@ -86,7 +86,7 @@
     CUDA_SPECIALIZE_DIM_COMMON(Name, 3)					\
     inline Name ## 3D(size_t s0, size_t s1, size_t s2):			\
       Layout<Type, 3>(Size<3>(s0, s1, s2)),				\
-      CUDA_INIT_POINTER(Pointer<Type, 3>(Size<3>(s0, s1, s2)),)		\
+      CUDA_INIT_POINTER(Pointer<Type, 3>(Size<3>(s0, s1, s2)))		\
       Name<Type, 3>(Size<3>(s0, s1, s2))				\
     {									\
     }									\
@@ -100,7 +100,7 @@
 #define CUDA_COPY_CONSTRUCTOR(Name1, Base)		\
   inline Name1(const Name1<Type, Dim> &x):		\
     Layout<Type, Dim>(x),				\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(x),)		\
+    CUDA_INIT_POINTER(Pointer<Type, Dim>(x))		\
     Base<Type, Dim>(x)					\
   {							\
     this->init();					\
@@ -110,7 +110,7 @@
   template<class Name2>					\
   inline Name1(const Name2 &x):				\
     Layout<Type, Dim>(x),				\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(x),)		\
+    CUDA_INIT_POINTER(Pointer<Type, Dim>(x))		\
     Base<Type, Dim>(x)					\
   {							\
     this->init();					\

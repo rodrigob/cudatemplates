@@ -27,7 +27,7 @@
 #include <cudatemplates/storage.hpp>
 
 
-#define CUDA_INIT_POINTER(args...)
+#define CUDA_INIT_POINTER(...)
 
 
 namespace Cuda {

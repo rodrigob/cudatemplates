@@ -26,7 +26,7 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
-#define CUDA_INIT_POINTER(args...) args
+#define CUDA_INIT_POINTER(...) __VA_ARGS__,
 
 
 namespace Cuda {
