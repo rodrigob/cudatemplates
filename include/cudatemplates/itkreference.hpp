@@ -87,6 +87,7 @@ private:
   */
   void setImage(typename ImageType::Pointer image)
   {
+    image_ptr = image;
     typename ImageType::SizeType isize = image->GetLargestPossibleRegion().GetSize();
     typename ImageType::SpacingType ispacing = image->GetSpacing();
 
@@ -98,6 +99,14 @@ private:
     this->buffer = image->GetBufferPointer();
     this->setPitch(0);
   }
+
+  /**
+     Pointer to ITK image.
+     This pointer is not used in the ItkReference class, but it increases the
+     reference count of the ITK image and prevents it from being deleted during
+     the lifetime of the ItkReference instance.
+  */
+  typename ImageType::Pointer image_ptr;
 };
 
 CUDA_SPECIALIZE_DIM(ItkReference);

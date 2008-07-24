@@ -30,24 +30,37 @@
 using namespace std;
 
 
+// prepare some ITK data types:
+typedef unsigned char PixelType;
+typedef itk::Image<PixelType, 2> ImageType;
+typedef itk::ImageFileReader<ImageType> ReaderType;
+typedef itk::ImageFileWriter<ImageType> WriterType;
+
+
+/**
+   Read ITK image.
+   When the image pointer is returned by this function, the ITK file reader
+   goes out of scope and decreases the reference count of the image. However,
+   the image is not destructed at this time since the Cuda::ItkReference class
+   holds an ImageType::Pointer to the image during its lifetime.
+   @return pointer to ITK image
+*/
+ImageType::Pointer
+read_image()
+{
+  // read input image:
+  ReaderType::Pointer reader = ReaderType::New();
+  reader->SetFileName("cameraman.png");
+  reader->Update();
+  return reader->GetOutput();
+}
+
 int
 main()
 {
   try {
-    // prepare some ITK data types:
-    typedef unsigned char PixelType;
-    typedef itk::Image<PixelType, 2> ImageType;
-    typedef itk::ImageFileReader<ImageType> ReaderType;
-    typedef itk::ImageFileWriter<ImageType> WriterType;
-
-    // read input image:
-    ReaderType::Pointer reader = ReaderType::New();
-    reader->SetFileName("cameraman.png");
-    reader->Update();
-    ImageType::Pointer image_input = reader->GetOutput();
-
     // create reference to ITK input image for use with CUDA classes:
-    Cuda::ItkReference<PixelType, 2> ref_image_input(image_input);
+    Cuda::ItkReference<PixelType, 2> ref_image_input(read_image());
 
     // create empty ITK output image:
     ImageType::Pointer image_output = ImageType::New();

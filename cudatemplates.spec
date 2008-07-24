@@ -44,4 +44,4 @@ make clean
 %defattr(-,root,root)
 %doc doc/html
 %doc LICENSE
-%{_includedir}/cut
+%{_includedir}/%{name}
