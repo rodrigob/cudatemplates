@@ -24,7 +24,7 @@
 #include <cuda.h>
 #include <cutil.h>
 
-#define CTK_NO_DEFAULT_CONSTRUCTORS
+#define CUDA_NO_DEFAULT_CONSTRUCTORS
 
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/copy.hpp>
