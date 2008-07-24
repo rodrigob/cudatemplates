@@ -26,6 +26,7 @@
 
 #define CUDA_NO_DEFAULT_CONSTRUCTORS
 #define ENFORCE_LAYOUT 0
+#define VERBOSE 0
 
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/copy.hpp>
@@ -190,7 +191,10 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     while(increment(index, size2));
   }
 
-  // cout << "test succeeded in \"" << __PRETTY_FUNCTION__ << "\"\n";
+#if VERBOSE
+  cout << "test succeeded in \"" << __PRETTY_FUNCTION__ << "\"\n";
+#endif
+
   return 0;
 }
 
@@ -222,6 +226,10 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       rpos2[i] = (d2 > 0) ? (rand() % d2) : 0;
     }
 
+#if VERBOSE
+    cout << rsize1 << rsize2 << rpos1 << rpos2 << rsize << endl;
+#endif
+
     err |= test1<T1, T2>(rsize1, rsize2, rpos1, rpos2, rsize);
   }
 
@@ -235,10 +243,9 @@ main()
   srand(time(0));
   int seed = rand();
   srand(seed);
+  int err = 0;
 
   try {
-    int err = 0;
-
     // simple usage example:
     {
       using namespace Cuda;
@@ -275,13 +282,14 @@ main()
 
 #include "test3d.cpp"
 
-    if(err)
-      cerr << "random seed was " << seed << endl;
-
-    return err;
   }
   catch(const exception &e) {
-    cerr << e.what() << endl;
-    return 1;
+    cerr << e.what();
+    err = 1;
   }
+
+  if(err)
+    cerr << "random seed was " << seed << endl;
+
+  return err;
 }

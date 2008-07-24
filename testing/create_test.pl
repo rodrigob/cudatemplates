@@ -17,10 +17,7 @@ sub no_support_1d
 # only power-of-two size allowed in 3D:
 sub only_pot_3d
 {
-    return false;
-    # the following cases do not work with enforced layout
-    # ("#define ENFORCED_LAYOUT 1" in main.cpp):
-    # return (@_[0] == 2) || (@_[0] == 4);
+    return (@_[0] == 2) || (@_[0] == 4);
 }
 
 sub create_code
