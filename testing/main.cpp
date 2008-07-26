@@ -77,8 +77,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       const Cuda::Size<T1::Dim> &size)
 {
   BOOST_STATIC_ASSERT(T1::Dim == T2::Dim);
-
-
+  
   // extract some types and constants:
   typedef typename T1::Type Type;
   const unsigned Dim = T1::Dim;
@@ -90,10 +89,9 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     T2 obj2(layout);
 
     // allocate plain C arrays and create HostMemoryReferences to them:
-    // Type buf1[layout.getSize()], buf2[layout.getSize()], buf3[layout.getSize()];
-	Type *buf1 = new Type[layout.getSize()];
-	Type *buf2 = new Type[layout.getSize()];
-	Type *buf3 = new Type[layout.getSize()];
+    Type *buf1 = new Type[layout.getSize()];
+    Type *buf2 = new Type[layout.getSize()];
+    Type *buf3 = new Type[layout.getSize()];
 
 #if ENFORCE_LAYOUT
     Cuda::HostMemoryReference<Type, Dim> ref1(layout, buf1);
@@ -128,24 +126,20 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       Type x3 = buf3[ref3.getOffset(index)];
 
       if(x2 != x1) {
-	//cerr << "copy test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
-	cerr << "copy test failed at index " << index << " in \"" << "\"\n"; //FIXXME
-	
-	
+	cerr << "copy test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
 	return 1;
       }
 
       if(x3 != x1) {
-	// cerr << "constructor test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
-	cerr << "constructor test failed at index " << index << " in \"" << "\"\n"; //FIXXME
+	cerr << "constructor test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
 	return 1;
       }
     }
     while(increment(index, size));
 
-	delete[] buf1;
-	delete[] buf2;
-	delete[] buf3;
+    delete[] buf1;
+    delete[] buf2;
+    delete[] buf3;
   }
 
   {
@@ -153,10 +147,9 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     T2 obj2(size2);
 
     // allocate plain C arrays and create HostMemoryReferences to them:
-    // Type buf1[obj1.getSize()], buf2[obj2.getSize()], buf3[obj2.getSize()];
-	Type *buf1 = new Type[obj1.getSize()];
-	Type *buf2 = new Type[obj2.getSize()];
-	Type *buf3 = new Type[obj2.getSize()];
+    Type *buf1 = new Type[obj1.getSize()];
+    Type *buf2 = new Type[obj2.getSize()];
+    Type *buf3 = new Type[obj2.getSize()];
 
     Cuda::HostMemoryReference<Type, Dim> ref1(size1, buf1);
     Cuda::HostMemoryReference<Type, Dim> ref2(size2, buf2);
@@ -198,17 +191,15 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       Type x2 = buf3[ref3.getOffset(index)];
 
       if(x2 != x1) {
-	//cerr << "copy test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
-	cerr << "copy test failed at index " << index << " in \"" << "\"\n"; //FIXXME
-	
+	cerr << "copy test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
 	return 1;
       }
     }
     while(increment(index, size2));
 
-	delete[] buf1;
-	delete[] buf2;
-	delete[] buf3;
+    delete[] buf1;
+    delete[] buf2;
+    delete[] buf3;
   }
 
 #if VERBOSE

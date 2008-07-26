@@ -8,5 +8,8 @@ add_definitions(-Wall)
 add_executable(cpptest main.cpp)
 target_link_libraries(cpptest cuda cudart)
 
+add_executable(fft fft.cpp)
+target_link_libraries(fft cuda cudart cufft)
+
 add_executable(itktest itktest.cpp)
 target_link_libraries(itktest cuda cudart ${ITK_LIBRARIES})

@@ -24,100 +24,174 @@
 
 #include <cassert>
 #include <complex>
-#include <stdexcept>
 
 #include <cufft.h>
 
 #include <cudatemplates/devicememorylinear.hpp>
+#include <cudatemplates/error.hpp>
 
 
-#define CUFFT_CHECK(cmd) { result_t res = cmd; if(res != CUFFT_SUCCESS) throw Error(res); }
+//!!! #define CUFFT_CHECK(call) { result_t_t err = call; if(err != CUFFT_SUCCESS) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
+#define CUFFT_CHECK(call) call
 
 
 namespace Cuda {
 namespace FFT {
 
 typedef cufftReal real;
-typedef std::complex<real> complex;
+typedef std::complex<cufftReal> std_complex;
+typedef cufftComplex complex;
 typedef cufftType_t type_t;
 typedef cufftResult_t result_t;
 
-class Error: public std::exception
-{
-  result_t result;
 
-public:
-  Error(result_t r): result(r) {}
+#define CUFFT_PLAN_SIZE1 size[0]
+#define CUFFT_PLAN_SIZE2 size[0], size[1]
+#define CUFFT_PLAN_SIZE3 size[0], size[1], size[2]
 
-  const char *what() const throw() {
-    static char msg[100];
-    sprintf(msg, "CUDA FFT error #%d", result);
-    return msg;
+#define CUFFT_PLAN_GENERIC(type, dim)					\
+  private:								\
+  cufftHandle plan;							\
+  Size<dim> size;							\
+  public:								\
+  inline ~Plan()							\
+  {									\
+    CUFFT_CHECK(cufftDestroy(plan));					\
   }
-};
+  
+#define CUFFT_PLAN_CONSTRUCTOR(type, dim)				\
+  public:								\
+  inline Plan(const Size<dim> &_size):					\
+  size(_size)								\
+  {									\
+    CUFFT_CHECK(cufftPlan ## dim ## d					\
+		(&plan, CUFFT_PLAN_SIZE ## dim, CUFFT_ ## type));	\
+  }
 
+#define CUFFT_PLAN_CONSTRUCTOR_BATCH(type, dim)				\
+  private:								\
+  int batch;								\
+  public:								\
+  inline Plan(const Size<dim> &_size, int _batch = 1):			\
+  size(_size), batch(_batch)						\
+  {									\
+    CUFFT_CHECK(cufftPlan ## dim ##d					\
+		(&plan, CUFFT_PLAN_SIZE ## dim,				\
+		 CUFFT_ ## type, batch));				\
+    size[0] *= batch;							\
+  }
+
+#define CUFFT_PLAN_EXEC(type, dim, in, out)				\
+  public:								\
+  inline void exec(const DeviceMemoryLinear<in, dim> &idata,		\
+		   DeviceMemoryLinear<out, dim> &odata)			\
+  {									\
+    if(0/*(idata.size != size) || (odata.size != size)*/)		\
+      CUDA_ERROR("size mismatch");					\
+    CUFFT_CHECK(cufftExec ## type					\
+		(plan, const_cast<in *>(idata.getBuffer()),		\
+		 odata.getBuffer()));					\
+  }
+  
+#define CUFFT_PLAN_EXEC_DIRECTION(type, dim, in, out)			\
+  public:								\
+  inline void exec(const DeviceMemoryLinear<in, dim> &idata,		\
+		   DeviceMemoryLinear<out, dim> &odata, int dir)	\
+  {									\
+    if(0/*(idata.size != size) || (odata.size != size)*/)		\
+      CUDA_ERROR("size mismatch");					\
+    CUFFT_CHECK(cufftExec ## type					\
+		(plan, const_cast<in *>(idata.getBuffer()),		\
+		 odata.getBuffer(), dir));				\
+  }
+  
+
+template <class TypeIn, class TypeOut, unsigned Dim>
 class Plan
 {
-protected:
-  cufftHandle plan;
-
-  inline ~Plan() {
-    assert(sizeof(complex) == 2 * sizeof(real));
-    CUFFT_CHECK(cufftDestroy(plan));
-  }
-
-public:
-  inline void exec(const complex *idata, complex *odata, int direction) {
-    CUFFT_CHECK(cufftExecC2C(plan, (cufftComplex *)idata, (cufftComplex *)odata, direction));
-  }
-
-  inline void exec(const real *idata, complex *odata) {
-    CUFFT_CHECK(cufftExecR2C(plan, (cufftReal *)idata, (cufftComplex *)odata));
-  }
-
-  inline void exec(const complex *idata, real *odata) {
-    CUFFT_CHECK(cufftExecC2R(plan, (cufftComplex *)idata, (cufftReal *)odata));
-  }
 };
 
-class Plan1d: public Plan
+template <>
+class Plan<real, complex, 1>
 {
-public:
-  inline Plan1d(int nx, type_t type, int batch = 1) {
-    CUFFT_CHECK(cufftPlan1d(&plan, nx, type, batch));
-  }
-
-  inline void exec(const DeviceMemoryLinear<complex, 1> &idata, DeviceMemoryLinear<complex, 1> &odata, int direction) {
-    // check size!!!
-    Plan::exec(idata.getBuffer(), odata.getBuffer(), direction);
-  }
-
-  inline void exec(const DeviceMemoryLinear<real, 1> &idata, DeviceMemoryLinear<complex, 1> &odata) {
-    // check size!!!
-    Plan::exec(idata.getBuffer(), odata.getBuffer());
-  }
-
-  inline void exec(const DeviceMemoryLinear<complex, 1> &idata, DeviceMemoryLinear<real, 1> &odata) {
-    // check size!!!
-    Plan::exec(idata.getBuffer(), odata.getBuffer());
-  }
+  CUFFT_PLAN_GENERIC          (R2C, 1)
+  CUFFT_PLAN_CONSTRUCTOR_BATCH(R2C, 1)
+  CUFFT_PLAN_EXEC             (R2C, 1, real, complex)
 };
 
-class Plan2d: public Plan
+template <>
+class Plan<complex, real, 1>
 {
-public:
-  inline Plan2d(int nx, int ny, type_t type) {
-    CUFFT_CHECK(cufftPlan2d(&plan, nx, ny, type));
-  }
+  CUFFT_PLAN_GENERIC          (C2R, 1)
+  CUFFT_PLAN_CONSTRUCTOR_BATCH(C2R, 1)
+  CUFFT_PLAN_EXEC             (C2R, 1, complex, real)
 };
 
-class Plan3d: public Plan
+template <>
+class Plan<complex, complex, 1>
 {
-public:
-  inline Plan3d(int nx, int ny, int nz, type_t type) {
-    CUFFT_CHECK(cufftPlan3d(&plan, nx, ny, nz, type));
-  }
+  CUFFT_PLAN_GENERIC          (C2C, 1)
+  CUFFT_PLAN_CONSTRUCTOR_BATCH(C2C, 1)
+  CUFFT_PLAN_EXEC_DIRECTION   (C2C, 1, complex, complex)
 };
+
+template <>
+class Plan<real, complex, 2>
+{
+  CUFFT_PLAN_GENERIC          (R2C, 2)
+  CUFFT_PLAN_CONSTRUCTOR      (R2C, 2)
+  CUFFT_PLAN_EXEC             (R2C, 2, real, complex)
+};
+
+template <>
+class Plan<complex, real, 2>
+{
+  CUFFT_PLAN_GENERIC          (C2R, 2)
+  CUFFT_PLAN_CONSTRUCTOR      (C2R, 2)
+  CUFFT_PLAN_EXEC             (C2R, 2, complex, real)
+};
+
+template <>
+class Plan<complex, complex, 2>
+{
+  CUFFT_PLAN_GENERIC          (C2C, 2)
+  CUFFT_PLAN_CONSTRUCTOR      (C2C, 2)
+  CUFFT_PLAN_EXEC_DIRECTION   (C2C, 2, complex, complex)
+};
+
+template <>
+class Plan<real, complex, 3>
+{
+  CUFFT_PLAN_GENERIC          (R2C, 3)
+  CUFFT_PLAN_CONSTRUCTOR      (R2C, 3)
+  CUFFT_PLAN_EXEC             (R2C, 3, real, complex)
+};
+
+template <>
+class Plan<complex, real, 3>
+{
+  CUFFT_PLAN_GENERIC          (C2R, 3)
+  CUFFT_PLAN_CONSTRUCTOR      (C2R, 3)
+  CUFFT_PLAN_EXEC             (C2R, 3, complex, real)
+};
+
+template <>
+class Plan<complex, complex, 3>
+{
+  CUFFT_PLAN_GENERIC          (C2C, 3)
+  CUFFT_PLAN_CONSTRUCTOR      (C2C, 3)
+  CUFFT_PLAN_EXEC_DIRECTION   (C2C, 3, complex, complex)
+};
+
+
+#undef CUFFT_PLAN_SIZE1
+#undef CUFFT_PLAN_SIZE2
+#undef CUFFT_PLAN_SIZE3
+#undef CUFFT_PLAN_GENERIC
+#undef CUFFT_PLAN_CONSTRUCTOR
+#undef CUFFT_PLAN_CONSTRUCTOR_BATCH
+#undef CUFFT_PLAN_EXEC
+#undef CUFFT_PLAN_EXEC_DIRECTION
 
 }  // namespace FFT
 }  // namespace Cuda

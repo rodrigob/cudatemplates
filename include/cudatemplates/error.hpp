@@ -27,9 +27,9 @@
 #include <cstdlib>
 
 #define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) abort(); }
-#define CUDA_ERROR(msg) { abort(); }
+#define CUDA_ERROR(msg) { std::cerr << msg << std::endl; abort(); }
 
-#else
+#else  // __CUDACC__
 
 #include <sstream>
 #include <stdexcept>
@@ -38,27 +38,29 @@
 #include <cuda_runtime.h>
 #include <driver_types.h>
 
-#ifndef WIN32
-	#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, err, 0); }
-	#define CUDA_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, cudaSuccess, s.str().c_str()); }
-#else
-	#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) abort(); }
-	#define CUDA_ERROR(msg) { abort(); }
+#ifndef __GNUC__
+#define __PRETTY_FUNCTION__ "(unknown function)"
 #endif
+
+#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
+#define CUDA_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
+
 
 namespace Cuda {
 
 class Error: public std::exception
 {
 public:
-  Error(const char *file, int line, const char *function, cudaError_t code, const char *comment)
+  Error(const char *file, int line, const char *function, int code, const char *comment)
   {
     std::ostringstream s;
     s << "CUDA error in " << file << ':' << line << std::endl << function << std::endl;
     
-    if(code > 0)
+    /*!!!
+    if(code != 0)
       s << '#' << code << ": " << cudaGetErrorString(code) << std::endl;
-    
+    */
+
     if(comment != 0)
       s << comment << std::endl;
     
@@ -80,7 +82,7 @@ private:
 
 };
 
-#endif
+#endif  // __CUDACC__
 
 
 #endif
