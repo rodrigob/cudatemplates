@@ -38,7 +38,7 @@ namespace Cuda {
    Appropriate padding is added to maximize access performance.
 */
 template <class Type, unsigned Dim>
-class DeviceMemoryPitched: public DeviceMemory<Type, Dim>
+class DeviceMemoryPitched: public DeviceMemoryStorage<Type, Dim>
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
 
@@ -59,7 +59,7 @@ public:
   inline DeviceMemoryPitched(const Size<Dim> &_size):
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
-    DeviceMemory<Type, Dim>(_size)
+    DeviceMemoryStorage<Type, Dim>(_size)
   {
     alloc();
   }
@@ -71,20 +71,12 @@ public:
   inline DeviceMemoryPitched(const Layout<Type, Dim> &layout):
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
-    DeviceMemory<Type, Dim>(layout)
+    DeviceMemoryStorage<Type, Dim>(layout)
   {
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(DeviceMemoryPitched, DeviceMemory)
-
-  /**
-     Destructor.
-  */
-  ~DeviceMemoryPitched()
-  {
-    this->free();
-  }
+  CUDA_COPY_CONSTRUCTOR(DeviceMemoryPitched, DeviceMemoryStorage)
 
   /**
      Allocate GPU memory.

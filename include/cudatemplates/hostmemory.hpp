@@ -1,4 +1,4 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
@@ -104,7 +104,6 @@ public:
     HostMemory<Type, Dim>(_size),
     PointerStorage<Type, Dim>(_size)
   {
-    alloc();
   }
 
   /**
@@ -117,13 +116,8 @@ public:
     HostMemory<Type, Dim>(layout),
     PointerStorage<Type, Dim>(layout)
   {
-    alloc();
   }
 
-  ~HostMemoryStorage();
-
-  void alloc();
-  void free();
   inline void init() { this->buffer = 0; }
 
 protected:
@@ -135,35 +129,6 @@ protected:
   {
   }
 };
-
-template <class Type, unsigned Dim>
-void HostMemoryStorage<Type, Dim>::
-alloc()
-{
-  this->setPitch(0);
-  this->buffer = (Type *)malloc(this->getSize() * sizeof(Type));
-
-  if(this->buffer == 0)
-    CUDA_ERROR("out of memory");
-}
-
-template <class Type, unsigned Dim>
-void HostMemoryStorage<Type, Dim>::
-free()
-{
-  if(this->buffer == 0)
-    return;
-
-  ::free(this->buffer);
-  this->buffer = 0;
-}
-
-template <class Type, unsigned Dim>
-HostMemoryStorage<Type, Dim>::
-~HostMemoryStorage()
-{
-  free();
-}
 
 }
 

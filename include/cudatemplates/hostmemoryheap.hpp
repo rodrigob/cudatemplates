@@ -87,7 +87,7 @@ public:
   void alloc();
 
   /**
-     Allocate CPU memory.
+     Free CPU memory.
   */
   void free();
 };

@@ -52,6 +52,20 @@ public:
     this->buffer = _buffer;
   }
 
+  /**
+     Constructor.
+     @param requested layout
+     @param _buffer pointer to CPU memory
+  */
+  inline HostMemoryReference(const HostMemory<Type, Dim> &data, const Size<Dim> &ofs, const Size<Dim> &_size):
+    Layout<Type, Dim>(data),
+    Pointer<Type, Dim>(data),
+    HostMemory<Type, Dim>(data)
+  {
+    this->buffer = data.getBuffer() + data.getOffset(ofs);
+    this->size = _size;
+  }
+
 protected:
   /**
      Default constructor.

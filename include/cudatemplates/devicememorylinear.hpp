@@ -37,7 +37,7 @@ namespace Cuda {
    No padding is performed, i.e., efficiency of access may be suboptimal.
 */
 template <class Type, unsigned Dim>
-class DeviceMemoryLinear: public DeviceMemory<Type, Dim>
+class DeviceMemoryLinear: public DeviceMemoryStorage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -56,7 +56,7 @@ public:
   inline DeviceMemoryLinear(const Size<Dim> &_size):
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
-    DeviceMemory<Type, Dim>(_size)
+    DeviceMemoryStorage<Type, Dim>(_size)
   {
     alloc();
   }
@@ -68,20 +68,12 @@ public:
   inline DeviceMemoryLinear(const Layout<Type, Dim> &layout):
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
-    DeviceMemory<Type, Dim>(layout)
+    DeviceMemoryStorage<Type, Dim>(layout)
   {
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(DeviceMemoryLinear, DeviceMemory)
-
-  /**
-     Destructor.
-  */
-  ~DeviceMemoryLinear()
-  {
-    this->free();
-  }
+  CUDA_COPY_CONSTRUCTOR(DeviceMemoryLinear, DeviceMemoryStorage)
 
   /**
      Allocate GPU memory.

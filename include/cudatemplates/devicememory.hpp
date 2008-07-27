@@ -33,7 +33,7 @@ namespace Cuda {
    This is the base class for all kind of GPU memory except CUDA arrays.
 */
 template <class Type, unsigned Dim>
-class DeviceMemory: public PointerStorage<Type, Dim>
+class DeviceMemory: virtual public Pointer<Type, Dim>
 {
 protected:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -51,8 +51,7 @@ protected:
   */
   inline DeviceMemory(const Size<Dim> &_size):
     Layout<Type, Dim>(_size),
-    Pointer<Type, Dim>(_size),
-    PointerStorage<Type, Dim>(_size)
+    Pointer<Type, Dim>(_size)
   {
   }
 
@@ -62,34 +61,77 @@ protected:
   */
   inline DeviceMemory(const Layout<Type, Dim> &layout):
     Layout<Type, Dim>(layout),
-    Pointer<Type, Dim>(layout),
-    PointerStorage<Type, Dim>(layout)
+    Pointer<Type, Dim>(layout)
   {
   }
-
-  /**
-     Destructor.
-  */
-  ~DeviceMemory()
-  {
-  }
-
-  /**
-     Free GPU memory.
-  */
-  void free();
 
 protected:
   inline DeviceMemory(const DeviceMemory<Type, Dim> &x):
     Layout<Type, Dim>(x),
+    Pointer<Type, Dim>(x)
+  {
+  }
+};
+
+/**
+   Representation of GPU memory managed by the CUDA Toolkit.
+   This is the base class for all kind of GPU memory for which memory
+   management is performed by the CUDA Toolkit (except CUDA arrays).
+*/
+template <class Type, unsigned Dim>
+class DeviceMemoryStorage: public DeviceMemory<Type, Dim>, public PointerStorage<Type, Dim>
+{
+public:
+#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
+  /**
+     Default constructor.
+  */
+  inline DeviceMemoryStorage()
+  {
+  }
+#endif
+
+  /**
+     Constructor.
+     @param _size requested size of memory block
+  */
+  inline DeviceMemoryStorage(const Size<Dim> &_size):
+    Layout<Type, Dim>(_size),
+    Pointer<Type, Dim>(_size),
+    DeviceMemory<Type, Dim>(_size),
+    PointerStorage<Type, Dim>(_size)
+  {
+  }
+
+  /**
+     Constructor.
+     @param layout requested layout of memory block
+  */
+  inline DeviceMemoryStorage(const Layout<Type, Dim> &layout):
+    Layout<Type, Dim>(layout),
+    Pointer<Type, Dim>(layout),
+    DeviceMemory<Type, Dim>(layout),
+    PointerStorage<Type, Dim>(layout)
+  {
+  }
+
+  ~DeviceMemoryStorage();
+
+  void free();
+  inline void init() { this->buffer = 0; }
+
+protected:
+  inline DeviceMemoryStorage(const DeviceMemoryStorage<Type, Dim> &x):
+    Layout<Type, Dim>(x),
     Pointer<Type, Dim>(x),
+    DeviceMemory<Type, Dim>(x),
     PointerStorage<Type, Dim>(x)
   {
   }
 };
 
 template <class Type, unsigned Dim>
-void DeviceMemory<Type, Dim>::
+void DeviceMemoryStorage<Type, Dim>::
 free()
 {
   if(this->buffer == 0)
@@ -97,6 +139,13 @@ free()
 
   CUDA_CHECK(cudaFree(this->buffer));
   this->buffer = 0;
+}
+
+template <class Type, unsigned Dim>
+DeviceMemoryStorage<Type, Dim>::
+~DeviceMemoryStorage()
+{
+  this->free();
 }
 
 }
