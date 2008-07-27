@@ -36,6 +36,11 @@
 */
 #define CUDA_USE_OFFSET 0
 
+/*
+  There is a possible range checking bug in cudaMemcpy3D,
+  see http://forums.nvidia.com/index.php?showtopic=73497.
+*/
+
 
 namespace Cuda {
 
