@@ -31,6 +31,8 @@
 
 namespace Cuda {
 
+template <class Type, unsigned Dim> class HostMemoryReference;
+
 /**
    Representation of CPU memory.
    This is the base class for all kind of CPU memory.
@@ -39,6 +41,9 @@ template <class Type, unsigned Dim>
 class HostMemory: virtual public Pointer<Type, Dim>
 {
 public:
+  typedef HostMemoryReference<Type, Dim> Reference;
+
+protected:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**
      Default constructor.
@@ -68,7 +73,6 @@ public:
   {
   }
 
-protected:
   inline HostMemory(const HostMemory<Type, Dim> &x):
     Layout<Type, Dim>(x),
     Pointer<Type, Dim>(x)

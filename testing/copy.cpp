@@ -27,13 +27,15 @@
 #define CUDA_NO_DEFAULT_CONSTRUCTORS
 #define ENFORCE_LAYOUT 0
 #define VERBOSE 0
+#define TEST_REFERENCE 1
 
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/copy.hpp>
-#include <cudatemplates/hostmemoryheap.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
-#include <cudatemplates/hostmemorylocked.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
+#include <cudatemplates/devicememoryreference.hpp>
+#include <cudatemplates/hostmemoryheap.hpp>
+#include <cudatemplates/hostmemorylocked.hpp>
 #include <cudatemplates/hostmemoryreference.hpp>
 
 using namespace std;
@@ -151,11 +153,13 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     Type *buf2 = new Type[obj2.getSize()];
     Type *buf3 = new Type[obj2.getSize()];
     Type *buf4 = new Type[size.getSize()];
+    Type *buf5 = new Type[size.getSize()];
 
     Cuda::HostMemoryReference<Type, Dim> ref1(size1, buf1);
     Cuda::HostMemoryReference<Type, Dim> ref2(size2, buf2);
     Cuda::HostMemoryReference<Type, Dim> ref3(size2, buf3);
     Cuda::HostMemoryReference<Type, Dim> ref4(size, buf4);
+    Cuda::HostMemoryReference<Type, Dim> ref5(size, buf5);
 
     // create random data:
     for(unsigned i = 0; i < ref1.getSize(); ++i)
@@ -171,6 +175,10 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     copy(ref3, obj2);
     T2 obj4(obj1, pos1, size);
     copy(ref4, obj4);
+#if TEST_REFERENCE
+    typename T1::Reference obj5(obj1, pos1, size);
+    copy(ref5, obj5);
+#endif
 
     // compare results:
     Cuda::Size<Dim> index;
@@ -206,6 +214,15 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 	  cerr << "constructor test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
 	  return 1;
 	}
+
+#if TEST_REFERENCE
+	Type x5 = buf5[ref5.getOffset(index - pos2)];
+
+	if(x5 != x1) {
+	  cerr << "reference test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
+	  return 1;
+	}
+#endif
       }
     }
     while(increment(index, size2));
@@ -213,6 +230,8 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     delete[] buf1;
     delete[] buf2;
     delete[] buf3;
+    delete[] buf4;
+    delete[] buf5;
   }
 
 #if VERBOSE
@@ -286,7 +305,7 @@ main()
       pos2a(smax2 / 16, smax2 / 16), pos2b(smax2 / 8, smax2 / 8),
       size2(smax2 / 2, smax2 / 2);
 
-#include "test2d.cpp"
+    // #include "test2d.cpp"
 
     // three-dimensional data:
     size_t smax3 = 64;
@@ -295,7 +314,7 @@ main()
       pos3a(smax3 / 4, smax3 / 4, smax3 / 4), pos3b(smax3 / 8, smax3 / 8, smax3 / 8),
       size3(smax3 / 2, smax3 / 2, smax3 / 2);
 
-#include "test3d.cpp"
+    // #include "test3d.cpp"
 
     // simple usage example:
     {

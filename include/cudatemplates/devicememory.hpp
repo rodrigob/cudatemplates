@@ -28,6 +28,8 @@
 
 namespace Cuda {
 
+template <class Type, unsigned Dim> class DeviceMemoryReference;
+
 /**
    Representation of GPU memory.
    This is the base class for all kind of GPU memory except CUDA arrays.
@@ -35,6 +37,9 @@ namespace Cuda {
 template <class Type, unsigned Dim>
 class DeviceMemory: virtual public Pointer<Type, Dim>
 {
+public:
+  typedef DeviceMemoryReference<Type, Dim> Reference;
+
 protected:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**
@@ -65,7 +70,6 @@ protected:
   {
   }
 
-protected:
   inline DeviceMemory(const DeviceMemory<Type, Dim> &x):
     Layout<Type, Dim>(x),
     Pointer<Type, Dim>(x)

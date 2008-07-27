@@ -18,11 +18,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CUDA_HOSTMEMORYREFERENCE_H
-#define CUDA_HOSTMEMORYREFERENCE_H
+#ifndef CUDA_DEVICEMEMORYREFERENCE_H
+#define CUDA_DEVICEMEMORYREFERENCE_H
 
 
-#include <cudatemplates/hostmemory.hpp>
+#include <cudatemplates/devicememory.hpp>
 
 
 #define CUDA_INIT_POINTER(...) __VA_ARGS__,
@@ -31,23 +31,23 @@
 namespace Cuda {
 
 /**
-   Reference to existing buffer in CPU main memory.
-   This class can be used to apply the Cuda Templates methods to memory regions
+   Reference to existing buffer in GPU main memory.
+   This class can be used to apply the CUDA Templates methods to memory regions
    managed by other libraries.
 */
 template <class Type, unsigned Dim>
-class HostMemoryReference: public HostMemory<Type, Dim>
+class DeviceMemoryReference: public DeviceMemory<Type, Dim>
 {
 public:
   /**
      Constructor.
      @param requested layout
-     @param _buffer pointer to CPU memory
+     @param _buffer pointer to GPU memory
   */
-  inline HostMemoryReference(const Layout<Type, Dim> &layout, Type *_buffer):
+  inline DeviceMemoryReference(const Layout<Type, Dim> &layout, Type *_buffer):
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
-    HostMemory<Type, Dim>(layout)
+    DeviceMemory<Type, Dim>(layout)
   {
     this->buffer = _buffer;
   }
@@ -57,12 +57,12 @@ public:
      The current implementation only works if the resulting object refers to a
      contiguous block of memory.
      @param requested layout
-     @param _buffer pointer to CPU memory
+     @param _buffer pointer to GPU memory
   */
-  inline HostMemoryReference(HostMemory<Type, Dim> &data, const Size<Dim> &ofs, const Size<Dim> &_size):
+  inline DeviceMemoryReference(DeviceMemory<Type, Dim> &data, const Size<Dim> &ofs, const Size<Dim> &_size):
     Layout<Type, Dim>(data),
     Pointer<Type, Dim>(data),
-    HostMemory<Type, Dim>(data)
+    DeviceMemory<Type, Dim>(data)
   {
     this->buffer = data.getBuffer() + data.getOffset(ofs);
     this->size = _size;
@@ -75,11 +75,11 @@ protected:
      This is only for subclasses which know how to correctly set up the data
      pointer.
   */
-  inline HostMemoryReference() {}
+  inline DeviceMemoryReference() {}
 
 };
 
-CUDA_SPECIALIZE_DIM(HostMemoryReference);
+CUDA_SPECIALIZE_DIM(DeviceMemoryReference);
 
 }
 

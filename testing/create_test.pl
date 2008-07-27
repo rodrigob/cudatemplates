@@ -4,8 +4,8 @@
     "HostMemoryHeap",
     "HostMemoryLocked",
     "DeviceMemoryLinear",
-    "DeviceMemoryPitched",
-    "Array"
+    "DeviceMemoryPitched"
+#    "Array"
     );
 
 # no DeviceMemoryPitched and Array in 1d:

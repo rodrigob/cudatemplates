@@ -86,7 +86,7 @@ public:
   /**
      Get offset for given index.
      @param index index for which to compute offset
-     @return offset (in bytes) for given index
+     @return offset (in elements) for given index
   */
   size_t getOffset(const SizeBase<Dim> &index) const
   {
@@ -96,6 +96,16 @@ public:
       o += index[i] * stride[i - 1];
 
     return o;
+  }
+
+  /**
+     Determine if layout is contiguous.
+  */
+  bool contiguous() const
+  {
+    Layout<Type, Dim> x(*this);
+    x.setPitch(0);
+    return x.stride == stride;
   }
 
   /**

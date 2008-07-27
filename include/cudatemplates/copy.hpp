@@ -670,20 +670,10 @@ copy(Array<Type, Dim> &dst, const Array<Type, Dim> &src,
     p.srcPos.x = src_ofs[0];
     p.srcPos.y = src_ofs[1];
     p.srcPos.z = src_ofs[2];
-    /*
-    p.srcPtr.pitch = src.getPitch();
-    p.srcPtr.xsize = src.size[0];
-    p.srcPtr.ysize = src.size[1];
-    */
     p.dstArray = dst.getArray();
     p.dstPos.x = dst_ofs[0];
     p.dstPos.y = dst_ofs[1];
     p.dstPos.z = dst_ofs[2];
-    /*
-    p.dstPtr.pitch = dst.getPitch();
-    p.dstPtr.xsize = dst.size[0];
-    p.dstPtr.ysize = dst.size[1];
-    */
     p.extent.width = size[0];
     p.extent.height = size[1];
     p.extent.depth = size[2];
