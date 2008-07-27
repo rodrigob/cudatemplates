@@ -27,7 +27,7 @@
 #define CUDA_NO_DEFAULT_CONSTRUCTORS
 #define ENFORCE_LAYOUT 0
 #define VERBOSE 0
-#define TEST_REFERENCE 1
+#define TEST_REFERENCE 0
 
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/copy.hpp>
@@ -305,7 +305,7 @@ main()
       pos2a(smax2 / 16, smax2 / 16), pos2b(smax2 / 8, smax2 / 8),
       size2(smax2 / 2, smax2 / 2);
 
-    // #include "test2d.cpp"
+#include "test2d.cpp"
 
     // three-dimensional data:
     size_t smax3 = 64;
@@ -314,7 +314,7 @@ main()
       pos3a(smax3 / 4, smax3 / 4, smax3 / 4), pos3b(smax3 / 8, smax3 / 8, smax3 / 8),
       size3(smax3 / 2, smax3 / 2, smax3 / 2);
 
-    // #include "test3d.cpp"
+#include "test3d.cpp"
 
     // simple usage example:
     {
