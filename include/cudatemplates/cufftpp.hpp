@@ -27,7 +27,7 @@
 
 #include <cufft.h>
 
-#include <cudatemplates/devicememorylinear.hpp>
+#include <cudatemplates/devicememory.hpp>
 #include <cudatemplates/error.hpp>
 
 
@@ -48,6 +48,10 @@ typedef cufftResult_t result_t;
 #define CUFFT_PLAN_SIZE1 size[0]
 #define CUFFT_PLAN_SIZE2 size[0], size[1]
 #define CUFFT_PLAN_SIZE3 size[0], size[1], size[2]
+
+
+// TODO: exec() methods must check for contiguous memory!
+
 
 #define CUFFT_PLAN_GENERIC(type, dim)					\
   private:								\
@@ -71,7 +75,7 @@ typedef cufftResult_t result_t;
   int batch;								\
   public:								\
   inline Plan(const Size<dim> &size, int _batch = 1):			\
-  batch(_batch)						\
+    batch(_batch)							\
   {									\
     CUFFT_CHECK(cufftPlan ## dim ##d					\
 		(&plan, CUFFT_PLAN_SIZE ## dim,				\
@@ -80,8 +84,8 @@ typedef cufftResult_t result_t;
 
 #define CUFFT_PLAN_EXEC(type, dim, in, out)				\
   public:								\
-  inline void exec(const DeviceMemoryLinear<in, dim> &idata,		\
-		   DeviceMemoryLinear<out, dim> &odata)			\
+  inline void exec(const DeviceMemory<in, dim> &idata,			\
+		   DeviceMemory<out, dim> &odata)			\
   {									\
     CUFFT_CHECK(cufftExec ## type					\
 		(plan, const_cast<in *>(idata.getBuffer()),		\
@@ -90,8 +94,8 @@ typedef cufftResult_t result_t;
   
 #define CUFFT_PLAN_EXEC_DIRECTION(type, dim, in, out)			\
   public:								\
-  inline void exec(const DeviceMemoryLinear<in, dim> &idata,		\
-		   DeviceMemoryLinear<out, dim> &odata, int dir)	\
+  inline void exec(const DeviceMemory<in, dim> &idata,			\
+		   DeviceMemory<out, dim> &odata, int dir)		\
   {									\
     CUFFT_CHECK(cufftExec ## type					\
 		(plan, const_cast<in *>(idata.getBuffer()),		\

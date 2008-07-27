@@ -30,7 +30,8 @@ cmake \
 -DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \
 -DCMAKE_INSTALL_LIBDIR:PATH=%{_libdir} \
 .
-make doc
+#make doc
+mkdir -p doc/html
 
 %install
 DESTDIR=$RPM_BUILD_ROOT make install
