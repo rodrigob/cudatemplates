@@ -56,10 +56,8 @@ public:
     std::ostringstream s;
     s << "CUDA error in " << file << ':' << line << std::endl << function << std::endl;
     
-    /*!!!
     if(code != 0)
-      s << '#' << code << ": " << cudaGetErrorString(code) << std::endl;
-    */
+      s << '#' << code << ": " << cudaGetErrorString((cudaError_t)code) << std::endl;
 
     if(comment != 0)
       s << comment << std::endl;

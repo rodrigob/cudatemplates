@@ -13,3 +13,6 @@ target_link_libraries(fft cuda cudart cufft)
 
 add_executable(itk itk.cpp)
 target_link_libraries(itk cuda cudart ${ITK_LIBRARIES})
+
+add_executable(array array.cpp)
+target_link_libraries(array cuda cudart)
