@@ -74,7 +74,7 @@ template <class T1, class T2>
 int
 test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
-      const Cuda::Size<T1::Dim> &size)
+      const Cuda::Size<T1::Dim> &size, bool use_region)
 {
   BOOST_STATIC_ASSERT(T1::Dim == T2::Dim);
   
@@ -142,7 +142,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     delete[] buf3;
   }
 
-  {
+  if(use_region) {
     T1 obj1(size1);
     T2 obj2(size2);
 
@@ -233,7 +233,7 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
   int err = 0;
 
   // test with fixed size:
-  err |= test1<T1, T2>(size1, size2, pos1, pos2, size);
+  err |= test1<T1, T2>(size1, size2, pos1, pos2, size, false);
   
   if(size_max > 0) {
     // test with random size:
@@ -254,7 +254,7 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     cout << rsize1 << rsize2 << rpos1 << rpos2 << rsize << endl;
 #endif
 
-    err |= test1<T1, T2>(rsize1, rsize2, rpos1, rpos2, rsize);
+    err |= test1<T1, T2>(rsize1, rsize2, rpos1, rpos2, rsize, true);
   }
 
   return err;
@@ -270,15 +270,6 @@ main()
   int err = 0;
 
   try {
-    // simple usage example:
-    {
-      using namespace Cuda;
-      Size<2> size(256, 256);
-      HostMemoryHeap<float, 2> cpu(size);
-      DeviceMemoryLinear<float, 2> gpu(size);
-      copy(gpu, cpu);
-    }
-
     // one-dimensional data:
     size_t smax1 = 512;
     Cuda::Size<1>
@@ -286,7 +277,7 @@ main()
       pos1a(smax1 / 16), pos1b(smax1 / 16),
       size1(smax1 / 2);
 
-    // #include "test1d.cpp"
+#include "test1d.cpp"
 
     // two-dimensional data:
     size_t smax2 = 512;
@@ -295,7 +286,7 @@ main()
       pos2a(smax2 / 16, smax2 / 16), pos2b(smax2 / 8, smax2 / 8),
       size2(smax2 / 2, smax2 / 2);
 
-    // #include "test2d.cpp"
+#include "test2d.cpp"
 
     // three-dimensional data:
     size_t smax3 = 64;
@@ -306,6 +297,14 @@ main()
 
 #include "test3d.cpp"
 
+    // simple usage example:
+    {
+      using namespace Cuda;
+      Size<2> size(256, 256);
+      HostMemoryHeap<float, 2> cpu(size);
+      DeviceMemoryLinear<float, 2> gpu(size);
+      copy(gpu, cpu);
+    }
   }
   catch(const exception &e) {
     cerr << e.what();
