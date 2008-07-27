@@ -150,12 +150,12 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     Type *buf1 = new Type[obj1.getSize()];
     Type *buf2 = new Type[obj2.getSize()];
     Type *buf3 = new Type[obj2.getSize()];
-    Type *buf4 = new Type[obj2.getSize()];
+    Type *buf4 = new Type[size.getSize()];
 
     Cuda::HostMemoryReference<Type, Dim> ref1(size1, buf1);
     Cuda::HostMemoryReference<Type, Dim> ref2(size2, buf2);
     Cuda::HostMemoryReference<Type, Dim> ref3(size2, buf3);
-    Cuda::HostMemoryReference<Type, Dim> ref4(size2, buf4);
+    Cuda::HostMemoryReference<Type, Dim> ref4(size, buf4);
 
     // create random data:
     for(unsigned i = 0; i < ref1.getSize(); ++i)
@@ -169,7 +169,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     copy(obj2, ref2);
     copy(obj2, obj1, pos2, pos1, size);
     copy(ref3, obj2);
-    T2 obj4(obj1, pos1, size);
+    T2 obj4(obj2, pos2, size);
     copy(ref4, obj4);
 
     // compare results:
@@ -192,17 +192,17 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 	buf1[ref1.getOffset(index + pos1 - pos2)] :
 	buf2[ref2.getOffset(index)];
 
-      Type x2 = buf3[ref3.getOffset(index)];
+      Type x3 = buf3[ref3.getOffset(index)];
 
-      if(x2 != x1) {
+      if(x3 != x1) {
 	cerr << "copy test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
 	return 1;
       }
 
       if(inside) {
-	Type x3 = buf4[ref4.getOffset(index + pos1 - pos2)];
+	Type x4 = buf4[ref4.getOffset(index - pos2)];
 
-	if(x3 != x1) {
+	if(x4 != x3) {
 	  cerr << "constructor test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
 	  return 1;
 	}

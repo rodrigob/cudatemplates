@@ -81,6 +81,18 @@ public:
     return r;
   }
 
+  /**
+     Get total number of elements.
+  */
+  size_t getSize() const {
+    size_t s = 1;
+
+    for(int i = Dim; i--;)
+      s *= size[i];
+
+    return s;
+  }
+
 protected:
   /**
      The size in each dimension.
