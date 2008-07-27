@@ -5,11 +5,11 @@ include(${ITK_USE_FILE})
 include_directories(../include ${Boost_INCLUDE_DIR})
 add_definitions(-Wall)
 
-add_executable(cpptest main.cpp)
-target_link_libraries(cpptest cuda cudart)
+add_executable(copy copy.cpp)
+target_link_libraries(copy cuda cudart)
 
 add_executable(fft fft.cpp)
 target_link_libraries(fft cuda cudart cufft)
 
-add_executable(itktest itktest.cpp)
-target_link_libraries(itktest cuda cudart ${ITK_LIBRARIES})
+add_executable(itk itk.cpp)
+target_link_libraries(itk cuda cudart ${ITK_LIBRARIES})

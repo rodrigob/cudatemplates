@@ -52,7 +52,6 @@ typedef cufftResult_t result_t;
 #define CUFFT_PLAN_GENERIC(type, dim)					\
   private:								\
   cufftHandle plan;							\
-  Size<dim> size;							\
   public:								\
   inline ~Plan()							\
   {									\
@@ -61,8 +60,7 @@ typedef cufftResult_t result_t;
   
 #define CUFFT_PLAN_CONSTRUCTOR(type, dim)				\
   public:								\
-  inline Plan(const Size<dim> &_size):					\
-  size(_size)								\
+  inline Plan(const Size<dim> &size)					\
   {									\
     CUFFT_CHECK(cufftPlan ## dim ## d					\
 		(&plan, CUFFT_PLAN_SIZE ## dim, CUFFT_ ## type));	\
@@ -72,13 +70,12 @@ typedef cufftResult_t result_t;
   private:								\
   int batch;								\
   public:								\
-  inline Plan(const Size<dim> &_size, int _batch = 1):			\
-  size(_size), batch(_batch)						\
+  inline Plan(const Size<dim> &size, int _batch = 1):			\
+  batch(_batch)						\
   {									\
     CUFFT_CHECK(cufftPlan ## dim ##d					\
 		(&plan, CUFFT_PLAN_SIZE ## dim,				\
 		 CUFFT_ ## type, batch));				\
-    size[0] *= batch;							\
   }
 
 #define CUFFT_PLAN_EXEC(type, dim, in, out)				\
@@ -86,8 +83,6 @@ typedef cufftResult_t result_t;
   inline void exec(const DeviceMemoryLinear<in, dim> &idata,		\
 		   DeviceMemoryLinear<out, dim> &odata)			\
   {									\
-    if(0/*(idata.size != size) || (odata.size != size)*/)		\
-      CUDA_ERROR("size mismatch");					\
     CUFFT_CHECK(cufftExec ## type					\
 		(plan, const_cast<in *>(idata.getBuffer()),		\
 		 odata.getBuffer()));					\
@@ -98,8 +93,6 @@ typedef cufftResult_t result_t;
   inline void exec(const DeviceMemoryLinear<in, dim> &idata,		\
 		   DeviceMemoryLinear<out, dim> &odata, int dir)	\
   {									\
-    if(0/*(idata.size != size) || (odata.size != size)*/)		\
-      CUDA_ERROR("size mismatch");					\
     CUFFT_CHECK(cufftExec ## type					\
 		(plan, const_cast<in *>(idata.getBuffer()),		\
 		 odata.getBuffer(), dir));				\
