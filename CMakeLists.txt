@@ -14,6 +14,8 @@ set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION
 configure_file(${CPACK_PACKAGE_NAME}.spec.in ${CPACK_PACKAGE_NAME}.spec)
 configure_file(Doxyfile.in Doxyfile)
 
+install(FILES FindCudaTemplates.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/Modules)
+
 set(CPACK_IGNORE_FILES
   ".depend"
   "/#.*#$"

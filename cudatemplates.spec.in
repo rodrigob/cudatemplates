@@ -28,7 +28,6 @@ BuildRequires: 	cmake boost-devel doxygen graphviz
 cmake \
 -DCMAKE_BUILD_TYPE:STRING=%{build_type} \
 -DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \
--DCMAKE_INSTALL_LIBDIR:PATH=%{_libdir} \
 .
 #make doc
 mkdir -p doc/html
@@ -46,3 +45,4 @@ make clean
 %doc doc/html
 %doc LICENSE
 %{_includedir}/%{name}
+%{_datadir}/cmake/Modules/*.cmake
