@@ -1,0 +1,2 @@
+set(CUDATEMPLATES_INCLUDE_DIR ${CudaTemplates_DIR}/include)
+set(CUDATEMPLATES_FOUND TRUE)
