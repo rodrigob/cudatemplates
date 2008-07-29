@@ -14,7 +14,9 @@ else(CUDATEMPLATES_INCLUDE_DIR)
     # valid windows CUDATEMPLATES installation
     # ...
   else(WIN32)
-    find_path(CUDATEMPLATES_INCLUDE_DIR cudatemplates/copy.hpp /usr/include /usr/local/include)
+    get_filename_component(TMP ${CMAKE_CURRENT_LIST_FILE} PATH)
+    get_filename_component(TMP ${TMP}/../../.. ABSOLUTE)
+    find_path(CUDATEMPLATES_INCLUDE_DIR cudatemplates/copy.hpp /usr/include /usr/local/include ${TMP}/include)
     if(CUDATEMPLATES_INCLUDE_DIR)
       set(CUDATEMPLATES_FOUND TRUE)
     endif(CUDATEMPLATES_INCLUDE_DIR)
