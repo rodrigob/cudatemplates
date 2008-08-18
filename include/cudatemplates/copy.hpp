@@ -49,7 +49,7 @@ static void
 check_bounds(const Layout<Type, Dim> &dst, const Layout<Type, Dim> &src,
 	     const Size<Dim> &dst_ofs, const Size<Dim> &src_ofs, const Size<Dim> &size)
 {
-  for(int i = Dim; i--;) {
+  for(size_t i = Dim; i--;) {
     if((dst_ofs[i] >= dst.size[i]) ||
        (dst_ofs[i] + size[i] > dst.size[i]) ||
        (src_ofs[i] >= src.size[i]) ||

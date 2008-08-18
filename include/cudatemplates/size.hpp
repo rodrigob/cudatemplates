@@ -22,6 +22,12 @@
 #define CUDA_SIZE_H
 
 
+#ifdef WIN32
+#pragma warning(disable: 4127)  // "conditional expression is constant": yes, this is called "template metaprogramming"
+#pragma warning(disable: 4710)  // "function not inlined": what exactly is the problem here?
+#endif
+
+
 #include <cudatemplates/staticassert.hpp>
 
 
@@ -63,7 +69,7 @@ public:
   inline SizeBase operator+(const SizeBase<Dim> &s) const {
     SizeBase<Dim> r;
     
-    for(int i = Dim; i--;)
+    for(size_t i = Dim; i--;)
       r[i] = (*this)[i] + s[i];
 
     return r;
@@ -75,7 +81,7 @@ public:
   inline SizeBase operator-(const SizeBase<Dim> &s) const {
     SizeBase<Dim> r;
     
-    for(int i = Dim; i--;)
+    for(size_t i = Dim; i--;)
       r[i] = (*this)[i] - s[i];
 
     return r;
@@ -188,7 +194,7 @@ bool operator==(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
 template <unsigned Dim>
 bool operator!=(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
 {
-  for(int i = Dim; i--;)
+  for(size_t i = Dim; i--;)
     if(s1[i] != s2[i])
       return true;
 

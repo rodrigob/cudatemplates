@@ -88,7 +88,7 @@ alloc()
   this->free();
   size_t p = 1;
 
-  for(int i = Dim; i--;)
+  for(size_t i = Dim; i--;)
     p *= this->size[i];
 
   CUDA_CHECK(cudaMalloc((void **)&this->buffer, p * sizeof(Type)));

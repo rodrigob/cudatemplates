@@ -106,7 +106,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 #endif
 
     // create random data:
-    for(int i = layout.getSize(); i--;)
+    for(size_t i = layout.getSize(); i--;)
       buf1[i] = my_random();
 
     // copy data forth and back:
@@ -119,7 +119,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     // compare results:
     Cuda::Size<Dim> index;
 
-    for(int i = Dim; i--;)
+    for(size_t i = Dim; i--;)
       index[i] = 0;
 
     do {
@@ -183,14 +183,14 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     // compare results:
     Cuda::Size<Dim> index;
 
-    for(int i = Dim; i--;)
+    for(size_t i = Dim; i--;)
       index[i] = 0;
 
     do {
       // check if current index is inside copied area:
       bool inside = true;
 
-      for(int i = Dim; i--;)
+      for(size_t i = Dim; i--;)
 	if((index[i] < pos2[i]) || (index[i] >= pos2[i] + size[i])) {
 	  inside = false;
 	  break;
@@ -258,7 +258,7 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     // test with random size:
     Cuda::Size<T1::Dim> rsize1, rsize2, rpos1, rpos2, rsize;
 
-    for(int i = T1::Dim; i--;) {
+    for(size_t i = T1::Dim; i--;) {
       rsize1[i] = (rand() % (size_max - 1)) + 1;
       rsize2[i] = (rand() % (size_max - 1)) + 1;
       size_t m = min(rsize1[i], rsize2[i]);
@@ -283,8 +283,10 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 int
 main()
 {
-  //srand(time(0));
-  int seed = rand();
+#ifndef WIN32
+  srand(time(0));
+#endif	
+  unsigned seed = (unsigned)rand();
   srand(seed);
   int err = 0;
 

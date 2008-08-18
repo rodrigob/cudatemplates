@@ -92,7 +92,7 @@ public:
   {
     size_t o = index[0];
 
-    for(int i = Dim; --i;)
+    for(size_t i = Dim; --i;)
       o += index[i] * stride[i - 1];
 
     return o;
@@ -150,7 +150,7 @@ public:
   */
   void setSize(const Size<Dim> &_size)
   {
-    for(int i = Dim; i--;)
+    for(size_t i = Dim; i--;)
       size[i] = _size[i];
     
     setPitch(0);  // no padding by default
