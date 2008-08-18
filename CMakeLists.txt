@@ -14,7 +14,12 @@ set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION
 configure_file(${CPACK_PACKAGE_NAME}.spec.in ${CPACK_PACKAGE_NAME}.spec)
 configure_file(Doxyfile.in Doxyfile)
 
-install(FILES FindCudaTemplates.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/Modules)
+#install(FILES FindCudaTemplates.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/Modules)
+if(WIN32)
+  install(FILES CudaTemplatesConfig.cmake DESTINATION .)
+else(WIN32)
+  install(FILES CudaTemplatesConfig.cmake DESTINATION share/CudaTemplates)
+endif(WIN32)
 
 set(CPACK_IGNORE_FILES
   ".depend"

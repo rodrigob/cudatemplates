@@ -5,6 +5,8 @@
 #  CUDATEMPLATES_INCLUDE_DIR - the CUDATEMPLATES include directory
 #
 
+message(FATAL_ERROR "FindCudaTemplates.cmake is obsolete, but it will remain in the repository until all relevant stuff has been moved to CudaTemplatesConfig.cmake.")
+
 if(CUDATEMPLATES_INCLUDE_DIR)
   # in cache already
   set(CUDATEMPLATES_FOUND TRUE)

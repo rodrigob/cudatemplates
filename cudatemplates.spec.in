@@ -45,4 +45,4 @@ make clean
 %doc doc/html
 %doc LICENSE
 %{_includedir}/%{name}
-%{_datadir}/cmake/Modules/*.cmake
+%{_datadir}/CudaTemplates
