@@ -1,6 +1,9 @@
-project(cudatemplates CXX CUDA)
+project(cudatemplates CXX)
 set(CMAKE_BUILD_TYPE Debug)
 cmake_minimum_required(VERSION 2.4)
+
+set(CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
+
 find_package(Cuda REQUIRED)
 add_subdirectory(include)
 add_subdirectory(testing)
@@ -72,10 +75,13 @@ set(CPACK_IGNORE_FILES
 
 set(CPACK_SOURCE_IGNORE_FILES ${CPACK_IGNORE_FILES})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
-set(CPACK_GENERATOR "TBZ2")
-set(CPACK_SOURCE_GENERATOR "TBZ2")
 
-include(CPack)
+if(UNIX)
+  set(CPACK_GENERATOR "TBZ2")
+  set(CPACK_SOURCE_GENERATOR "TBZ2")
+  include(CPack)
+endif(UNIX)
+
 add_custom_target(dist COMMAND make package_source)
 add_custom_target(doc COMMAND doxygen)
 add_custom_target(clean-all COMMAND find \\\( -name CMakeFiles -or -name CMakeCache.txt -or -name Makefile -or -name '*.cmake' -or -name 'CPack*.cmake' -or -name _CPack_Packages -or -name '*~' \\\) -prune -exec rm -rf {} '\;')
