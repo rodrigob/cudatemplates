@@ -33,6 +33,12 @@
 
 namespace Cuda {
 
+  namespace gil {
+    // pass types through to boost::gil except float:
+    template <class src> struct typeconv { typedef src dst; };
+    template <> struct typeconv<float> { typedef boost::gil::bits32f dst; };
+  }
+
 /**
    Reference to existing boost::gil image.
 */
@@ -40,7 +46,7 @@ template <class Type>
 class GilReference2D: public HostMemoryReference2D<Type>
 {
 public:
-  typedef typename boost::gil::image<boost::gil::pixel<Type, boost::gil::gray_layout_t>, false> gil_image_t;
+  typedef boost::gil::image<boost::gil::pixel<typename Cuda::gil::typeconv<Type>::dst, boost::gil::gray_layout_t>, false> gil_image_t;
 
   /**
      Constructor.
