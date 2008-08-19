@@ -82,7 +82,7 @@ private:
 
 CUDA_SPECIALIZE_DIM(IplReference);
 
-}
+}  // namespace Cuda
 
 
 #undef CUDA_INIT_POINTER

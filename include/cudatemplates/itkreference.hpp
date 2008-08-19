@@ -111,7 +111,7 @@ private:
 
 CUDA_SPECIALIZE_DIM(ItkReference);
 
-}
+}  // namespace Cuda
 
 
 #undef CUDA_INIT_POINTER

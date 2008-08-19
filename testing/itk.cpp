@@ -75,14 +75,14 @@ main()
 
     // write output image:
     WriterType::Pointer writer = WriterType::New();
-    writer->SetFileName("cameraman.jpg");
+    writer->SetFileName("cameraman_itk_out.png");
     writer->SetInput(image_output);
     writer->Update();
-
-    return 0;
   }
   catch(const exception &e) {
     cerr << e.what() << endl;
     return 1;
   }
+
+  return 0;
 }
