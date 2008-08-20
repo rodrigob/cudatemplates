@@ -129,6 +129,7 @@ public:
   /**
      Set pitch.
      Computes the step size in each dimension for later offset calculations.
+     The image size must be set before calling this method.
      @param pitch new pitch
    */
   void setPitch(size_t pitch)
