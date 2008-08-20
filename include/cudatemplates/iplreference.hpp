@@ -60,7 +60,8 @@ private:
   {
     image_ptr = image;
 
-    this->size[0] = image->widthStep;
+    this->setPitch(image->widthStep);
+    this->size[0] = image->width;
     this->size[1] = image->height;
 
     // DO NOT set spacing with image->align -- this will cause a segfault!
@@ -68,7 +69,6 @@ private:
     // this->spacing[2] =
 
     this->buffer = image->imageData;
-    this->setPitch(image->widthStep);
   }
 
   /**
