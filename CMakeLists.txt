@@ -14,8 +14,10 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_NAME "cudatemplates")
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
 
-configure_file(${CPACK_PACKAGE_NAME}.spec.in ${CPACK_PACKAGE_NAME}.spec)
-configure_file(Doxyfile.in Doxyfile)
+if(NOT WIN32)
+  configure_file(${CPACK_PACKAGE_NAME}.spec.in ${CPACK_PACKAGE_NAME}.spec)
+  configure_file(Doxyfile.in Doxyfile)
+endif(NOT WIN32)
 
 #install(FILES FindCudaTemplates.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/Modules)
 if(WIN32)
