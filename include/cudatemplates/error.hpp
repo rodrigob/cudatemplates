@@ -25,6 +25,7 @@
 #ifdef __CUDACC__
 
 #include <cstdlib>
+#include <iostream>
 
 #define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) abort(); }
 #define CUDA_ERROR(msg) { std::cerr << msg << std::endl; abort(); }
