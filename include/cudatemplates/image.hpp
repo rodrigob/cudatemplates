@@ -21,6 +21,8 @@
 #ifndef CUDA_IMAGE_H
 #define CUDA_IMAGE_H
 
+#include <cudatemplates/copy.hpp>
+
 namespace Cuda {
 
   /** Image. 
@@ -53,11 +55,13 @@ namespace Cuda {
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
     /** Default constructor. */
     inline Image() : 
+      nChannels_(0),
+      interleaved_(false),
       hostEntity_(NULL),
       deviceEntity_(NULL),
       imageAvailable_(false),
       hostModified_(false),
-      deviceModified_(false)     
+      deviceModified_(false)
       {
       }
 #endif
@@ -68,8 +72,10 @@ namespace Cuda {
      * @param inputHost CudaTemplate representation of host memory
      */
     inline Image(HostType* inputHost) :
-      hostModified_(false),
-      deviceModified_(false)     
+      nChannels_(0),
+      interleaved_(false),
+      hostModified_(true),
+      deviceModified_(false)
       {
 	assert(inputHost != NULL);
 	hostEntity_ = inputHost;
@@ -85,9 +91,11 @@ namespace Cuda {
      * automatically creates the correspsonding host representation.
      * @param inputDevice CudaTemplate representation of Device memory
      */
-    Image(DeviceType* inputDevice) :
+    inline Image(DeviceType* inputDevice) :
+      nChannels_(0),
+      interleaved_(false),
       hostModified_(false),
-      deviceModified_(false)     
+      deviceModified_(true)
       {
 	assert(inputDevice != NULL);
 	deviceEntity_ = inputDevice;
@@ -105,14 +113,57 @@ namespace Cuda {
      * @param inputDevice CudaTemplate representation of device memory
      */
     inline Image(HostType* inputHost, DeviceType* inputDevice) :
+      nChannels_(0),
+      interleaved_(false),
       hostModified_(false),
-      deviceModified_(false)     
+      deviceModified_(false)
       {
+	// Check if sizes are equal. No guarantee that data is equal
+	// but at least better than nothing...
 	assert(inputHost->size == inputDevice->size);
 	hostEntity_ = inputHost;
 	deviceEntity_ = inputDevice;
 	imageAvailable_ = true;
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+      }
 
+    ~Image()
+      {
+	std::cout << "Destructor of Image called" << std::endl;
+	delete(hostEntity_);
+	hostEntity_ = 0;
+	delete(deviceEntity_);
+	deviceEntity_ = 0;
+      }
+
+    /** Updates the data on the host side - also works for reference structures (data is copied!)
+     * @param[in] data pixel data. (e.g. of an IplImage)
+     * @param[in] width image width.
+     * @param[in] height image height.
+     * @param[in] widthStep row size (default = width). (e.g. IplImage::widthStep if used as OpenCV connector)
+     */
+    inline void updateHostBuffer(unsigned char* data, int width, int height, uint widthStep = 0)
+      {
+	if(data == NULL)
+	  return;
+	if(widthStep == 0)
+	  widthStep = width;
+
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+	//assert(hostEntity_->size == width*height);
+	Cuda::Size<2> size = hostEntity_->size;
+	// copy and norm single pixel values
+	PixelType* buffer = hostEntity_->getBuffer();
+
+	for(unsigned y = 0; y < size[1]; ++y)
+	{
+	  for(unsigned x = 0; x < size[0]; ++x)
+	  {
+	    buffer[(size[0] * y)+x] = 
+	      static_cast<PixelType>(data[(widthStep * y)+x])/255.0f;
+	  }
+	}
+	hostModified_ = true;
       }
 
     // getters --------------------------------------------------------------------
@@ -124,9 +175,11 @@ namespace Cuda {
     */
     inline HostType* getHostEntity()
       { 
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
 	if(deviceModified_) updateHostEntity();
 	return hostEntity_;
       }
+
     /** Get the CudaTemplates reprensetation of the device memory.
      * The memory is automatically synchronized if the host memory
      * was modified.
@@ -134,7 +187,8 @@ namespace Cuda {
     */
     inline DeviceType* getDeviceEntity() 
       { 
-	if(hostModified_) updateDeviceEntity();
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+	if(hostModified_) this->updateDeviceEntity();
 	return deviceEntity_;
       }
 
@@ -143,18 +197,32 @@ namespace Cuda {
      * was modified.
      * @return templated pixel buffer of host memory
     */
-    inline PixelType*  getHostBuffer() const { return hostEntity_->getBuffer(); }
+    inline PixelType*  getHostBuffer()
+      { 
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+	if(deviceModified_) this->updateHostEntity();
+	return hostEntity_->getBuffer();
+      }
     /** Get the templated pixel reprensetation of the host memory.
      * The memory is automatically synchronized if the device memory
      * 	was modified.
      *	@return templated pixel buffer of host memory
     */
-    inline PixelType*  getDeviceBuffer()const { return deviceEntity_->getBuffer(); }
+    inline PixelType* getDeviceBuffer()
+      {
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+	if(hostModified_) this->updateDeviceEntity();
+	return deviceEntity_->getBuffer(); 
+      }
 
     /** Get size.
      * @return size of the stored host and device memory layout in each dimension.
     */
-    inline Cuda::Size<2> getSize() const { return deviceEntity_->size; }
+    inline Cuda::Size<2> getSize() const
+      { 
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+	return deviceEntity_->size;
+      }
     /** Get pitch.
      * @return number of bytes in a row (including any padding)
      */
@@ -163,15 +231,31 @@ namespace Cuda {
     /** Get flag if an image is available.
      * @return true if a valid host and device representation is available and false if not.
      */
-    inline bool imageAvailable() const { return imageAvailable_; };
+    inline bool imageAvailable() const { return imageAvailable_; }
     /** Get flag if host instance was modified.
      * @return true if the host memory was modified and not synchronized with the device memory.
      */
-    inline bool hostModified() const { return hostModified_; };
+    inline bool hostModified() const { return hostModified_; }
     /** Get flag if device instance was modified.
      * @return true if the device memory was modified and not synchronized with the host memory.
     */
-    inline bool deviceModified() const { return deviceModified_; };
+    inline bool deviceModified() const { return deviceModified_; }
+
+
+    /** Get Number of channels.
+     * @return Number of color channels.
+     */
+    inline uint getNChannels() const { return nChannels_; }
+
+    /** Get flag if channels are saved interleaved.
+     * @return TRUE if channels are greater 1 and saved in interleaved
+     * mode. FALSE if saved in planar mode or only one channel is
+     * available.
+     */
+    inline bool interleaved() const { return interleaved_; }
+
+    uint nChannels_;       /**< Number of channels saved in the image structure.*/
+    bool interleaved_;     /**< Flag if color channels are interleaved or planar.*/
 
   protected:
     
@@ -189,6 +273,7 @@ namespace Cuda {
 	hostModified_ = false;
       }
 
+
   private:
     HostType* hostEntity_;     /**< CudaTemplate representation of host memory.*/
     DeviceType* deviceEntity_; /**< CudaTemplate representation of device memory.*/
@@ -196,6 +281,7 @@ namespace Cuda {
     bool imageAvailable_; /**< Flag if host and device representations are available.*/
     bool hostModified_;   /**< Flag if host representation was modified.*/
     bool deviceModified_; /**< Flag if device representation was modified.*/
+
   };
 }
 
