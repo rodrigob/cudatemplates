@@ -25,6 +25,7 @@
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/devicememory.hpp>
 #include <cudatemplates/hostmemory.hpp>
+#include <cudatemplates/hostmemoryreference.hpp>
 #include <cudatemplates/staticassert.hpp>
 
 
