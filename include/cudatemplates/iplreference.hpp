@@ -68,7 +68,8 @@ private:
     // this->spacing[1] = 
     // this->spacing[2] =
 
-    this->buffer = image->imageData;
+    unsigned char *tmp = (unsigned char*)image->imageData;
+    this->buffer = reinterpret_cast<Type*>(tmp);
   }
 
   /**
