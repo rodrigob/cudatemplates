@@ -127,7 +127,7 @@ namespace Cuda {
 	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
       }
 
-    ~Image()
+    virtual ~Image()
       {
 	std::cout << "Destructor of Image called" << std::endl;
 	delete(hostEntity_);
@@ -273,14 +273,14 @@ namespace Cuda {
 	hostModified_ = false;
       }
 
-
-  private:
     HostType* hostEntity_;     /**< CudaTemplate representation of host memory.*/
     DeviceType* deviceEntity_; /**< CudaTemplate representation of device memory.*/
-
+    
     bool imageAvailable_; /**< Flag if host and device representations are available.*/
     bool hostModified_;   /**< Flag if host representation was modified.*/
     bool deviceModified_; /**< Flag if device representation was modified.*/
+
+  private:
 
   };
 }
