@@ -79,6 +79,12 @@ public:
      Allocate GPU memory.
   */
   void alloc();
+
+  /**
+     Initializes the GPU memory with the value \a val.
+     Unfortunately only integer values are supported by the cudaMemset functions.
+   */
+  void initMem(int val);
 };
 
 template <class Type, unsigned Dim>
@@ -94,6 +100,19 @@ alloc()
   CUDA_CHECK(cudaMalloc((void **)&this->buffer, p * sizeof(Type)));
   this->setPitch(0);
   assert(this->buffer != 0);
+}
+
+template <class Type, unsigned Dim>
+void DeviceMemoryLinear<Type, Dim>::
+initMem(int val)
+{
+  if(this->buffer == 0)
+    return;
+  size_t p = 1;
+  for(size_t i = Dim; i--;)
+    p *= this->size[i];
+
+  CUDA_CHECK(cudaMemset(this->buffer, p * sizeof(Type)));
 }
 
 CUDA_SPECIALIZE_DIM(DeviceMemoryLinear)

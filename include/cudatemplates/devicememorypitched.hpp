@@ -82,6 +82,12 @@ public:
      Allocate GPU memory.
   */
   void alloc();
+
+  /**
+     Initializes the GPU memory with the value \a val.
+     Unfortunately only integer values are supported by the cudaMemset functions.
+   */
+  void initMem(int val);
 };
 
 template <class Type, unsigned Dim>
@@ -109,9 +115,36 @@ alloc()
     CUDA_CHECK(cudaMalloc3D(&pitchDevPtr, extent));
     this->buffer = (Type *)pitchDevPtr.ptr;
     this->setPitch(pitchDevPtr.pitch);
+    this->xsize = pitchDevPtr.xsize;
+    this->ysize = pitchDevPtr.ysize;
   }
 
   assert(this->buffer != 0);
+}
+
+template <class Type, unsigned Dim>
+void DeviceMemoryPitched<Type, Dim>::
+initMem(int val)
+{
+  if(this->buffer == 0)
+    return;
+  if(Dim == 2) {
+    CUDA_CHECK(cudaMemset2D(this->buffer, this->getPitch(), val, this->size[0], this->size[1]));
+  }
+  else if(Dim >= 3) {
+    cudaExtent extent;
+    extent.width = this->size[0] * sizeof(Type);
+    extent.height = this->size[1];
+    extent.depth = this->size[2];
+
+    cudaPitchedPtr pitchDevPtr;
+    pitchDevPtr.ptr = (void *)this->buffer;
+    pitchDevPtr.pitch = this->getPitch();
+    pitchDevPtr.xsize = this->xsize;
+    pitchDevPtr.ysize = this->ysize;
+    
+    CUDA_CHECK(cudaMemset3D(pitchDevPtr, val, extent));
+  }
 }
 
 CUDA_SPECIALIZE_DIM(DeviceMemoryPitched)
