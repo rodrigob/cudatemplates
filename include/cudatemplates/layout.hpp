@@ -172,6 +172,19 @@ public:
      This is currently unused.
   */
   float spacing[Dim];
+
+  /**
+     The xsize field specifies the logical width of each row in bytes.
+     Currently only used for CUDA 3d alloc and memset
+  */
+  size_t xsize;
+
+  /**
+     The ysize field specifies the height of each 2D slice in rows.
+     Currently only used for CUDA 3d alloc and memset
+  */
+  size_t ysize;
+  
 };
 
 }
