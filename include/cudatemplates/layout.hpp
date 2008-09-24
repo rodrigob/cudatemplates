@@ -55,7 +55,9 @@ public:
   /**
      Default constructor.
   */
-  Layout()
+  Layout() :
+    xsize(0),
+    ysize(0)
   {
     for(int i = Dim; i--;) {
       size[i] = 0;
@@ -69,7 +71,9 @@ public:
      @param _size requested size (may be padded by subclasses to fulfill
      alignment requirements).
   */
-  Layout(const Size<Dim> &_size)
+  Layout(const Size<Dim> &_size) :
+    xsize(0),
+    ysize(0)
   {
     for(int i = Dim; i--;)
       spacing[i] = 1;
