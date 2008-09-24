@@ -59,7 +59,7 @@ namespace Cuda {
       interleaved_(false),
       hostEntity_(NULL),
       deviceEntity_(NULL),
-      imageAvailable_(false),
+      imageAvailable_(false), 
       hostModified_(false),
       deviceModified_(false)
       {
@@ -82,7 +82,7 @@ namespace Cuda {
 
 	deviceEntity_ = new DeviceType(hostEntity_->size);
 	Cuda::copy(*deviceEntity_, *hostEntity_);
-
+	
 	imageAvailable_ = true;
       }
 
@@ -150,7 +150,6 @@ namespace Cuda {
 	  widthStep = width;
 
 	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
-	//assert(hostEntity_->size == width*height);
 	Cuda::Size<2> size = hostEntity_->size;
 	// copy and norm single pixel values
 	PixelType* buffer = hostEntity_->getBuffer();
@@ -203,7 +202,7 @@ namespace Cuda {
 	if(deviceModified_) this->updateHostEntity();
 	return hostEntity_->getBuffer();
       }
-    /** Get the templated pixel reprensetation of the host memory.
+    /** Get the templated pixel reprensetation of the device memory.
      * The memory is automatically synchronized if the device memory
      * 	was modified.
      *	@return templated pixel buffer of host memory
