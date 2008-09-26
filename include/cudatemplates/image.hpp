@@ -163,6 +163,7 @@ namespace Cuda {
 	  }
 	}
 	hostModified_ = true;
+	this->updateDeviceEntity();
       }
 
     // getters --------------------------------------------------------------------
