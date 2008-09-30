@@ -40,6 +40,20 @@ class DeviceMemory: virtual public Pointer<Type, Dim>
 public:
   typedef DeviceMemoryReference<Type, Dim> Reference;
 
+  struct KernelData
+  {
+    Layout<Type, Dim> layout;
+    Type *data;
+
+    KernelData(): data(0) {}
+
+    KernelData(DeviceMemory<Type, Dim> &mem):
+      layout(mem),
+      data(mem.getBuffer())
+    {
+    }
+  };
+
 protected:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**

@@ -22,15 +22,20 @@
 #define CUDA_ERROR_H
 
 
-#ifdef __CUDACC__
+#ifndef __GNUC__
+#define __PRETTY_FUNCTION__ "(unknown function)"
+#endif
 
-#include <cstdlib>
-#include <iostream>
+
+#if defined(__CUDACC__) || defined(NVCC)
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) abort(); }
-#define CUDA_ERROR(msg) { std::cerr << msg << std::endl; abort(); }
+#define CUDA_ERROR(msg) { fprintf(stderr, "%s:%d (%s):\n%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__, msg); abort(); }
 
-#else  // __CUDACC__
+#else  // defined(__CUDACC__) || defined(NVCC)
 
 #include <sstream>
 #include <stdexcept>
@@ -38,10 +43,6 @@
 
 #include <cuda_runtime.h>
 #include <driver_types.h>
-
-#ifndef __GNUC__
-#define __PRETTY_FUNCTION__ "(unknown function)"
-#endif
 
 #define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
 #define CUDA_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
@@ -81,7 +82,7 @@ private:
 
 };
 
-#endif  // __CUDACC__
+#endif  // defined(__CUDACC__) || defined(NVCC)
 
 
 #endif

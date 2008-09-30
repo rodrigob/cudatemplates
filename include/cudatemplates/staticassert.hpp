@@ -22,7 +22,7 @@
 #define CUDA_STATIC_ASSERT_H
 
 
-#ifdef __CUDACC__
+#if defined(__CUDACC__) || defined(NVCC)
 
 // With nvcc V0.2.1221, the Boost static assertion macro
 // triggers an internal compiler bug, so leave if out for now:
