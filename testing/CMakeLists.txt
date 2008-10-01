@@ -5,7 +5,8 @@ include_directories(../include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE} ${Boost_INCLU
 cuda_include_directories(../include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 add_definitions(-Wall)
 
-set(CUDA_BUILD_TYPE Device)
+#set(CUDA_BUILD_TYPE Device)
+set(CUDA_BUILD_TYPE Emulation)
 
 add_executable(copy copy.cpp)
 target_link_libraries(copy ${CUDA_TARGET_LINK})
@@ -23,3 +24,7 @@ add_executable(array array.cpp)
 target_link_libraries(array ${CUDA_TARGET_LINK})
 
 cuda_add_executable(kernel kernel.cu)
+
+cuda_add_executable(texture texture.cu)
+#add_executable(texture texture.cpp)
+#target_link_libraries(texture ${CUDA_TARGET_LINK})

@@ -40,15 +40,14 @@ class DeviceMemory: virtual public Pointer<Type, Dim>
 public:
   typedef DeviceMemoryReference<Type, Dim> Reference;
 
-  struct KernelData
+  struct KernelData: public Layout<Type, Dim>
   {
-    Layout<Type, Dim> layout;
     Type *data;
 
     KernelData(): data(0) {}
 
     KernelData(DeviceMemory<Type, Dim> &mem):
-      layout(mem),
+      Layout<Type, Dim>(mem),
       data(mem.getBuffer())
     {
     }

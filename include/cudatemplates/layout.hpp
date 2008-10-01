@@ -66,12 +66,13 @@ public:
     }
   }
 #endif
+
   /**
      Constructor.
      @param _size requested size (may be padded by subclasses to fulfill
      alignment requirements).
   */
-  Layout(const Size<Dim> &_size) :
+  Layout(const Size<Dim> &_size):
     xsize(0),
     ysize(0)
   {
