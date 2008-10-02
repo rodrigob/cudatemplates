@@ -47,41 +47,8 @@ class Array: public Storage<Type, Dim>
 public:
 
 #ifdef __CUDACC__
-
-  /*
-  template<enum cudaTextureReadMode readMode = cudaReadModeElementType>
-  struct Texture: public texture<Type, Dim, readMode>
-  {
-  public:
-    Texture(int norm = 0,
-            enum cudaTextureFilterMode fMode = cudaFilterModePoint,
-	    enum cudaTextureAddressMode aMode = cudaAddressModeClamp):
-      texture<Type, Dim, readMode>(norm, fMode, aMode)
-    {
-    }
-
-    Texture(int norm,
-            enum cudaTextureFilterMode fMode,
-	    enum cudaTextureAddressMode aMode,
-	    struct cudaChannelFormatDesc desc):
-      texture<Type, Dim, readMode>(norm, fMode, aMode, desc)
-    {
-    }
-
-    void bind(const Array &array)
-    {
-      cudaBindTextureToArray(*this, array.array);
-    }
-
-    void unbind()
-    {
-      cudaUnbindTexture(*this);
-    }
-  };
-  */
   typedef texture<Type, Dim, cudaReadModeElementType> Texture;
   typedef texture<Type, Dim, cudaReadModeNormalizedFloat> TextureNormalizedFloat;
-
 #endif
 
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -133,7 +100,7 @@ public:
   */
   void alloc();
 
-#ifdef __CUDACC__xx
+#ifdef __CUDACC__
 
   template<enum cudaTextureReadMode readMode>
   void bindTexture(texture<Type, Dim, readMode> &tex)

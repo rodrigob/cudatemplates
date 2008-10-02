@@ -287,9 +287,23 @@ public:
   /**
      Array index operator.
      @param i index
+     @return value at index i
+  */
+  inline Type &operator[](const Size<Dim> &i) { return buffer[getOffset(i)]; }
+
+  /**
+     Array index operator.
+     @param i index
      @return value at index i (constant)
   */
   inline const Type &operator[](size_t i) const { return buffer[i]; }
+
+  /**
+     Array index operator.
+     @param i index
+     @return value at index i
+  */
+  inline const Type &operator[](const Size<Dim> &i) const { return buffer[getOffset(i)]; }
 
   /**
      Get buffer pointer.

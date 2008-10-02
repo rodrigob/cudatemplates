@@ -3,10 +3,12 @@ find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 include_directories(../include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE} ${Boost_INCLUDE_DIR})
 cuda_include_directories(../include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
-add_definitions(-Wall)
+#add_definitions(-Wall)
+
+#set(CMAKE_CUDA_FLAGS_DEBUG "--device-emulation --debug")
 
 #set(CUDA_BUILD_TYPE Device)
-set(CUDA_BUILD_TYPE Emulation)
+#set(CUDA_BUILD_TYPE Emulation)
 
 add_executable(copy copy.cpp)
 target_link_libraries(copy ${CUDA_TARGET_LINK})
@@ -23,8 +25,8 @@ target_link_libraries(gil ${CUDA_TARGET_LINK} png)
 add_executable(array array.cpp)
 target_link_libraries(array ${CUDA_TARGET_LINK})
 
-cuda_add_executable(kernel kernel.cu)
+add_executable(kernel kernel.cu)
+target_link_libraries(kernel ${CUDA_TARGET_LINK})
 
-cuda_add_executable(texture texture.cu)
-#add_executable(texture texture.cpp)
-#target_link_libraries(texture ${CUDA_TARGET_LINK})
+add_executable(texture texture.cu)
+target_link_libraries(texture ${CUDA_TARGET_LINK})

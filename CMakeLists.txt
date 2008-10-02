@@ -1,4 +1,4 @@
-project(cudatemplates CXX)
+project(cudatemplates CXX CUDA)
 set(CMAKE_BUILD_TYPE Debug)
 cmake_minimum_required(VERSION 2.6.1)  # FindBoost.cmake is broken in older versions
 
