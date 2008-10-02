@@ -20,7 +20,7 @@ __global__ void kernel(memdev_t::KernelData res)
 {
   int x = threadIdx.x + blockDim.x * blockIdx.x;
   int y = threadIdx.y + blockDim.y * blockIdx.y;
-  res.data[x + y * SIZE] = tex2D(tex, x, y);
+  res.data[x + y * SIZE] = tex2D(tex, x + 0.5, y + 0.5);
 }
 
 int
@@ -40,6 +40,7 @@ main()
 
   // copy image to array and bind array as texture:
   copy(array, hbuf1);
+  tex.filterMode = cudaFilterModeLinear;
   array.bindTexture(tex);
 
   // execute kernel:
