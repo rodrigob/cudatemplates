@@ -73,6 +73,7 @@ public:
      alignment requirements).
   */
   Layout(const Size<Dim> &_size):
+    region_size(_size),
     xsize(0),
     ysize(0)
   {
@@ -162,10 +163,18 @@ public:
     setPitch(0);  // no padding by default
   }
 
+  void setRegion(const Size<Dim> &_ofs, const Size<Dim> &_size)
+  {
+    region_ofs = _ofs;
+    region_size = _size;
+  }
+
   /**
      Size of the layout in each dimension (in elements).
   */
   Size<Dim> size;
+
+  Size<Dim> region_ofs, region_size;
 
   /**
      Step size of the layout in each dimension (in elements).
