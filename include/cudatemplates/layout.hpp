@@ -50,7 +50,8 @@ class Layout
 public:
   typedef _Type Type;
   enum { Dim = _Dim };
-  
+  typedef Layout<_Type, _Dim> layout_t;
+
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**
      Default constructor.
