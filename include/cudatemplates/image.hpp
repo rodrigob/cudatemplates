@@ -129,7 +129,7 @@ namespace Cuda {
 
     virtual ~Image()
       {
-	std::cout << "Destructor of Image called" << std::endl;
+//	std::cout << "Destructor of Image called" << std::endl;
 	delete(hostEntity_);
 	hostEntity_ = 0;
 	delete(deviceEntity_);
