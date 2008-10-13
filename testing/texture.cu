@@ -18,9 +18,11 @@ texture_t tex;
 
 __global__ void kernel(memdev_t::KernelData res)
 {
-  int x = threadIdx.x + blockDim.x * blockIdx.x;
-  int y = threadIdx.y + blockDim.y * blockIdx.y;
-  res.data[x + y * SIZE] = tex2D(tex, x + 0.5, y + 0.5);
+  int x1 = threadIdx.x + blockDim.x * blockIdx.x;
+  int y1 = threadIdx.y + blockDim.y * blockIdx.y;
+  int x2 = res.size[0] - 1 - x1;
+  int y2 = res.size[1] - 1 - y1;
+  res.data[x1 + y1 * SIZE] = tex2D(tex, x2 + 0.5, y2 + 0.5);
 }
 
 int
@@ -32,11 +34,11 @@ main()
   array_t array(SIZE, SIZE);
 
   // create random image:
-  Cuda::Size<2> index;
+  Cuda::Size<2> index1, index2;
 
-  for(index[1] = SIZE; index[1]--;)
-    for(index[0] = SIZE; index[0]--;)
-      hbuf1[index] = random() % RANGE;
+  for(index1[1] = SIZE; index1[1]--;)
+    for(index1[0] = SIZE; index1[0]--;)
+      hbuf1[index1] = random() % RANGE;
 
   // copy image to array and bind array as texture:
   copy(array, hbuf1);
@@ -51,12 +53,18 @@ main()
   // verify:
   copy(hbuf2, dbuf);
 
-  for(index[1] = SIZE; index[1]--;)
-    for(index[0] = SIZE; index[0]--;)
-      if(hbuf1[index] != hbuf2[index]) {
+  for(index1[1] = SIZE; index1[1]--;) {
+    index2[1] = SIZE - 1 - index1[1];
+
+    for(index1[0] = SIZE; index1[0]--;) {
+      index2[0] = SIZE - 1 - index1[0];
+
+      if(hbuf1[index1] != hbuf2[index2]) {
 	fprintf(stderr, "texture access error\n");
 	return 1;
       }
+    }
+  }
 
   return 0;
 }

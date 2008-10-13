@@ -40,16 +40,22 @@ class DeviceMemory: virtual public Pointer<Type, Dim>
 public:
   typedef DeviceMemoryReference<Type, Dim> Reference;
 
-  struct KernelData: public Layout<Type, Dim>
+  /**
+     A stripped-down version of the layout data structure suitable for passing
+     to a CUDA kernel.
+  */
+  struct KernelData
   {
     Type *data;
+    size_t size[Dim];
 
     KernelData(): data(0) {}
 
     KernelData(DeviceMemory<Type, Dim> &mem):
-      Layout<Type, Dim>(mem),
       data(mem.getBuffer())
     {
+      for(int i = Dim; i--;)
+	size[i] = mem.size[i];
     }
   };
 
