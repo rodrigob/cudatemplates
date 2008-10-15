@@ -3,7 +3,6 @@
 #include <cudatemplates/devicememorylinear.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
 
-
 const int SIZE = 256;
 const int BLOCK_SIZE = 16;
 const int RANGE = 1000000;
@@ -28,6 +27,15 @@ __global__ void kernel(memdev_t::KernelData res)
 int
 main()
 {
+#ifdef _DEVICEEMU
+
+  fprintf(stderr,
+	  "This file terminates with a \"segmentation fault\" in device emulation mode\n"
+	  "(don't know why, if you find out, please let me know - Markus)\n");
+  return 1;
+
+#else
+
   // allocate memory:
   memhost_t hbuf1(SIZE, SIZE), hbuf2(SIZE, SIZE);
   memdev_t dbuf(SIZE, SIZE);
@@ -67,4 +75,6 @@ main()
   }
 
   return 0;
+
+#endif
 }
