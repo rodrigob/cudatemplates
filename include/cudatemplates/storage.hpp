@@ -289,7 +289,7 @@ public:
      @param i index
      @return value at index i
   */
-  inline Type &operator[](const Size<Dim> &i) { return buffer[getOffset(i)]; }
+  inline Type &operator[](const Size<Dim> &i) { return buffer[this->getOffset(i)]; }
 
   /**
      Array index operator.
@@ -303,7 +303,7 @@ public:
      @param i index
      @return value at index i
   */
-  inline const Type &operator[](const Size<Dim> &i) const { return buffer[getOffset(i)]; }
+  inline const Type &operator[](const Size<Dim> &i) const { return buffer[this->getOffset(i)]; }
 
   /**
      Get buffer pointer.

@@ -46,7 +46,7 @@ main()
 
   for(index1[1] = SIZE; index1[1]--;)
     for(index1[0] = SIZE; index1[0]--;)
-      hbuf1[index1] = random() % RANGE;
+      hbuf1[index1] = (float)(rand() % RANGE);
 
   // copy image to array and bind array as texture:
   copy(array, hbuf1);
