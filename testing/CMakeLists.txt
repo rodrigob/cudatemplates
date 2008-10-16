@@ -3,12 +3,14 @@ find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 
 set(CUDA_BUILD_CUBIN OFF)
-set(CUDA_BUILD_TYPE Device)
-#set(CUDA_BUILD_TYPE Emulation)
+#set(CUDA_BUILD_TYPE Device)
+set(CUDA_BUILD_TYPE Emulation)
+
 find_package(Cuda REQUIRED)
 
-include_directories(../include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE} ${Boost_INCLUDE_DIR})
-cuda_include_directories(../include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
+include_directories(${CMAKE_SOURCE_DIR}/include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE} ${Boost_INCLUDE_DIR})
+cuda_include_directories(${CMAKE_SOURCE_DIR}/include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
+
 #add_definitions(-Wall)
 
 add_executable(copy copy.cpp)
