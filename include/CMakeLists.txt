@@ -1,3 +1,5 @@
+add_subdirectory(cudatemplates)
+
 install(
   DIRECTORY cudatemplates
   DESTINATION include
