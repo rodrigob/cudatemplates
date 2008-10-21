@@ -26,9 +26,6 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -71,7 +68,7 @@ public:
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(HostMemoryHeap, HostMemoryStorage)
+#include "specializations/copy_hostmemoryheap.hpp"
 
   /**
      Destructor.
@@ -114,16 +111,9 @@ free()
   this->buffer = 0;
 }
 
-// CUDA_SPECIALIZE_DIM(HostMemoryHeap)
-
-#include "specializations/hostmemoryheap1d.hpp"
-#include "specializations/hostmemoryheap2d.hpp"
-#include "specializations/hostmemoryheap3d.hpp"
+#include "specializations/hostmemoryheap.hpp"
 
 }
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

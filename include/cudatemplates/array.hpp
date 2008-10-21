@@ -32,9 +32,6 @@
 #include <cudatemplates/storage.hpp>
 
 
-#define CUDA_INIT_POINTER(...)
-
-
 namespace Cuda {
 
 /**
@@ -85,7 +82,7 @@ public:
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(Array, Storage)
+#include "specializations/copy_array.hpp"
 
   /**
      Destructor.
@@ -185,12 +182,9 @@ free()
   array = 0;
 }
 
-CUDA_SPECIALIZE_DIM(Array)
+#include "specializations/array.hpp"
 
 }
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

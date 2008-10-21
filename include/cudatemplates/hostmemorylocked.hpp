@@ -28,9 +28,6 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -74,7 +71,7 @@ public:
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(HostMemoryLocked, HostMemoryStorage)
+#include "specializations/copy_hostmemorylocked.hpp"
   
   /**
      Destructor.
@@ -114,12 +111,9 @@ free()
   this->buffer = 0;
 }
 
-CUDA_SPECIALIZE_DIM(HostMemoryLocked)
+#include "specializations/hostmemorylocked.hpp"
 
 }
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

@@ -27,9 +27,6 @@
 #include <cudatemplates/hostmemoryreference.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -109,12 +106,9 @@ private:
   typename ImageType::Pointer image_ptr;
 };
 
-CUDA_SPECIALIZE_DIM(ItkReference);
+#include "specializations/itkreference.hpp"
 
 }  // namespace Cuda
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

@@ -28,9 +28,6 @@
 #include <cudatemplates/hostmemoryreference.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
   namespace gil {
@@ -90,10 +87,9 @@ private:
   }
 };
 
+  // #include "specializations/gilreference.hpp"
+
 }  // namespace Cuda
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

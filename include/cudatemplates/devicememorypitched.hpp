@@ -28,9 +28,6 @@
 #include <cudatemplates/staticassert.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -76,7 +73,7 @@ public:
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(DeviceMemoryPitched, DeviceMemoryStorage)
+#include "specializations/copy_devicememorypitched.hpp"
 
   /**
      Allocate GPU memory.
@@ -147,12 +144,9 @@ initMem(int val)
   }
 }
 
-CUDA_SPECIALIZE_DIM(DeviceMemoryPitched)
+#include "specializations/devicememorypitched.hpp"
 
 }
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

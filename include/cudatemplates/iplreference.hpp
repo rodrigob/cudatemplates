@@ -27,9 +27,6 @@
 #include <cudatemplates/hostmemoryreference.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -81,12 +78,9 @@ private:
   IplImage *image_ptr;
 };
 
-CUDA_SPECIALIZE_DIM(IplReference);
+#include "specializations/iplreference.hpp"
 
 }  // namespace Cuda
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

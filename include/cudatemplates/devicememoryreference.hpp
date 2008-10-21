@@ -25,9 +25,6 @@
 #include <cudatemplates/devicememory.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -79,12 +76,9 @@ protected:
 
 };
 
-CUDA_SPECIALIZE_DIM(DeviceMemoryReference);
+#include "specializations/devicememoryreference.hpp"
 
 }
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif

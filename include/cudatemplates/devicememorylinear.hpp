@@ -27,9 +27,6 @@
 #include <cudatemplates/devicememory.hpp>
 
 
-#define CUDA_INIT_POINTER(...) __VA_ARGS__,
-
-
 namespace Cuda {
 
 /**
@@ -73,7 +70,7 @@ public:
     alloc();
   }
 
-  CUDA_COPY_CONSTRUCTOR(DeviceMemoryLinear, DeviceMemoryStorage)
+#include "specializations/copy_devicememorylinear.hpp"
 
   /**
      Allocate GPU memory.
@@ -115,12 +112,9 @@ initMem(int val)
   CUDA_CHECK(cudaMemset(this->buffer, p * sizeof(Type)));
 }
 
-CUDA_SPECIALIZE_DIM(DeviceMemoryLinear)
+#include "specializations/devicememorylinear.hpp"
 
 }
-
-
-#undef CUDA_INIT_POINTER
 
 
 #endif
