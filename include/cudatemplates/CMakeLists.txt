@@ -1,4 +1,5 @@
 add_subdirectory(cublas)
+add_subdirectory(specializations)
 
 install(
   DIRECTORY cublas

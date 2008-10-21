@@ -132,7 +132,6 @@ public:
      @return pointer to cudaArray
   */
   inline const cudaArray *getArray() const { return array; }
-
   
   /**
      Initialize CUDA array pointer.

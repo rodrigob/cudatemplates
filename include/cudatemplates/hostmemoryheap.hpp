@@ -114,7 +114,11 @@ free()
   this->buffer = 0;
 }
 
-CUDA_SPECIALIZE_DIM(HostMemoryHeap)
+// CUDA_SPECIALIZE_DIM(HostMemoryHeap)
+
+#include "specializations/hostmemoryheap1d.hpp"
+#include "specializations/hostmemoryheap2d.hpp"
+#include "specializations/hostmemoryheap3d.hpp"
 
 }
 
