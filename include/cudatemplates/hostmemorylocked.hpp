@@ -71,7 +71,7 @@ public:
     alloc();
   }
 
-#include "specializations/copy_hostmemorylocked.hpp"
+#include "auto/copy_hostmemorylocked.hpp"
   
   /**
      Destructor.
@@ -111,7 +111,7 @@ free()
   this->buffer = 0;
 }
 
-#include "specializations/hostmemorylocked.hpp"
+#include "auto/specdim_hostmemorylocked.hpp"
 
 }
 

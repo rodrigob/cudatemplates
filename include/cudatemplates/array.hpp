@@ -82,7 +82,7 @@ public:
     alloc();
   }
 
-#include "specializations/copy_array.hpp"
+#include "auto/copy_array.hpp"
 
   /**
      Destructor.
@@ -182,7 +182,7 @@ free()
   array = 0;
 }
 
-#include "specializations/array.hpp"
+#include "auto/specdim_array.hpp"
 
 }
 

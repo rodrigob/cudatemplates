@@ -73,7 +73,7 @@ public:
     alloc();
   }
 
-#include "specializations/copy_devicememorypitched.hpp"
+#include "auto/copy_devicememorypitched.hpp"
 
   /**
      Allocate GPU memory.
@@ -144,7 +144,7 @@ initMem(int val)
   }
 }
 
-#include "specializations/devicememorypitched.hpp"
+#include "auto/specdim_devicememorypitched.hpp"
 
 }
 

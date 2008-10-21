@@ -87,7 +87,7 @@ private:
   }
 };
 
-  // #include "specializations/gilreference.hpp"
+  // #include "auto/specdim_gilreference.hpp"
 
 }  // namespace Cuda
 

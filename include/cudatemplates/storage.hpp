@@ -25,40 +25,6 @@
 #include <cudatemplates/layout.hpp>
 
 
-#define CUDA_COPY_CONSTRUCTOR(Name1, Base)		\
-  inline Name1(const Name1<Type, Dim> &x):		\
-    Layout<Type, Dim>(x),				\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(x))		\
-    Base<Type, Dim>(x)					\
-  {							\
-    this->init();					\
-    this->alloc();					\
-    copy(*this, x);					\
-  }							\
-  template<class Name2>					\
-  inline Name1(const Name2 &x):				\
-    Layout<Type, Dim>(x),				\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(x))		\
-    Base<Type, Dim>(x)					\
-  {							\
-    this->init();					\
-    this->alloc();					\
-    copy(*this, x);					\
-  }							\
-  template<class Name2>					\
-  inline Name1(const Name2 &x,				\
-	       const Size<Dim> &ofs,			\
-	       const Size<Dim> &size):			\
-    Layout<Type, Dim>(size),				\
-    CUDA_INIT_POINTER(Pointer<Type, Dim>(size))		\
-    Base<Type, Dim>(size)				\
-  {							\
-    this->init();					\
-    this->alloc();					\
-    copy(*this, x, Size<Dim>(), ofs, size);		\
-  }
-
-
 namespace Cuda {
 
 /**

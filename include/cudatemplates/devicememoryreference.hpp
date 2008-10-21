@@ -76,7 +76,7 @@ protected:
 
 };
 
-#include "specializations/devicememoryreference.hpp"
+#include "auto/specdim_devicememoryreference.hpp"
 
 }
 

@@ -78,7 +78,7 @@ private:
   IplImage *image_ptr;
 };
 
-#include "specializations/iplreference.hpp"
+#include "auto/specdim_iplreference.hpp"
 
 }  // namespace Cuda
 

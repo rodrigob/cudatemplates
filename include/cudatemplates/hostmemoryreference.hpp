@@ -76,7 +76,7 @@ protected:
 
 };
 
-#include "specializations/hostmemoryreference.hpp"
+#include "auto/specdim_hostmemoryreference.hpp"
 
 }
 

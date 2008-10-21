@@ -68,7 +68,7 @@ public:
     alloc();
   }
 
-#include "specializations/copy_hostmemoryheap.hpp"
+#include "auto/copy_hostmemoryheap.hpp"
 
   /**
      Destructor.
@@ -111,7 +111,7 @@ free()
   this->buffer = 0;
 }
 
-#include "specializations/hostmemoryheap.hpp"
+#include "auto/specdim_hostmemoryheap.hpp"
 
 }
 

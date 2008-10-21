@@ -106,7 +106,7 @@ private:
   typename ImageType::Pointer image_ptr;
 };
 
-#include "specializations/itkreference.hpp"
+#include "auto/specdim_itkreference.hpp"
 
 }  // namespace Cuda
 

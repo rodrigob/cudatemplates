@@ -70,7 +70,7 @@ public:
     alloc();
   }
 
-#include "specializations/copy_devicememorylinear.hpp"
+#include "auto/copy_devicememorylinear.hpp"
 
   /**
      Allocate GPU memory.
@@ -112,7 +112,7 @@ initMem(int val)
   CUDA_CHECK(cudaMemset(this->buffer, p * sizeof(Type)));
 }
 
-#include "specializations/devicememorylinear.hpp"
+#include "auto/specdim_devicememorylinear.hpp"
 
 }
 
