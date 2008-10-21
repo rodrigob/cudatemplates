@@ -1,0 +1,71 @@
+/*
+  NOTE: THIS FILE HAS BEEN CREATED AUTOMATICALLY,
+  ANY CHANGES WILL BE OVERWRITTEN WITHOUT NOTICE!
+*/
+
+/* 
+  Cuda Templates.
+
+  Copyright (C) 2008 Institute for Computer Graphics and Vision,
+                     Graz University of Technology
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef CUDA_@NAME@@Dim@D_H
+#define CUDA_@NAME@@Dim@D_H
+
+
+template <class Type>
+class @Name@@Dim@D: public @Name@<Type, @Dim@>
+{
+public:
+  inline @Name@@Dim@D()
+  {
+  }
+
+  inline @Name@@Dim@D(const Size<@Dim@> &_size, Type *_buffer):
+    Layout<Type, @Dim@>(_size),
+    @Pointer@Pointer<Type, @Dim@>(_size),
+    @Name@<Type, @Dim@>(_size, _buffer)
+  {
+  }
+
+  inline @Name@@Dim@D(const Layout<Type, @Dim@> &layout, Type *_buffer):
+    Layout<Type, @Dim@>(layout),
+    @Pointer@Pointer<Type, @Dim@>(layout),
+    @Name@<Type, @Dim@>(layout, _buffer)
+  {
+  }
+
+  inline @Name@@Dim@D(@SizeArgDecl@, Type *_buffer):
+    Layout<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
+    @Pointer@Pointer<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
+    @Name@<Type, @Dim@>(Size<@Dim@>(@SizeArgs@), _buffer)
+  {
+  }
+
+  inline void alloc()
+  {
+    @Name@<Type, @Dim@>::alloc();
+  }
+
+  inline void alloc(@SizeArgDecl@)
+  {
+    Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
+  }
+};
+
+
+#endif
