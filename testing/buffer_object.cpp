@@ -18,22 +18,86 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
 #include <iostream>
 #include <stdexcept>
 
-#include <cuda.h>
-#include <cutil.h>
-*/
+#include <boost/gil/extension/io/png_dynamic_io.hpp>
+#include <boost/gil/image.hpp>
+#include <boost/gil/typedefs.hpp>
 
+#include <GL/glut.h>
+
+#include <cudatemplates/copy.hpp>
+#include <cudatemplates/gilreference.hpp>
 #include <cudatemplates/opengl/bufferobject.hpp>
 
-using namespace std;
 
+using namespace std;
+using namespace boost;
+
+
+void
+reshape(int w, int h)
+{
+  glViewport(0, 0, w, h);
+}
+
+void
+display()
+{
+  glClearColor(1.0, 1.0, 1.0, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glColor3f(0.5, 0.5, 0.5);
+  glBegin(GL_POLYGON);
+  const float size = 0.5;
+  glVertex3f(-size, -size, 0.0);
+  glVertex3f( size, -size, 0.0);
+  glVertex3f( size,  size, 0.0);
+  glVertex3f(-size,  size, 0.0);
+  glEnd();
+  glutSwapBuffers();
+}
+
+void
+keyboard(unsigned char c, int, int)
+{
+  if(c == 0x1b)
+    exit(0);
+}
 
 int
-main()
+main(int argc, char *argv[])
 {
-  Cuda::Size<2> size(256, 256);
-  Cuda::OpenGL::BufferObject<float, 2> buf(size);
+  try {
+    // read image:
+    typedef unsigned char PixelType;
+    Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
+    gil::png_read_image("cameraman.png", gil_image);
+    Cuda::GilReference2D<PixelType> image(gil_image);
+
+    // init GLUT:
+    glutInitWindowSize(image.size[0], image.size[1]);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInit(&argc, argv);
+    glutCreateWindow("CUDA templates: OpenGL buffer object demo");
+    glutReshapeFunc(reshape);
+    glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
+    
+    // create buffer object:
+    Cuda::OpenGL::BufferObject<float, 2> buf(image.size);
+
+    // enter main loop:
+    glutMainLoop();
+  }
+  catch(const std::exception &e) {
+    cerr << e.what() << endl;
+    return 1;
+  }
+
+  return 0;
 }
