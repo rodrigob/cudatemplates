@@ -29,10 +29,10 @@
 #include <cuda_gl_interop.h>
 
 #include <cudatemplates/devicememory.hpp>
+#include <cudatemplates/opengl/type.hpp>
 
 
 namespace Cuda {
-
 namespace OpenGL {
 
 /**
@@ -88,7 +88,19 @@ public:
   /**
      Bind OpenGL buffer object.
   */
-  inline void bind() { glBindBuffer(GL_ARRAY_BUFFER, bufname); }
+  // inline void bind() { glBindBuffer(GL_ARRAY_BUFFER, bufname); }
+
+  /**
+     Copy OpenGL texture to buffer object.
+     @param texname texture name
+  */
+  void copyFromTexture(GLuint texname);
+
+  /**
+     Copy buffer object to OpenGL texture.
+     @param texname texture name
+  */
+  void copyToTexture(GLuint texname) const;
 
   /**
      Free GPU memory.
@@ -98,7 +110,7 @@ public:
   /**
      Unbind OpenGL buffer object.
   */
-  inline void unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+  // inline void unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
 
 private:
@@ -124,7 +136,7 @@ alloc()
     -) make OpenGL buffer type configurable
   */
   glGenBuffers(1, &bufname);
-  bind();
+  glBindBuffer(GL_ARRAY_BUFFER, bufname);
   glBufferData(GL_ARRAY_BUFFER, p * sizeof(Type), 0, GL_DYNAMIC_DRAW);
 
   cudaGLRegisterBufferObject(bufname);
@@ -136,6 +148,30 @@ alloc()
 
 template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
+copyFromTexture(GLuint texname)
+{
+  // TODO: currently hard-coded for one channel and two dimensions
+  cudaGLUnregisterBufferObject(bufname);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, bufname);
+  glReadPixels(0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL); 
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);  // unbind buffer before we register it again for Cuda
+  cudaGLRegisterBufferObject(bufname);
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
+copyToTexture(GLuint texname) const
+{
+  // TODO: currently hard-coded for one channel and two dimensions
+  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, bufname);
+  glBindTexture(GL_TEXTURE_2D, texname);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL);
+  // don't unbind texture since it is likely to be used soon
+  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
 free()
 {
   if(this->bufname == 0)
@@ -143,7 +179,7 @@ free()
 
   cudaGLUnmapBufferObject(bufname);
   cudaGLUnregisterBufferObject(bufname);
-  unbind();
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDeleteBuffers(1, &bufname);
   bufname = 0;
   this->buffer = 0;
@@ -152,7 +188,6 @@ free()
 // #include "auto/specdim_opengl_bufferobject.hpp"
 
 }
-
 }
 
 

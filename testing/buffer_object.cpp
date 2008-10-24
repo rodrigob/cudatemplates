@@ -36,6 +36,9 @@ using namespace std;
 using namespace boost;
 
 
+GLuint texname;
+
+
 void
 reshape(int w, int h)
 {
@@ -51,15 +54,20 @@ display()
   glLoadIdentity();
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glColor3f(0.5, 0.5, 0.5);
+
+  glEnable(GL_TEXTURE_2D);
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+  glBindTexture(GL_TEXTURE_2D, texname);
+
   glBegin(GL_POLYGON);
-  const float size = 0.5;
-  glVertex3f(-size, -size, 0.0);
-  glVertex3f( size, -size, 0.0);
-  glVertex3f( size,  size, 0.0);
-  glVertex3f(-size,  size, 0.0);
+  glTexCoord2f(0, 1); glVertex3f(-1, -1, 0);
+  glTexCoord2f(1, 1); glVertex3f( 1, -1, 0);
+  glTexCoord2f(1, 0); glVertex3f( 1,  1, 0);
+  glTexCoord2f(0, 0); glVertex3f(-1,  1, 0);
   glEnd();
+
   glutSwapBuffers();
+  glutPostRedisplay();
 }
 
 void
@@ -80,16 +88,29 @@ main(int argc, char *argv[])
     Cuda::GilReference2D<PixelType> image(gil_image);
 
     // init GLUT:
+    glutInit(&argc, argv);
     glutInitWindowSize(image.size[0], image.size[1]);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-    glutInit(&argc, argv);
-    glutCreateWindow("CUDA templates: OpenGL buffer object demo");
+    glutCreateWindow("OpenGL buffer object demo");
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+
+    // create OpenGL texture:
+    glGenTextures(1, &texname);
+    glBindTexture(GL_TEXTURE_2D, texname);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, image.size[0], image.size[1], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
     
     // create buffer object:
-    Cuda::OpenGL::BufferObject<float, 2> buf(image.size);
+    Cuda::OpenGL::BufferObject<PixelType, 2> bufobj(image.size);
+
+    // copy image to buffer object and to texture:
+    copy(bufobj, image);
+    bufobj.copyToTexture(texname);
 
     // enter main loop:
     glutMainLoop();
