@@ -31,8 +31,9 @@ namespace Cuda {
 template <class Type, unsigned Dim> class DeviceMemoryReference;
 
 /**
-   Representation of GPU memory.
-   This is the base class for all kind of GPU memory except CUDA arrays.
+   Representation of global GPU memory.
+   This is the base class for all kind of GPU memory for which a pointer can be
+   obtained for read and write access (i.e., no CUDA arrays).
 */
 template <class Type, unsigned Dim>
 class DeviceMemory: virtual public Pointer<Type, Dim>
@@ -97,9 +98,10 @@ protected:
 };
 
 /**
-   Representation of GPU memory managed by the CUDA Toolkit.
-   This is the base class for all kind of GPU memory for which memory
-   management is performed by the CUDA Toolkit (except CUDA arrays).
+   Representation of global GPU memory managed by CUDA templates.
+   This is the base class for all kind of GPU memory for which a pointer can be
+   obtained for read and write access and for which memory management is
+   performed by the CUDA templates and (i.e., no CUDA arrays).
 */
 template <class Type, unsigned Dim>
 class DeviceMemoryStorage: public DeviceMemory<Type, Dim>, public PointerStorage<Type, Dim>

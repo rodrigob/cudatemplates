@@ -9,10 +9,13 @@ set(CUDA_BUILD_TYPE Device)
 find_package(Cuda REQUIRED)
 #include(${CMAKE_SOURCE_DIR}/CMake/cuda/FindCuda.cmake)
 
+find_package(OpenGL REQUIRED)
+
 include_directories(${CMAKE_SOURCE_DIR}/include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE} ${Boost_INCLUDE_DIR})
 cuda_include_directories(${CMAKE_SOURCE_DIR}/include ${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 
 #add_definitions(-Wall)
+add_definitions(-DGL_GLEXT_PROTOTYPES)
 
 add_executable(copy copy.cpp)
 target_link_libraries(copy ${CUDA_TARGET_LINK})
@@ -38,3 +41,6 @@ cuda_add_executable(kernel kernel.cu)
 #add_executable(texture texture.cu)
 #target_link_libraries(texture ${CUDA_TARGET_LINK})
 cuda_add_executable(texture texture.cu)
+
+add_executable(buffer_object buffer_object.cpp)
+target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES})
