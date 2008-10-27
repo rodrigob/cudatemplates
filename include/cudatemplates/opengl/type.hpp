@@ -30,7 +30,7 @@ namespace OpenGL {
 
 template <class Type> GLenum getType();
 
-#define CUDA_OPENGL_TYPE(a, b) template <> GLenum getType<a>() { return b; }
+#define CUDA_OPENGL_TYPE(a, b) template <> inline GLenum getType<a>() { return b; }
 
 CUDA_OPENGL_TYPE(unsigned char , GL_UNSIGNED_BYTE)
 CUDA_OPENGL_TYPE(         char , GL_BYTE)

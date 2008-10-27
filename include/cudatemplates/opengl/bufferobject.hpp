@@ -90,6 +90,15 @@ public:
   void alloc();
 
   /**
+     Allocate buffer memory.
+     @_size size to be allocated
+  */
+  inline void alloc(const Size<Dim> &_size)
+  {
+    DeviceMemoryStorage<Type, Dim>::alloc(_size);
+  }
+
+  /**
      Register and map buffer object.
      If you called disconnect(), this must be called before using the buffer
      memory in a CUDA kernel.

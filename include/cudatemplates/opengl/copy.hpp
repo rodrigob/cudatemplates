@@ -46,14 +46,14 @@ copy(Texture<Type, Dim> &dst, const BufferObject<Type, Dim> &src)
   CUDA_CHECK_SIZE;
 
   // copying a buffer object to a texture requires unmapping the buffer object,
-  // we therefore need a non-const reference:
-  BufferObject<Type, Dim> &src2 = const_cast<BufferObject<Type, Dim> &>(src);
+  // we therefore need a non-const pointer (nvcc can't handle references here):
+  BufferObject<Type, Dim> *src2 = const_cast<BufferObject<Type, Dim> *>(&src);
 
-  src2.disconnect();
+  src2->disconnect();
   CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, src.getName()));
   dst.glTexSubImage(0);
   CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
-  src2.connect();
+  src2->connect();
 }
 
 /**

@@ -78,6 +78,15 @@ public:
   void alloc();
 
   /**
+     Allocate GPU memory.
+     @_size size to be allocated
+  */
+  inline void alloc(const Size<Dim> &_size)
+  {
+    DeviceMemoryStorage<Type, Dim>::alloc(_size);
+  }
+
+  /**
      Initializes the GPU memory with the value \a val.
      Unfortunately only integer values are supported by the cudaMemset functions.
    */

@@ -95,6 +95,10 @@ public:
   */
   void alloc();
 
+  /**
+     Allocate texture memory.
+     @_size size to be allocated
+  */
   inline void alloc(const Size<Dim> &_size)
   {
     Storage<Type, Dim>::alloc(_size);
@@ -130,6 +134,8 @@ public:
     case 2: return GL_TEXTURE_2D;
     case 3: return GL_TEXTURE_3D;
     }
+
+    return 0;  // satisfy compiler
   }
 
   void glTexSubImage(const GLvoid *pixels);
