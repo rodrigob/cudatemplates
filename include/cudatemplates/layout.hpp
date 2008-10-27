@@ -47,6 +47,8 @@ namespace Cuda {
 template <class _Type, unsigned _Dim>
 class Layout
 {
+  CUDA_STATIC_ASSERT(_Dim > 0);
+
 public:
   typedef _Type Type;
   enum { Dim = _Dim };
