@@ -18,8 +18,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CUDA_ERROR_H
-#define CUDA_ERROR_H
+#ifndef CUDA_OPENGL_ERROR_H
+#define CUDA_OPENGL_ERROR_H
+
+
+#include <GL/gl.h>
 
 
 #ifndef __GNUC__
@@ -32,8 +35,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) abort(); }
-#define CUDA_ERROR(msg) { fprintf(stderr, "%s:%d (%s):\n%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__, msg); abort(); }
+#define CUDA_OPENGL_CHECK(call) {	\
+    call;				\
+    GLenum err = glGetError();		\
+    if(err != GL_NO_ERROR)		\
+      abort();				\
+}
+
+#define CUDA_OPENGL_ERROR(msg) CUDA_ERROR(msg)
 
 #else  // defined(__CUDACC__) || defined(NVCC)
 
@@ -44,22 +53,29 @@
 #include <cuda_runtime.h>
 #include <driver_types.h>
 
-#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
-#define CUDA_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
+#define CUDA_OPENGL_CHECK(call) {					\
+    call;								\
+    GLenum err = glGetError();						\
+    if(err != GL_NO_ERROR)						\
+      throw Cuda::OpenGL::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); \
+}
+
+#define CUDA_OPENGL_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
 
 
 namespace Cuda {
+namespace OpenGL {
 
 class Error: public std::exception
 {
 public:
-  Error(const char *file, int line, const char *function, int code, const char *comment) throw()
+  Error(const char *file, int line, const char *function, GLenum code, const char *comment) throw()
   {
     std::ostringstream s;
-    s << "CUDA error in " << file << ':' << line << std::endl << function << std::endl;
+    s << "OpenGL error in " << file << ':' << line << std::endl << function << std::endl;
     
     if(code != 0)
-      s << '#' << code << ": " << cudaGetErrorString((cudaError_t)code) << std::endl;
+      s << '#' << code << ": " << (const char *)gluErrorString(code) << std::endl;
 
     if(comment != 0)
       s << comment << std::endl;
@@ -80,7 +96,8 @@ private:
   std::string message;
 };
 
-};
+}  // namespace OpenGL
+}  // namespace Cuda
 
 #endif  // defined(__CUDACC__) || defined(NVCC)
 

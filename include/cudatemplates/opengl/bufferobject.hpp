@@ -29,6 +29,8 @@
 #include <cuda_gl_interop.h>
 
 #include <cudatemplates/devicememory.hpp>
+#include <cudatemplates/error.hpp>
+#include <cudatemplates/opengl/error.hpp>
 #include <cudatemplates/opengl/type.hpp>
 
 
@@ -77,6 +79,8 @@ public:
   {
     alloc();
   }
+
+  ~BufferObject();
 
   // #include "auto/copy_opengl_bufferobject.hpp"
 
@@ -130,17 +134,13 @@ alloc()
   for(size_t i = Dim; i--;)
     p *= this->size[i];
 
-  /*
-    TODO:
-    -) check for OpenGL and CUDA errors
-    -) make OpenGL buffer type configurable
-  */
-  glGenBuffers(1, &bufname);
-  glBindBuffer(GL_ARRAY_BUFFER, bufname);
-  glBufferData(GL_ARRAY_BUFFER, p * sizeof(Type), 0, GL_DYNAMIC_DRAW);
+  CUDA_OPENGL_CHECK(glGenBuffers(1, &bufname));
+  CUDA_OPENGL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, bufname));
+  CUDA_OPENGL_CHECK(glBufferData(GL_ARRAY_BUFFER, p * sizeof(Type), 0, GL_DYNAMIC_DRAW));
+  CUDA_OPENGL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
-  cudaGLRegisterBufferObject(bufname);
-  cudaGLMapBufferObject((void **)&this->buffer, bufname);
+  CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
+  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, bufname));
 
   this->setPitch(0);
   assert(this->buffer != 0);
@@ -151,11 +151,11 @@ void BufferObject<Type, Dim>::
 copyFromTexture(GLuint texname)
 {
   // TODO: currently hard-coded for one channel and two dimensions
-  cudaGLUnregisterBufferObject(bufname);
-  glBindBuffer(GL_PIXEL_PACK_BUFFER, bufname);
-  glReadPixels(0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL); 
-  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);  // unbind buffer before we register it again for Cuda
-  cudaGLRegisterBufferObject(bufname);
+  CUDA_CHECK(cudaGLUnregisterBufferObject(bufname));
+  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_PACK_BUFFER, bufname));
+  CUDA_OPENGL_CHECK(glReadPixels(0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL));
+  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_PACK_BUFFER, 0));  // unbind buffer before we register it again for Cuda
+  CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
 }
 
 template <class Type, unsigned Dim>
@@ -163,11 +163,11 @@ void BufferObject<Type, Dim>::
 copyToTexture(GLuint texname) const
 {
   // TODO: currently hard-coded for one channel and two dimensions
-  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, bufname);
-  glBindTexture(GL_TEXTURE_2D, texname);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL);
+  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, bufname));
+  CUDA_OPENGL_CHECK(glBindTexture(GL_TEXTURE_2D, texname));
+  CUDA_OPENGL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL));
   // don't unbind texture since it is likely to be used soon
-  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
 }
 
 template <class Type, unsigned Dim>
@@ -183,6 +183,13 @@ free()
   glDeleteBuffers(1, &bufname);
   bufname = 0;
   this->buffer = 0;
+}
+
+template <class Type, unsigned Dim>
+BufferObject<Type, Dim>::
+~BufferObject()
+{
+  this->free();
 }
 
 // #include "auto/specdim_opengl_bufferobject.hpp"
