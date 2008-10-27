@@ -30,13 +30,17 @@
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/gilreference.hpp>
 #include <cudatemplates/opengl/bufferobject.hpp>
+#include <cudatemplates/opengl/copy.hpp>
+#include <cudatemplates/opengl/texture.hpp>
 
 
 using namespace std;
 using namespace boost;
 
 
-GLuint texname;
+// GLuint texname;
+typedef unsigned char PixelType;
+Cuda::OpenGL::Texture<PixelType, 2> texture;
 
 
 void
@@ -57,7 +61,8 @@ display()
 
   glEnable(GL_TEXTURE_2D);
   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-  glBindTexture(GL_TEXTURE_2D, texname);
+
+  texture.bind();
 
   glBegin(GL_POLYGON);
   glTexCoord2f(0, 1); glVertex3f(-1, -1, 0);
@@ -82,7 +87,6 @@ main(int argc, char *argv[])
 {
   try {
     // read image:
-    typedef unsigned char PixelType;
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
     gil::png_read_image("cameraman.png", gil_image);
     Cuda::GilReference2D<PixelType> image(gil_image);
@@ -97,21 +101,26 @@ main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
 
     // create OpenGL texture:
-    glGenTextures(1, &texname);
-    glBindTexture(GL_TEXTURE_2D, texname);
+    texture.alloc(image.size);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, image.size[0], image.size[1], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
-    
+
+#if 1
     // create buffer object:
     Cuda::OpenGL::BufferObject<PixelType, 2> bufobj(image.size);
 
-    // copy image to buffer object and to texture:
+    // copy image to buffer object:
     copy(bufobj, image);
-    bufobj.copyToTexture(texname);
-    bufobj.copyFromTexture(texname);
+
+    // copy buffer object to texture:
+    copy(texture, bufobj);
+#else
+    // copy image to texture:
+    copy(texture, image);
+#endif
 
     // enter main loop:
     glutMainLoop();

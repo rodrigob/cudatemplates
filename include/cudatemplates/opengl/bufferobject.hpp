@@ -85,14 +85,9 @@ public:
   // #include "auto/copy_opengl_bufferobject.hpp"
 
   /**
-     Allocate GPU memory.
+     Allocate buffer memory.
   */
   void alloc();
-
-  /**
-     Bind OpenGL buffer object.
-  */
-  // inline void bind() { glBindBuffer(GL_ARRAY_BUFFER, bufname); }
 
   /**
      Register and map buffer object.
@@ -102,18 +97,6 @@ public:
   void connect();
 
   /**
-     Copy OpenGL texture to buffer object.
-     @param texname texture name
-  */
-  void copyFromTexture(GLuint texname);
-
-  /**
-     Copy buffer object to OpenGL texture.
-     @param texname texture name
-  */
-  void copyToTexture(GLuint texname);
-
-  /**
      Unmap and unregister buffer object.
      This must be called before accessing the buffer memory in OpenGL, e.g.,
      copying the buffer data from or to a texture.
@@ -121,15 +104,11 @@ public:
   void disconnect();
 
   /**
-     Free GPU memory.
+     Free buffer memory.
   */
   void free();
 
-  /**
-     Unbind OpenGL buffer object.
-  */
-  // inline void unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
-
+  inline GLuint getName() const { return bufname; }
 
 private:
   /**
@@ -179,59 +158,6 @@ alloc()
   CUDA_OPENGL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, bufname));
   CUDA_OPENGL_CHECK(glBufferData(GL_ARRAY_BUFFER, p * sizeof(Type), 0, GL_DYNAMIC_DRAW));
   CUDA_OPENGL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
-  connect();
-}
-
-template <class Type, unsigned Dim>
-void BufferObject<Type, Dim>::
-copyFromTexture(GLuint texname)
-{
-  // TODO: currently hard-coded for one channel and two dimensions
-  disconnect();
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_PACK_BUFFER, bufname));
-  CUDA_OPENGL_CHECK(glReadPixels(0, 0, this->size[0], this->size[1], GL_LUMINANCE, getType<Type>(), NULL));
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_PACK_BUFFER, 0));
-  connect();
-}
-
-template <class Type, unsigned Dim>
-void BufferObject<Type, Dim>::
-copyToTexture(GLuint texname)
-{
-  // TODO: currently hard-coded for one channel
-  GLenum target;
-
-  switch(Dim) {
-  case 1: target = GL_TEXTURE_1D; break;
-  case 2: target = GL_TEXTURE_2D; break;
-  case 3: target = GL_TEXTURE_3D;
-  }
-
-  disconnect();
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, bufname));
-  CUDA_OPENGL_CHECK(glBindTexture(target, texname));
-
-  switch(Dim) {
-  case 1:
-    CUDA_OPENGL_CHECK(glTexSubImage1D(target, 0,
-				      0, this->size[0],
-				      GL_LUMINANCE, getType<Type>(), NULL));
-    break;
-
-  case 2:
-    CUDA_OPENGL_CHECK(glTexSubImage2D(target, 0,
-				      0, 0, this->size[0], this->size[1],
-				      GL_LUMINANCE, getType<Type>(), NULL));
-    break;
-
-  case 3:
-    CUDA_OPENGL_CHECK(glTexSubImage3D(target, 0,
-				      0, 0, 0, this->size[0], this->size[1], this->size[2],
-				      GL_LUMINANCE, getType<Type>(), NULL));
-  }
-
-  CUDA_OPENGL_CHECK(glBindTexture(target, 0));
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
   connect();
 }
 

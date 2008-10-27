@@ -98,6 +98,8 @@ public:
 
   /**
      Initialize data structure.
+     Subclasses should use this method to initialize their internal data
+     representation to a defined "empty" state.
   */
   virtual void init() = 0;
 

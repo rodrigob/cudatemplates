@@ -28,6 +28,7 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+#include <cudatemplates/opengl/error.hpp>
 #include <cudatemplates/opengl/type.hpp>
 #include <cudatemplates/storage.hpp>
 
@@ -48,9 +49,9 @@ public:
   /**
      Default constructor.
   */
-  inline Texture():
-    texname(0)
+  inline Texture()
   {
+    init();
   }
 #endif
 
@@ -59,10 +60,10 @@ public:
      @param _size requested size of memory block.
   */
   inline Texture(const Size<Dim> &_size):
-    texname(0),
     Layout<Type, Dim>(_size),
     Storage<Type, Dim>(_size)
   {
+    init();
     alloc();
   }
 
@@ -78,28 +79,68 @@ public:
     alloc();
   }
 
+  /**
+     Destructor.
+     @param layout requested size of memory block.
+  */
+  inline ~Texture()
+  {
+    free();
+  }
+
   // #include "auto/copy_opengl_texture.hpp"
 
   /**
-     Allocate GPU memory.
+     Allocate texture memory.
   */
   void alloc();
 
-  /**
-     Bind OpenGL buffer object.
-  */
-  // inline void bind() { glBindBuffer(GL_ARRAY_BUFFER, texname); }
+  inline void alloc(const Size<Dim> &_size)
+  {
+    Storage<Type, Dim>::alloc(_size);
+  }
 
   /**
-     Free GPU memory.
+     Bind OpenGL texture object.
+  */
+  inline void bind()
+  {
+    CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
+  }
+
+  /**
+     Free texture memory.
   */
   void free();
+
+  inline GLuint getName() const { return texname; }
+
+  /**
+     Initialize texture name.
+  */
+  inline void init() { texname = 0; }
+
+  /**
+     Get OpenGL texture target.
+  */
+  static inline GLenum target()
+  {
+    switch(Dim) {
+    case 1: return GL_TEXTURE_1D;
+    case 2: return GL_TEXTURE_2D;
+    case 3: return GL_TEXTURE_3D;
+    }
+  }
+
+  void glTexSubImage(const GLvoid *pixels);
 
   /**
      Unbind OpenGL buffer object.
   */
-  // inline void unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
-
+  static inline void unbind()
+  {
+    CUDA_OPENGL_CHECK(glBindTexture(target(), 0));
+  }
 
 private:
   /**
@@ -117,25 +158,49 @@ alloc()
       CUDA_ERROR("Texture size must be power of two");
 
   this->free();
-  glGenTextures(1, &texname);
+  CUDA_OPENGL_CHECK(glGenTextures(1, &texname));
+  CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
 
   switch(Dim) {
   case 1:
-    glBindTexture(GL_TEXTURE_1D, texname);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_LUMINANCE, this->size[0], 0, GL_LUMINANCE, getType<Type>(), 0);
+    CUDA_OPENGL_CHECK(glTexImage1D(target(), 0, GL_LUMINANCE, this->size[0], 0, GL_LUMINANCE, getType<Type>(), 0));
     break;
 
   case 2:
-    glBindTexture(GL_TEXTURE_2D, texname);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, this->size[0], this->size[1], 0, GL_LUMINANCE, getType<Type>(), 0);
+    CUDA_OPENGL_CHECK(glTexImage2D(target(), 0, GL_LUMINANCE, this->size[0], this->size[1], 0, GL_LUMINANCE, getType<Type>(), 0));
     break;
 
   case 3:
-    glBindTexture(GL_TEXTURE_3D, texname);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE, this->size[0], this->size[1], this->size[2], 0, GL_LUMINANCE, getType<Type>(), 0);
+    CUDA_OPENGL_CHECK(glTexImage3D(target(), 0, GL_LUMINANCE, this->size[0], this->size[1], this->size[2], 0, GL_LUMINANCE, getType<Type>(), 0));
+  }
+}
+
+template <class Type, unsigned Dim>
+void Texture<Type, Dim>::
+glTexSubImage(const GLvoid *pixels)
+{
+  bind();
+
+  switch(Dim) {
+  case 1:
+    CUDA_OPENGL_CHECK(glTexSubImage1D(target(), 0,
+				      0, this->size[0],
+				      GL_LUMINANCE, getType<Type>(), pixels));
+    break;
+
+  case 2:
+    CUDA_OPENGL_CHECK(glTexSubImage2D(target(), 0,
+				      0, 0, this->size[0], this->size[1],
+				      GL_LUMINANCE, getType<Type>(), pixels));
+    break;
+
+  case 3:
+    CUDA_OPENGL_CHECK(glTexSubImage3D(target(), 0,
+				      0, 0, 0, this->size[0], this->size[1], this->size[2],
+				      GL_LUMINANCE, getType<Type>(), pixels));
   }
 
-  // TODO: check for OpenGL error
+  unbind();
 }
 
 template <class Type, unsigned Dim>
@@ -145,8 +210,8 @@ free()
   if(this->texname == 0)
     return;
 
-  glDeleteTextures(1, &texname);
-  texname = 0;
+  CUDA_OPENGL_CHECK(glDeleteTextures(1, &texname));
+  init();
 }
 
 // #include "auto/specdim_opengl_texture.hpp"

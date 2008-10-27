@@ -44,6 +44,9 @@
 */
 
 
+#define CUDA_CHECK_SIZE if(dst.size != src.size) CUDA_ERROR("size mismatch")
+
+
 namespace Cuda {
 
 template<class Type, unsigned Dim>
@@ -74,10 +77,8 @@ void
 copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind)
 {
   CUDA_STATIC_ASSERT(Dim >= 1);
-
-  if(dst.size != src.size)
-    CUDA_ERROR("size mismatch");
-
+  CUDA_CHECK_SIZE;
+  
   if(Dim == 1) {
     CUDA_CHECK(cudaMemcpy(dst.getBuffer(), src.getBuffer(), src.getSize() * sizeof(Type), kind));
   }
@@ -298,9 +299,7 @@ copyFromArray(Pointer<Type, Dim> &dst, const Array<Type, Dim> &src, cudaMemcpyKi
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
   CUDA_STATIC_ASSERT(Dim <= 3);
-
-  if(dst.size != src.size)
-    CUDA_ERROR("size mismatch");
+  CUDA_CHECK_SIZE;
 
   if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DFromArray(dst.getBuffer(), dst.getPitch(),
@@ -458,9 +457,7 @@ copyToArray(Array<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
   CUDA_STATIC_ASSERT(Dim <= 3);
-
-  if(dst.size != src.size)
-    CUDA_ERROR("size mismatch");
+  CUDA_CHECK_SIZE;
 
   if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DToArray(dst.getArray(), 0, 0,
@@ -617,9 +614,7 @@ copy(Array<Type, Dim> &dst, const Array<Type, Dim> &src)
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
   CUDA_STATIC_ASSERT(Dim <= 3);
-
-  if(dst.size != src.size)
-    CUDA_ERROR("size mismatch");
+  CUDA_CHECK_SIZE;
 
   if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DArrayToArray(dst.getArray(), 0, 0,
@@ -694,6 +689,9 @@ copy(Array<Type, Dim> &dst, const Array<Type, Dim> &src,
 }
 
 }
+
+
+#undef CUDA_CHECK_SIZE
 
 
 #endif
