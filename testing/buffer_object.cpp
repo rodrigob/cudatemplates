@@ -111,6 +111,7 @@ main(int argc, char *argv[])
     // copy image to buffer object and to texture:
     copy(bufobj, image);
     bufobj.copyToTexture(texname);
+    bufobj.copyFromTexture(texname);
 
     // enter main loop:
     glutMainLoop();
