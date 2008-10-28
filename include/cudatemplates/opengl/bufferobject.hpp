@@ -23,7 +23,10 @@
 
 
 #include <GL/gl.h>
+
+#ifndef WIN32
 #include <GL/glext.h>
+#endif
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
