@@ -89,7 +89,7 @@ public:
   /**
      Initializes the GPU memory with the value \a val.
      Unfortunately only integer values are supported by the cudaMemset functions.
-   */
+  */
   void initMem(int val);
 };
 
@@ -105,7 +105,9 @@ alloc()
 
   CUDA_CHECK(cudaMalloc((void **)&this->buffer, p * sizeof(Type)));
   this->setPitch(0);
-  assert(this->buffer != 0);
+
+  if(this->buffer == 0)
+    CUDA_ERROR("cudaMalloc failed");
 }
 
 template <class Type, unsigned Dim>
@@ -114,11 +116,8 @@ initMem(int val)
 {
   if(this->buffer == 0)
     return;
-  size_t p = 1;
-  for(size_t i = Dim; i--;)
-    p *= this->size[i];
 
-  CUDA_CHECK(cudaMemset(this->buffer, p * sizeof(Type)));
+  CUDA_CHECK(cudaMemset(this->buffer, val, this->getSize() * sizeof(Type)));
 }
 
 #include "auto/specdim_devicememorylinear.hpp"

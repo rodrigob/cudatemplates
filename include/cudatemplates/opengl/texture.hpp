@@ -179,6 +179,13 @@ alloc()
   case 3:
     CUDA_OPENGL_CHECK(glTexImage3D(target(), 0, GL_LUMINANCE, this->size[0], this->size[1], this->size[2], 0, GL_LUMINANCE, getType<Type>(), 0));
   }
+
+  // A minimal set of texture parameters is required, otherwise the texture
+  // won't be visible at all (feel free to override them later as needed):
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 template <class Type, unsigned Dim>

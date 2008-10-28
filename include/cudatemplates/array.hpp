@@ -97,6 +97,15 @@ public:
   */
   void alloc();
 
+  /**
+     Allocate GPU memory.
+     @_size size to be allocated
+  */
+  inline void alloc(const Size<Dim> &_size)
+  {
+    Storage<Type, Dim>::alloc(_size);
+  }
+
 #ifdef __CUDACC__
 
   template<enum cudaTextureReadMode readMode>
@@ -108,7 +117,7 @@ public:
   template<enum cudaTextureReadMode readMode>
   void unbindTexture(texture<Type, Dim, readMode> &tex)
   {
-    cudaUnbindTextureToArray(tex);
+    cudaUnbindTexture(tex);
   }
 
 #endif

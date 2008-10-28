@@ -33,9 +33,7 @@
 #include <cudatemplates/opengl/copy.hpp>
 #include <cudatemplates/opengl/texture.hpp>
 
-
 using namespace std;
-using namespace boost;
 
 
 // GLuint texname;
@@ -88,7 +86,7 @@ main(int argc, char *argv[])
   try {
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
-    gil::png_read_image("cameraman.png", gil_image);
+    boost::gil::png_read_image("cameraman.png", gil_image);
     Cuda::GilReference2D<PixelType> image(gil_image);
 
     // init GLUT:
