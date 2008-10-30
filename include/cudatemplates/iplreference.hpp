@@ -50,9 +50,9 @@ public:
 
   /**
      Constructor.
-     This allocates memory for the ITK image of the given size.
+     This allocates memory for the Ipl image of the given size.
      @param _size size of image
-     @param image ITK image to reference
+     @param image Ipl image to reference
   */
   inline IplReference(const Size<Dim> &_size, IplImage *image):
     Layout<Type, Dim>(),
