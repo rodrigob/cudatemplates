@@ -48,6 +48,20 @@ public:
     setImage(image);
   }
 
+  /**
+     Constructor.
+     This allocates memory for the ITK image of the given size.
+     @param _size size of image
+     @param image ITK image to reference
+  */
+  inline IplReference(const Size<Dim> &_size, IplImage *image):
+    Layout<Type, Dim>(),
+    Pointer<Type, Dim>(),
+    HostMemoryReference<Type, Dim>()
+  {
+    setImage(image);
+  }
+
 private:
   /**
      Extract image information from IPL image.
@@ -59,14 +73,14 @@ private:
 
     this->size[0] = image->width;
     this->size[1] = image->height;
-    this->setPitch(image->widthStep);
-
+    this->setPitch(image->widthStep * sizeof(Type));
+		   
     // DO NOT set spacing with image->align -- this will cause a segfault!
     // this->spacing[1] = 
     // this->spacing[2] =
 
     unsigned char *tmp = (unsigned char*)image->imageData;
-    this->buffer = reinterpret_cast<Type*>(tmp);
+		   this->buffer = reinterpret_cast<Type*>(tmp); // TODO convert function
   }
 
   /**
