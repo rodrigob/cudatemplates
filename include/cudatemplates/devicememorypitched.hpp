@@ -84,7 +84,7 @@ public:
      Initializes the GPU memory with the value \a val.
      Unfortunately only integer values are supported by the cudaMemset functions.
    */
-  void initMem(int val);
+  void initMem(int val, bool sync = true);
 };
 
 template <class Type, unsigned Dim>
@@ -121,10 +121,11 @@ alloc()
 
 template <class Type, unsigned Dim>
 void DeviceMemoryPitched<Type, Dim>::
-initMem(int val)
+initMem(int val, bool sync)
 {
   if(this->buffer == 0)
     return;
+
   if(Dim == 2) {
     CUDA_CHECK(cudaMemset2D(this->buffer, this->getPitch(), val, this->size[0], this->size[1]));
   }
@@ -142,6 +143,9 @@ initMem(int val)
     
     CUDA_CHECK(cudaMemset3D(pitchDevPtr, val, extent));
   }
+
+  if(sync)
+    cudaThreadSynchronize();
 }
 
 #include "auto/specdim_devicememorypitched.hpp"

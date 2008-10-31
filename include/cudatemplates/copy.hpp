@@ -1,19 +1,19 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -78,7 +78,7 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind
 {
   CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_CHECK_SIZE;
-  
+
   if(Dim == 1) {
     CUDA_CHECK(cudaMemcpy(dst.getBuffer(), src.getBuffer(), src.getSize() * sizeof(Type), kind));
   }
@@ -99,7 +99,7 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind
     p.extent.width = src.size[0] * sizeof(Type);  // no CUDA array involved -> width is given in bytes
     p.extent.height = src.size[1];
     p.extent.depth = src.size[2];
-    
+
     for(unsigned i = 3; i < Dim; ++i)
       p.extent.depth *= src.size[i];
 
@@ -128,7 +128,7 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src,
 {
   CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
-  
+
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
   if(Dim == 1) {
@@ -511,8 +511,8 @@ copyToArray(Array<Type, Dim> &dst, const Pointer<Type, Dim> &src,
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
   if(Dim == 2) {
-    CUDA_CHECK(cudaMemcpy2DToArray(dst.getArray(), dst_ofs[0] * sizeof(Type), dst_ofs[1],
-				   src.getBuffer() + src_ofs[0] + src_ofs[1] * src.stride[0], src.getPitch(),
+    CUDA_CHECK(cudaMemcpy2DToArray(dst.getArray(), dst_ofs[0], dst_ofs[1],
+				   src.getBuffer() + src_ofs[0] * sizeof(Type) + src_ofs[1] * src.getPitch(), src.getPitch(),
 				   size[0] * sizeof(Type), size[1], kind));
   }
   else if(Dim == 3) {
