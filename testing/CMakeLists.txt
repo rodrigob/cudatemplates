@@ -23,7 +23,7 @@ find_package(ITK REQUIRED)
 include(${ITK_USE_FILE})
 
 # OpenCV:
-find_package( OpenCV REQUIRED )
+find_package(OpenCV)
 include_directories(${OPENCV_INCLUDE_DIR})
 
 # OpenGL:
@@ -62,8 +62,10 @@ target_link_libraries(itk ${CUDA_TARGET_LINK} ${ITK_LIBRARIES})
 add_executable(gil gil.cpp)
 target_link_libraries(gil ${CUDA_TARGET_LINK} ${PNG_LIBRARIES})
 
-add_executable(ipl ipl.cpp)
-target_link_libraries(ipl ${CUDA_TARGET_LINK} ${OPENCV_LIBRARIES})
+if(OpenCV_FOUND)
+  add_executable(ipl ipl.cpp)
+  target_link_libraries(ipl ${CUDA_TARGET_LINK} ${OPENCV_LIBRARIES})
+endif(OpenCV_FOUND)
 
 add_executable(array array.cpp)
 target_link_libraries(array ${CUDA_TARGET_LINK})
