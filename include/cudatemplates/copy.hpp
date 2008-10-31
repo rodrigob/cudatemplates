@@ -511,8 +511,13 @@ copyToArray(Array<Type, Dim> &dst, const Pointer<Type, Dim> &src,
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
   if(Dim == 2) {
-    CUDA_CHECK(cudaMemcpy2DToArray(dst.getArray(), dst_ofs[0], dst_ofs[1],
-				   src.getBuffer() + src_ofs[0] * sizeof(Type) + src_ofs[1] * src.getPitch(), src.getPitch(),
+    /*
+      Notes:
+      -) the dstX parameter of cudaMemcpy2DToArray is measured in bytes
+      -) src.getBuffer() is a "Type *", i.e., we can count in elements here
+    */
+    CUDA_CHECK(cudaMemcpy2DToArray(dst.getArray(), dst_ofs[0] * sizeof(Type), dst_ofs[1],
+				   src.getBuffer() + src_ofs[0] + src_ofs[1] * src.stride[0], src.getPitch(),
 				   size[0] * sizeof(Type), size[1], kind));
   }
   else if(Dim == 3) {

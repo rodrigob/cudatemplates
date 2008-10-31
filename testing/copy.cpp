@@ -117,6 +117,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     copy(ref3, obj3);
 
     // compare results:
+    cudaThreadSynchronize();
     Cuda::Size<Dim> index;
 
     for(size_t i = Dim; i--;)
@@ -181,6 +182,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 #endif
 
     // compare results:
+    cudaThreadSynchronize();
     Cuda::Size<Dim> index;
 
     for(size_t i = Dim; i--;)
@@ -281,12 +283,25 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 
 
 int
-main()
+main(int argc, char *argv[])
 {
+  if(argc > 2) {
+    cerr << "usage: copy [<seed>]\n";
+    return 1;
+  }
+
+  unsigned seed;
+
+  if(argc == 2) {
+    seed = atoi(argv[1]);
+  }
+  else {
 #ifndef WIN32
-  srand(time(0));
-#endif	
-  unsigned seed = (unsigned)rand();
+    srand(time(0));
+#endif
+    seed = (unsigned)rand();
+  }
+
   srand(seed);
   int err = 0;
 
