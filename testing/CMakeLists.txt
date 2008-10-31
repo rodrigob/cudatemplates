@@ -77,5 +77,9 @@ add_executable(texture texture.cu)
 target_link_libraries(texture ${CUDA_TARGET_LINK})
 cuda_add_executable(texture texture.cu)
 
- add_executable(buffer_object buffer_object.cpp)
- target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${PNG_LIBRARIES})
+add_executable(buffer_object buffer_object.cpp)
+target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${PNG_LIBRARIES})
+
+# run tests:
+
+add_test(copy copy)
