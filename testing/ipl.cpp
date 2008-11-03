@@ -57,7 +57,7 @@ main()
     Cuda::copy(host_image_output, device_image);
 
     // write output image:
-    int ret = cvSaveImage( "cameraman_ipl_out.png", image_output );
+    cvSaveImage( "cameraman_ipl_out.png", image_output );
   }
   catch(const std::exception &e) {
     std::cerr << e.what() << std::endl;
