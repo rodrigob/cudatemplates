@@ -81,7 +81,10 @@ public:
     ysize(0)
   {
     for(int i = Dim; i--;)
+    {
       spacing[i] = 1;
+      region_ofs[i] = 0;
+    }
 
     setSize(_size);
   }
@@ -177,7 +180,15 @@ public:
   */
   Size<Dim> size;
 
-  Size<Dim> region_ofs, region_size;
+  /**
+     Offset of region of interesst
+  */
+  Size<Dim> region_ofs;
+
+  /**
+     Size of region of interest
+   */
+  Size<Dim> region_size;
 
   /**
      Step size of the layout in each dimension (in elements).
