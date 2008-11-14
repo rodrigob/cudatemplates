@@ -31,9 +31,9 @@
 using namespace std;
 
 
-const int   SIZE    =   1024;  // image size
-const int   COUNT   = 100000;  // number of FFTs to perform
-const float EPSILON =   1e-6;  // error threshold
+const size_t SIZE    =   1024;  // image size
+const int    COUNT   = 100000;  // number of FFTs to perform
+const float  EPSILON =   1e-6;  // error threshold
 
 
 double

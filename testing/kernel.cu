@@ -21,7 +21,7 @@ int
 main()
 {
   // allocate CPU and GPU memory:
-  const int SIZE = 256;
+  const size_t SIZE = 256;
   memhost_t h_arg1(SIZE), h_arg2(SIZE), h_sum(SIZE);
   memdev_t d_arg1(SIZE), d_arg2(SIZE), d_sum(SIZE);
 

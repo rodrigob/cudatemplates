@@ -60,7 +60,7 @@ public:
 
   /**
      Constructor.
-     @param layout requested size of memory block.
+     @param layout requested layout of memory block.
   */
   inline DeviceMemoryLinear(const Layout<Type, Dim> &layout):
     Layout<Type, Dim>(layout),
