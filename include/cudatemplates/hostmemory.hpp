@@ -26,7 +26,7 @@
 #include <cstring>
 
 #include <cudatemplates/error.hpp>
-#include <cudatemplates/storage.hpp>
+#include <cudatemplates/pointerstorage.hpp>
 
 
 namespace Cuda {
