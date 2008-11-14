@@ -65,6 +65,30 @@ public:
   {
     Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
   }
+
+  inline @Name@@Dim@D(const @Name@@Dim@D<Type> &x):
+    Layout<Type, @Dim@>(x),
+    @Pointer@Pointer<Type, @Dim@>(x),
+    @Name@<Type, @Dim@>(x)
+    {
+    }
+
+  template<class Name>
+    inline @Name@@Dim@D(const Name &x):
+    Layout<Type, @Dim@>(x),
+    @Pointer@Pointer<Type, @Dim@>(x),
+    @Name@<Type, @Dim@>(x)
+    {
+    }
+
+  template<class Name>
+    inline @Name@@Dim@D(const Name &x, const Size<@Dim@> &ofs, const Size<@Dim@> &size):
+    Layout<Type, @Dim@>(size),
+    @Pointer@Pointer<Type, @Dim@>(size),
+    @Name@<Type, @Dim@>(x, ofs, size)
+    {
+    }
+
 };
 
 

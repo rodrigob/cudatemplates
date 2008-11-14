@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 SET(CMAKE_MODULE_PATH $ENV{ICG_CMAKE_MODULE_PATH})
 
 # Boost:
-find_package(Boost 1.34 REQUIRED)
+set(Boost_ADDITIONAL_VERSIONS "1.37.0")
+find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # Cuda:
