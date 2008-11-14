@@ -27,14 +27,14 @@
 #include <cudatemplates/size.hpp>
 
 
-/**
-   Default constructors are convenient for application programmers using this
-   library, but due to the use of virtual base classes the library developer
-   can easily pick the wrong constructor, therefore this flag is introduced to
-   disable default constructors and get compiler error messages where the
-   default constructor would have been used incorrectly.
-   This is for testing purposes only, do *NOT* set this flag in application
-   code!
+/*
+  Default constructors are convenient for application programmers using this
+  library, but due to the use of virtual base classes the library developer
+  can easily pick the wrong constructor, therefore this flag is introduced to
+  disable default constructors and get compiler error messages where the
+  default constructor would have been used incorrectly.
+  This is for testing purposes only, do *NOT* set this flag in application
+  code!
 */
 // #define CUDA_NO_DEFAULT_CONSTRUCTORS
 
@@ -43,6 +43,14 @@ namespace Cuda {
 
 /**
    Description of memory layout of multidimensional data.
+   To achieve optimal memory bandwidth in CUDA, it is crucial to follow some
+   memory layout rules. The purpose of this class is to hold the layout
+   information in addition to the actual size of the data. Moreover, the Layout
+   class contains fields for specifying geometric properties in each dimension
+   (see Layout::spacing) and a region of interest (see Layout::region_ofs and
+   see Layout::region_size). These fields are often used in application code
+   and therefore provided for convenience, but are not handled by the Layout
+   class itself.
 */
 template <class _Type, unsigned _Dim>
 class Layout
@@ -187,7 +195,7 @@ public:
 
   /**
      Size of region of interest
-   */
+  */
   Size<Dim> region_size;
 
   /**

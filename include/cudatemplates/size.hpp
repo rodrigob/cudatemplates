@@ -40,7 +40,7 @@ namespace Cuda {
 template <unsigned Dim>
 class SizeBase
 {
-  CUDA_STATIC_ASSERT(Dim >= 1);
+  CUDA_STATIC_ASSERT(Dim > 0);
 
 public:
   /**
@@ -55,16 +55,22 @@ public:
 
   /**
      Array index operator.
+     @return size in given (i-th) dimension
+     @param i index
   */
   inline size_t operator[](size_t i) const { return size[i]; }
 
   /**
      Array index operator.
+     @return size in given (i-th) dimension
+     @param i index
   */
   inline size_t &operator[](size_t i) { return size[i]; }
 
   /**
      Addition operator.
+     @return sum of *this and given size
+     @param s size to be added
   */
   inline SizeBase operator+(const SizeBase<Dim> &s) const {
     SizeBase<Dim> r;
@@ -77,6 +83,10 @@ public:
 
   /**
      Subtraction operator.
+     Note that the size is unsigned in each dimension, i.e., you will get an
+     overflow if you subtract a larger from a smaller quantity.
+     @return difference of *this and given size
+     @param s size to be subtracted
   */
   inline SizeBase operator-(const SizeBase<Dim> &s) const {
     SizeBase<Dim> r;
@@ -89,6 +99,8 @@ public:
 
   /**
      Get total number of elements.
+     This is the product of the sizes in each dimension.
+     @return total number of elements
   */
   size_t getSize() const {
     size_t s = 1;

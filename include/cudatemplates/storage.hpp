@@ -29,6 +29,9 @@ namespace Cuda {
 
 /**
    Class to represent memory that can be allocated and freed.
+   This is used as a virtual base class for all types of memory for which the
+   CUDA templates should perform their own memory management (i.e.,
+   allocation and deallocation).
 */
 template <class Type, unsigned Dim>
 class Storage: virtual public Layout<Type, Dim>
@@ -54,6 +57,7 @@ public:
 
   /**
      Constructor.
+     See Storage::alloc(const Layout<Type, Dim> &) for possible performance implications.
      @param layout requested layout
   */
   inline Storage(const Layout<Type, Dim> &layout):
@@ -81,6 +85,9 @@ public:
 
   /**
      Allocate memory.
+     This uses the requested layout regardless of constraints imposed by
+     subclasses (such as DeviceMemoryPitched). Use with care to avoid
+     performance penalties!
      @param layout requested layout
   */
   void alloc(const Layout<Type, Dim> &layout);
@@ -129,8 +136,10 @@ alloc(const Layout<Type, Dim> &layout)
 }
 
 /**
-   Class to represent memory that is accessible via a typed pointer.
-   Host and device memory are accessible by pointers, but CUDA arrays are not.
+   Class to represent memory that is accessible via a pointer.
+   This is used as a virtual base class for all types of memory which can be
+   accessed via a typed pointer. Host and device memory are accessible by
+   pointers, but CUDA arrays are not.
 */
 template <class Type, unsigned Dim>
 class Pointer: virtual public Layout<Type, Dim>
