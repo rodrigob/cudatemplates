@@ -92,9 +92,10 @@ private:
   IplImage *image_ptr;
 };
 
-#include "auto/specdim_iplreference.hpp"
-
 }  // namespace Cuda
+
+
+#include "auto/specdim_iplreference.hpp"
 
 
 #endif

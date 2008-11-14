@@ -123,9 +123,10 @@ initMem(int val, bool sync)
     cudaThreadSynchronize();
 }
 
-#include "auto/specdim_devicememorylinear.hpp"
-
 }
+
+
+#include "auto/specdim_devicememorylinear.hpp"
 
 
 #endif

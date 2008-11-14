@@ -191,9 +191,10 @@ free()
   array = 0;
 }
 
-#include "auto/specdim_array.hpp"
-
 }
+
+
+#include "auto/specdim_array.hpp"
 
 
 #endif

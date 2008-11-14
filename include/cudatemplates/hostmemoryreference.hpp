@@ -76,9 +76,10 @@ protected:
 
 };
 
-#include "auto/specdim_hostmemoryreference.hpp"
-
 }
+
+
+#include "auto/specdim_hostmemoryreference.hpp"
 
 
 #endif

@@ -111,9 +111,10 @@ free()
   this->buffer = 0;
 }
 
-#include "auto/specdim_hostmemoryheap.hpp"
-
 }
+
+
+#include "auto/specdim_hostmemoryheap.hpp"
 
 
 #endif

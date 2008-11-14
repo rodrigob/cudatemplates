@@ -43,7 +43,7 @@ template <class Type>
 class GilReference2D: public HostMemoryReference2D<Type>
 {
 public:
-  typedef boost::gil::image<boost::gil::pixel<typename Cuda::gil::typeconv<Type>::dst, boost::gil::gray_layout_t>, false> gil_image_t;
+  typedef boost::gil::image<boost::gil::pixel<typename gil::typeconv<Type>::dst, boost::gil::gray_layout_t>, false> gil_image_t;
 
   /**
      Constructor.
@@ -87,9 +87,10 @@ private:
   }
 };
 
-  // #include "auto/specdim_gilreference.hpp"
-
 }  // namespace Cuda
+
+
+// #include "auto/specdim_gilreference.hpp"
 
 
 #endif

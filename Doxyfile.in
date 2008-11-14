@@ -90,7 +90,11 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = include/cudatemplates
+INPUT                  = include/cudatemplates \
+		       	 include/cudatemplates/auto \
+		       	 include/cudatemplates/cublas \
+		       	 include/cudatemplates/opengl \
+		       	 doc
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \

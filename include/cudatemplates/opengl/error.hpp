@@ -57,10 +57,10 @@
     call;								\
     GLenum err = glGetError();						\
     if(err != GL_NO_ERROR)						\
-      throw Cuda::OpenGL::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); \
+      throw ::Cuda::OpenGL::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); \
 }
 
-#define CUDA_OPENGL_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
+#define CUDA_OPENGL_ERROR(msg) { std::ostringstream s; s << msg; throw ::Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
 
 
 namespace Cuda {

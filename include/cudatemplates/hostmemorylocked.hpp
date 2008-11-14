@@ -111,9 +111,10 @@ free()
   this->buffer = 0;
 }
 
-#include "auto/specdim_hostmemorylocked.hpp"
-
 }
+
+
+#include "auto/specdim_hostmemorylocked.hpp"
 
 
 #endif

@@ -27,6 +27,14 @@
 #define CUDA_@NAME@@Dim@D_H
 
 
+#include <cudatemplates/@name@.hpp>
+
+
+namespace Cuda {
+
+/**
+   @Name@ template specialized for @Dim@ dimension(s).
+ */
 template <class Type>
 class @Name@@Dim@D: public @Name@<Type, @Dim@>
 {
@@ -152,6 +160,8 @@ public:
   }
 
 };
+
+}  // namespace Cuda
 
 
 #endif

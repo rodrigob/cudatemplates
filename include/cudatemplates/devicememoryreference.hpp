@@ -76,9 +76,10 @@ protected:
 
 };
 
-#include "auto/specdim_devicememoryreference.hpp"
-
 }
+
+
+#include "auto/specdim_devicememoryreference.hpp"
 
 
 #endif

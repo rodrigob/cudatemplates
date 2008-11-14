@@ -44,8 +44,8 @@
 #include <cuda_runtime.h>
 #include <driver_types.h>
 
-#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
-#define CUDA_ERROR(msg) { std::ostringstream s; s << msg; throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
+#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) throw ::Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
+#define CUDA_ERROR(msg) { std::ostringstream s; s << msg; throw ::Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, s.str().c_str()); }
 
 
 namespace Cuda {
