@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 SET(CMAKE_MODULE_PATH $ENV{ICG_CMAKE_MODULE_PATH})
 
 # Boost:
-set(Boost_ADDITIONAL_VERSIONS "1.37.0")
+set(Boost_ADDITIONAL_VERSIONS "1_37")
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
