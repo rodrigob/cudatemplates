@@ -34,25 +34,54 @@
 namespace Cuda {
 namespace FFT {
 
+/**
+   Plan for @type1@-to-@type2@ FFT.
+*/
 template <>
 class Plan<@type1@, @type2@, @Dim@>
 {
 public:
+  /**
+     Constructor.
+     The constructor creates a CUFFT plan with the given size.
+     @param size requested size of CUFFT plan
+     @batch_arg_doc@
+  */
   inline Plan(const Size<@Dim@> &size@batch_arg_decl@)
   {
     CUFFT_CHECK(cufftPlan@Dim@d(&plan, @size_args_array@, CUFFT_@TYPE@@batch_arg@));
   }
 
+  /**
+     Constructor.
+     The constructor creates a CUFFT plan with the given size.
+     @param @size_args@ requested size of CUFFT plan
+     @batch_arg_doc@
+  */
   inline Plan(@size_args_decl@@batch_arg_decl@)
   {
     CUFFT_CHECK(cufftPlan@Dim@d(&plan, @size_args@, CUFFT_@TYPE@@batch_arg@));
   }
 
+  /**
+     Destructor.
+     The destructor destroys the CUFFT plan.
+  */
   inline ~Plan()
   {
     CUFFT_CHECK(cufftDestroy(plan));
   }
-  
+
+  /**
+     Executes the CUFFT plan.
+     This method executes the CUFFT @type1@-to-@type2@ transform plan. CUFFT
+     uses as input data the GPU memory specified by the idata parameter. The
+     Fourier coefficients are stored in the odata array. If idata and odata
+     refer to the same memory location, this method does an in‐place transform.
+     @param idata input data
+     @param odata output data
+     @dir_arg_doc@
+  */
   inline void exec(const DeviceMemory<@type1@, @Dim@> &idata, DeviceMemory<@type2@, @Dim@> &odata@dir_arg_decl@)
   {
     if((idata.stride[0] != idata.size[0]) || (odata.stride[0] != odata.size[0]))

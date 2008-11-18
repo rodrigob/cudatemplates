@@ -45,7 +45,6 @@ namespace Cuda {
    * - DeviceType = CudaTemplates representation of the device memory.
    * - PixelType = Element type stored at each posizion.
    *
-   * \namespace Cuda
    */
   template <class HostType, class DeviceType, class PixelType>
   class Image

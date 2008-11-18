@@ -33,6 +33,10 @@
 
 
 namespace Cuda {
+
+/**
+   This namespace wraps the CUFFT functionality.
+*/
 namespace FFT {
 
 typedef cufftReal real;

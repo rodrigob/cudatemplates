@@ -39,6 +39,9 @@
 // #define CUDA_NO_DEFAULT_CONSTRUCTORS
 
 
+/**
+   This namespace contains all classes and functions of the CUDA templates.
+*/
 namespace Cuda {
 
 /**
