@@ -24,7 +24,7 @@
 #include <iostream>
 
 #include <cudatemplates/copy.hpp>
-#include <cudatemplates/cufftpp.hpp>
+#include <cudatemplates/cufft.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
 
