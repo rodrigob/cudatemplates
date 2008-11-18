@@ -18,19 +18,41 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CUFFT_H
-#define CUFFT_H
+#ifndef CUFFT_COMMON_H
+#define CUFFT_COMMON_H
 
 
-#include "auto/plan_real_complex_1d.hpp"
-#include "auto/plan_real_complex_2d.hpp"
-#include "auto/plan_real_complex_3d.hpp"
-#include "auto/plan_complex_real_1d.hpp"
-#include "auto/plan_complex_real_2d.hpp"
-#include "auto/plan_complex_real_3d.hpp"
-#include "auto/plan_complex_complex_1d.hpp"
-#include "auto/plan_complex_complex_2d.hpp"
-#include "auto/plan_complex_complex_3d.hpp"
+#include <complex>
+
+#include <cufft.h>
+
+#include <cudatemplates/error.hpp>
+
+
+#define CUFFT_CHECK(call) { ::Cuda::FFT::result_t err = call; if(err != CUFFT_SUCCESS) throw ::Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
+
+
+namespace Cuda {
+namespace FFT {
+
+typedef cufftReal real;
+typedef std::complex<cufftReal> std_complex;
+typedef cufftComplex complex;
+typedef cufftType_t type_t;
+typedef cufftResult_t result_t;
+
+/**
+   Generic FFT plan template.
+   This template is empty, all behaviour is implemented specializations of this
+   template.
+*/
+template <class TypeIn, class TypeOut, unsigned Dim>
+class Plan
+{
+};
+
+}  // namespace FFT
+}  // namespace Cuda
 
 
 #endif

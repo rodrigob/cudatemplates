@@ -1,0 +1,67 @@
+/*
+  NOTE: THIS FILE HAS BEEN CREATED AUTOMATICALLY,
+  ANY CHANGES WILL BE OVERWRITTEN WITHOUT NOTICE!
+*/
+
+/*
+  Cuda Templates.
+
+  Copyright (C) 2008 Institute for Computer Graphics and Vision,
+                     Graz University of Technology
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef CUFFT_@TYPE1@_@TYPE2@_@Dim@D_H
+#define CUFFT_@TYPE1@_@TYPE2@_@Dim@D_H
+
+
+#include <cudatemplates/cufft_common.hpp>
+#include <cudatemplates/devicememory.hpp>
+
+
+namespace Cuda {
+namespace FFT {
+
+template <>
+class Plan<@type1@, @type2@, @Dim@>
+{
+public:
+  inline Plan(const Size<@Dim@> &size@batch_arg_decl@)
+  {
+    CUFFT_CHECK(cufftPlan@Dim@d(&plan, @SizeArgsArray@, CUFFT_@TYPE@@batch_arg@));
+  }
+
+  inline ~Plan()
+  {
+    CUFFT_CHECK(cufftDestroy(plan));
+  }
+  
+  inline void exec(const DeviceMemory<@type1@, @Dim@> &idata, DeviceMemory<@type2@, @Dim@> &odata@dir_arg_decl@)
+  {
+    if((idata.stride[0] != idata.size[0]) || (odata.stride[0] != odata.size[0]))
+      throw Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, "CUFFT can only be used for contiguous memory (i.e., no padding between rows)");
+
+    CUFFT_CHECK(cufftExec@TYPE@(plan, const_cast<@type1@ *>(idata.getBuffer()), odata.getBuffer()@dir_arg@));
+  }
+  
+private:
+  cufftHandle plan;
+};
+
+}  // namespace FFT
+}  // namespace Cuda
+
+
+#endif
