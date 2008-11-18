@@ -40,7 +40,12 @@ class Plan<@type1@, @type2@, @Dim@>
 public:
   inline Plan(const Size<@Dim@> &size@batch_arg_decl@)
   {
-    CUFFT_CHECK(cufftPlan@Dim@d(&plan, @SizeArgsArray@, CUFFT_@TYPE@@batch_arg@));
+    CUFFT_CHECK(cufftPlan@Dim@d(&plan, @size_args_array@, CUFFT_@TYPE@@batch_arg@));
+  }
+
+  inline Plan(@size_args_decl@@batch_arg_decl@)
+  {
+    CUFFT_CHECK(cufftPlan@Dim@d(&plan, @size_args@, CUFFT_@TYPE@@batch_arg@));
   }
 
   inline ~Plan()
