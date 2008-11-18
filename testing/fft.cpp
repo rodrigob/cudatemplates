@@ -78,7 +78,7 @@ main()
     double t = t2 - t1;
     cout
       << "total time: " << t << " seconds\n"
-      << "FFTs per second (" << SIZE << 'x' << SIZE << ", forward and inverse): " << (COUNT / t) << endl;
+      << "FFTs per second (size = " << SIZE << ", forward and inverse): " << (COUNT / t) << endl;
 
     // copy data to host memory:
     copy(data2_h, data2_g);
