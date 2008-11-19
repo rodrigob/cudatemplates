@@ -215,13 +215,23 @@ namespace Cuda {
       }
 
     /** Get size.
-     * @return size of the stored host and device memory layout in each dimension.
+     * @return size of the stored device memory layout in each dimension.
     */
     inline Cuda::Size<2> getSize() const
       { 
 	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
 	return deviceEntity_->size;
       }
+
+    /** Get stride.
+     * @return stride of the stored device memory layout in each dimension.
+    */
+    inline Cuda::Size<2> getStride() const
+      { 
+	assert(hostEntity_ != NULL && deviceEntity_ != NULL);
+	return deviceEntity_->stride;
+      }
+
     /** Get pitch.
      * @return number of bytes in a row (including any padding)
      */
