@@ -52,14 +52,14 @@ public:
      Constructor.
      This allocates memory for the Ipl image of the given size.
      @param _size size of image
-     @param image Ipl image to reference
+     @param _image pointer to IplImage to be referenced.
   */
-  inline IplReference(const Size<Dim> &_size, IplImage *image):
+  inline IplReference(const Size<Dim> &_size, IplImage *_image):
     Layout<Type, Dim>(),
     Pointer<Type, Dim>(),
     HostMemoryReference<Type, Dim>()
   {
-    setImage(image);
+    setImage(_image);
   }
 
 private:
@@ -79,8 +79,8 @@ private:
     // this->spacing[1] = 
     // this->spacing[2] =
 
-    unsigned char *tmp = (unsigned char*)image->imageData;
-		   this->buffer = reinterpret_cast<Type*>(tmp); // TODO convert function
+    // buffer is always interpreted as given template type -> TODO convert function?
+    this->buffer = (Type*)image->imageData;
   }
 
   /**
