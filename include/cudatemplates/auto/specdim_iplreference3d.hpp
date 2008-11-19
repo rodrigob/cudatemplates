@@ -36,7 +36,7 @@ namespace Cuda {
    IplReference template specialized for 3 dimension(s).
 */
 template <class Type>
-class IplReference3D : public HostMemoryReference3D<Type>, public IplReference<Type, 3>
+class IplReference3D : public IplReference<Type, 3>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -56,7 +56,6 @@ public:
   inline IplReference3D(IplImage *_image):
     Layout<Type, 3>(),
     Pointer<Type, 3>(),
-    HostMemoryReference3D<Type>(),
     IplReference<Type, 3>(_image)
   {
   }
@@ -69,7 +68,6 @@ public:
   inline IplReference3D(const Size<3> &_size, IplImage *_image):
     Layout<Type, 3>(_size),
     Pointer<Type, 3>(_size),
-    HostMemoryReference3D<Type>(),
     IplReference<Type, 3>(_size, _image)
   {
   }

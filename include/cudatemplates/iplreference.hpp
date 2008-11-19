@@ -73,11 +73,7 @@ private:
 
     this->size[0] = image->width;
     this->size[1] = image->height;
-    this->setPitch(image->widthStep * sizeof(Type));
-		   
-    // DO NOT set spacing with image->align -- this will cause a segfault!
-    // this->spacing[1] = 
-    // this->spacing[2] =
+    this->setPitch(image->widthStep);
 
     // buffer is always interpreted as given template type -> TODO convert function?
     this->buffer = (Type*)image->imageData;

@@ -36,7 +36,7 @@ namespace Cuda {
    IplReference template specialized for 2 dimension(s).
 */
 template <class Type>
-class IplReference2D : public HostMemoryReference2D<Type>, public IplReference<Type, 2>
+class IplReference2D : public IplReference<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -56,7 +56,6 @@ public:
   inline IplReference2D(IplImage *_image):
     Layout<Type, 2>(),
     Pointer<Type, 2>(),
-    HostMemoryReference2D<Type>(),
     IplReference<Type, 2>(_image)
   {
   }
@@ -69,7 +68,6 @@ public:
   inline IplReference2D(const Size<2> &_size, IplImage *_image):
     Layout<Type, 2>(_size),
     Pointer<Type, 2>(_size),
-    HostMemoryReference2D<Type>(),
     IplReference<Type, 2>(_size, _image)
   {
   }

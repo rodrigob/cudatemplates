@@ -36,7 +36,7 @@ namespace Cuda {
    @Name@ template specialized for @Dim@ dimension(s).
 */
 template <class Type>
-class @Name@@Dim@D : public @HostMemoryReference@HostMemoryReference@Dim@D<Type>, public @Name@<Type, @Dim@>
+class @Name@@Dim@D : public @Name@<Type, @Dim@>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -56,7 +56,6 @@ public:
   inline @Name@@Dim@D(IplImage *_image):
     Layout<Type, @Dim@>(),
     @Pointer@Pointer<Type, @Dim@>(),
-    @HostMemoryReference@HostMemoryReference@Dim@D<Type>(),
     @Name@<Type, @Dim@>(_image)
   {
   }
@@ -69,7 +68,6 @@ public:
   inline @Name@@Dim@D(const Size<@Dim@> &_size, IplImage *_image):
     Layout<Type, @Dim@>(_size),
     @Pointer@Pointer<Type, @Dim@>(_size),
-    @HostMemoryReference@HostMemoryReference@Dim@D<Type>(),
     @Name@<Type, @Dim@>(_size, _image)
   {
   }
