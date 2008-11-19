@@ -69,9 +69,7 @@ public:
   /**
      Default constructor.
   */
-  Layout() :
-    xsize(0),
-    ysize(0)
+  Layout()
   {
     for(int i = Dim; i--;) {
       size[i] = 0;
@@ -87,9 +85,7 @@ public:
      alignment requirements).
   */
   Layout(const Size<Dim> &_size):
-    region_size(_size),
-    xsize(0),
-    ysize(0)
+    region_size(_size)
   {
     for(int i = Dim; i--;)
     {
@@ -211,19 +207,6 @@ public:
      This is currently unused.
   */
   float spacing[Dim];
-
-  /**
-     The xsize field specifies the logical width of each row in bytes.
-     Currently only used for CUDA 3d alloc and memset
-  */
-  size_t xsize;
-
-  /**
-     The ysize field specifies the height of each 2D slice in rows.
-     Currently only used for CUDA 3d alloc and memset
-  */
-  size_t ysize;
-  
 };
 
 }

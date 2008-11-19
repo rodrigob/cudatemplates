@@ -34,15 +34,25 @@ namespace Cuda {
 
 /**
    DeviceMemoryReference template specialized for 3 dimension(s).
- */
+*/
 template <class Type>
 class DeviceMemoryReference3D: public DeviceMemoryReference<Type, 3>
 {
 public:
+#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
+  /**
+     Default constructor.
+  */
   inline DeviceMemoryReference3D()
   {
   }
+#endif
 
+  /**
+     Constructor.
+     @param _size size of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
   inline DeviceMemoryReference3D(const Size<3> &_size, Type *_buffer):
     Layout<Type, 3>(_size),
     Pointer<Type, 3>(_size),
@@ -50,13 +60,11 @@ public:
   {
   }
 
-  inline DeviceMemoryReference3D(const Layout<Type, 3> &layout, Type *_buffer):
-    Layout<Type, 3>(layout),
-    Pointer<Type, 3>(layout),
-    DeviceMemoryReference<Type, 3>(layout, _buffer)
-  {
-  }
-
+  /**
+     Constructor.
+     @param size0, size1, size2 size of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
   inline DeviceMemoryReference3D(size_t size0, size_t size1, size_t size2, Type *_buffer):
     Layout<Type, 3>(Size<3>(size0, size1, size2)),
     Pointer<Type, 3>(Size<3>(size0, size1, size2)),
@@ -64,14 +72,16 @@ public:
   {
   }
 
-  inline void alloc()
+  /**
+     Constructor.
+     @param layout requested layout of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
+  inline DeviceMemoryReference3D(const Layout<Type, 3> &layout, Type *_buffer):
+    Layout<Type, 3>(layout),
+    Pointer<Type, 3>(layout),
+    DeviceMemoryReference<Type, 3>(layout, _buffer)
   {
-    DeviceMemoryReference<Type, 3>::alloc();
-  }
-
-  inline void alloc(size_t size0, size_t size1, size_t size2)
-  {
-    Storage<Type, 3>::alloc(Size<3>(size0, size1, size2));
   }
 };
 

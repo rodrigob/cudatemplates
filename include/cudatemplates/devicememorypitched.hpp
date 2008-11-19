@@ -112,8 +112,6 @@ alloc()
     CUDA_CHECK(cudaMalloc3D(&pitchDevPtr, extent));
     this->buffer = (Type *)pitchDevPtr.ptr;
     this->setPitch(pitchDevPtr.pitch);
-    this->xsize = pitchDevPtr.xsize;
-    this->ysize = pitchDevPtr.ysize;
   }
 
   assert(this->buffer != 0);
@@ -138,8 +136,8 @@ initMem(int val, bool sync)
     cudaPitchedPtr pitchDevPtr;
     pitchDevPtr.ptr = (void *)this->buffer;
     pitchDevPtr.pitch = this->getPitch();
-    pitchDevPtr.xsize = this->xsize;
-    pitchDevPtr.ysize = this->ysize;
+    pitchDevPtr.xsize = this->stride[0] * sizeof(Type);
+    pitchDevPtr.ysize = (this->stride[1] / this->stride[0]) * sizeof(Type);
 
     CUDA_CHECK(cudaMemset3D(pitchDevPtr, val, extent));
   }

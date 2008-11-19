@@ -34,15 +34,25 @@ namespace Cuda {
 
 /**
    IplReference template specialized for 3 dimension(s).
- */
+*/
 template <class Type>
 class IplReference3D: public IplReference<Type, 3>
 {
 public:
+#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
+  /**
+     Default constructor.
+  */
   inline IplReference3D()
   {
   }
+#endif
 
+  /**
+     Constructor.
+     @param _size size of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
   inline IplReference3D(const Size<3> &_size, Type *_buffer):
     Layout<Type, 3>(_size),
     Pointer<Type, 3>(_size),
@@ -50,13 +60,11 @@ public:
   {
   }
 
-  inline IplReference3D(const Layout<Type, 3> &layout, Type *_buffer):
-    Layout<Type, 3>(layout),
-    Pointer<Type, 3>(layout),
-    IplReference<Type, 3>(layout, _buffer)
-  {
-  }
-
+  /**
+     Constructor.
+     @param size0, size1, size2 size of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
   inline IplReference3D(size_t size0, size_t size1, size_t size2, Type *_buffer):
     Layout<Type, 3>(Size<3>(size0, size1, size2)),
     Pointer<Type, 3>(Size<3>(size0, size1, size2)),
@@ -64,14 +72,16 @@ public:
   {
   }
 
-  inline void alloc()
+  /**
+     Constructor.
+     @param layout requested layout of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
+  inline IplReference3D(const Layout<Type, 3> &layout, Type *_buffer):
+    Layout<Type, 3>(layout),
+    Pointer<Type, 3>(layout),
+    IplReference<Type, 3>(layout, _buffer)
   {
-    IplReference<Type, 3>::alloc();
-  }
-
-  inline void alloc(size_t size0, size_t size1, size_t size2)
-  {
-    Storage<Type, 3>::alloc(Size<3>(size0, size1, size2));
   }
 };
 

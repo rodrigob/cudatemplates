@@ -34,15 +34,25 @@ namespace Cuda {
 
 /**
    @Name@ template specialized for @Dim@ dimension(s).
- */
+*/
 template <class Type>
 class @Name@@Dim@D: public @Name@<Type, @Dim@>
 {
 public:
+#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
+  /**
+     Default constructor.
+  */
   inline @Name@@Dim@D()
   {
   }
+#endif
 
+  /**
+     Constructor.
+     @param _size size of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
   inline @Name@@Dim@D(const Size<@Dim@> &_size, Type *_buffer):
     Layout<Type, @Dim@>(_size),
     @Pointer@Pointer<Type, @Dim@>(_size),
@@ -50,13 +60,11 @@ public:
   {
   }
 
-  inline @Name@@Dim@D(const Layout<Type, @Dim@> &layout, Type *_buffer):
-    Layout<Type, @Dim@>(layout),
-    @Pointer@Pointer<Type, @Dim@>(layout),
-    @Name@<Type, @Dim@>(layout, _buffer)
-  {
-  }
-
+  /**
+     Constructor.
+     @param @SizeArgs@ size of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
   inline @Name@@Dim@D(@SizeArgDecl@, Type *_buffer):
     Layout<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
     @Pointer@Pointer<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
@@ -64,14 +72,16 @@ public:
   {
   }
 
-  inline void alloc()
+  /**
+     Constructor.
+     @param layout requested layout of memory block.
+     @param _buffer pointer to memory block to be referenced.
+  */
+  inline @Name@@Dim@D(const Layout<Type, @Dim@> &layout, Type *_buffer):
+    Layout<Type, @Dim@>(layout),
+    @Pointer@Pointer<Type, @Dim@>(layout),
+    @Name@<Type, @Dim@>(layout, _buffer)
   {
-    @Name@<Type, @Dim@>::alloc();
-  }
-
-  inline void alloc(@SizeArgDecl@)
-  {
-    Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
   }
 };
 

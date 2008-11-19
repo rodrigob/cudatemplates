@@ -34,7 +34,7 @@ namespace Cuda {
 
 /**
    HostMemoryLocked template specialized for 2 dimension(s).
- */
+*/
 template <class Type>
 class HostMemoryLocked2D: public HostMemoryLocked<Type, 2>
 {
@@ -144,7 +144,7 @@ public:
 
   /**
      Allocate memory.
-     @_size size to be allocated
+     @param _size size to be allocated
   */
   inline void alloc(const Size<2> &_size)
   {
@@ -153,6 +153,7 @@ public:
 
   /**
      Allocate memory.
+     size0, size1 size to be allocated
   */
   inline void alloc(size_t size0, size_t size1)
   {

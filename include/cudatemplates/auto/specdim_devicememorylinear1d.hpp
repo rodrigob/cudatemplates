@@ -34,7 +34,7 @@ namespace Cuda {
 
 /**
    DeviceMemoryLinear template specialized for 1 dimension(s).
- */
+*/
 template <class Type>
 class DeviceMemoryLinear1D: public DeviceMemoryLinear<Type, 1>
 {
@@ -144,7 +144,7 @@ public:
 
   /**
      Allocate memory.
-     @_size size to be allocated
+     @param _size size to be allocated
   */
   inline void alloc(const Size<1> &_size)
   {
@@ -153,6 +153,7 @@ public:
 
   /**
      Allocate memory.
+     size0 size to be allocated
   */
   inline void alloc(size_t size0)
   {
