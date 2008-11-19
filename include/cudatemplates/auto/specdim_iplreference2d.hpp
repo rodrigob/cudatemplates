@@ -36,7 +36,7 @@ namespace Cuda {
    IplReference template specialized for 2 dimension(s).
 */
 template <class Type>
-class IplReference2D: public IplReference<Type, 2>
+class IplReference2D : public HostMemoryReference2D<Type>, public IplReference<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
@@ -48,39 +48,29 @@ public:
   }
 #endif
 
+
+  /**
+     Constructor.
+     @param _image pointer to IplImage to be referenced.
+  */
+  inline IplReference2D(IplImage *_image):
+    Layout<Type, 2>(),
+    Pointer<Type, 2>(),
+    HostMemoryReference2D<Type>(),
+    IplReference<Type, 2>(_image)
+  {
+  }
+
   /**
      Constructor.
      @param _size size of memory block.
-     @param _buffer pointer to memory block to be referenced.
+     @param _image pointer to IplImage to be referenced.
   */
-  inline IplReference2D(const Size<2> &_size, Type *_buffer):
+  inline IplReference2D(const Size<2> &_size, IplImage *_image):
     Layout<Type, 2>(_size),
     Pointer<Type, 2>(_size),
-    IplReference<Type, 2>(_size, _buffer)
-  {
-  }
-
-  /**
-     Constructor.
-     @param size0, size1 size of memory block.
-     @param _buffer pointer to memory block to be referenced.
-  */
-  inline IplReference2D(size_t size0, size_t size1, Type *_buffer):
-    Layout<Type, 2>(Size<2>(size0, size1)),
-    Pointer<Type, 2>(Size<2>(size0, size1)),
-    IplReference<Type, 2>(Size<2>(size0, size1), _buffer)
-  {
-  }
-
-  /**
-     Constructor.
-     @param layout requested layout of memory block.
-     @param _buffer pointer to memory block to be referenced.
-  */
-  inline IplReference2D(const Layout<Type, 2> &layout, Type *_buffer):
-    Layout<Type, 2>(layout),
-    Pointer<Type, 2>(layout),
-    IplReference<Type, 2>(layout, _buffer)
+    HostMemoryReference2D<Type>(),
+    IplReference<Type, 2>(_size, _image)
   {
   }
 };

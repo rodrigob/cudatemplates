@@ -23,27 +23,27 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CUDA_IPLREFERENCE1D_H
-#define CUDA_IPLREFERENCE1D_H
+#ifndef CUDA_@NAME@@Dim@D_H
+#define CUDA_@NAME@@Dim@D_H
 
 
-#include <cudatemplates/iplreference.hpp>
+#include <cudatemplates/@name@.hpp>
 
 
 namespace Cuda {
 
 /**
-   IplReference template specialized for 1 dimension(s).
+   @Name@ template specialized for @Dim@ dimension(s).
 */
 template <class Type>
-class IplReference1D : public HostMemoryReference1D<Type>, public IplReference<Type, 1>
+class @Name@@Dim@D : public @HostMemoryReference@HostMemoryReference@Dim@D<Type>, public @Name@<Type, @Dim@>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**
      Default constructor.
   */
-  inline IplReference1D()
+  inline @Name@@Dim@D()
   {
   }
 #endif
@@ -53,11 +53,11 @@ public:
      Constructor.
      @param _image pointer to IplImage to be referenced.
   */
-  inline IplReference1D(IplImage *_image):
-    Layout<Type, 1>(),
-    Pointer<Type, 1>(),
-    HostMemoryReference1D<Type>(),
-    IplReference<Type, 1>(_image)
+  inline @Name@@Dim@D(IplImage *_image):
+    Layout<Type, @Dim@>(),
+    @Pointer@Pointer<Type, @Dim@>(),
+    @HostMemoryReference@HostMemoryReference@Dim@D<Type>(),
+    @Name@<Type, @Dim@>(_image)
   {
   }
 
@@ -66,11 +66,11 @@ public:
      @param _size size of memory block.
      @param _image pointer to IplImage to be referenced.
   */
-  inline IplReference1D(const Size<1> &_size, IplImage *_image):
-    Layout<Type, 1>(_size),
-    Pointer<Type, 1>(_size),
-    HostMemoryReference1D<Type>(),
-    IplReference<Type, 1>(_size, _image)
+  inline @Name@@Dim@D(const Size<@Dim@> &_size, IplImage *_image):
+    Layout<Type, @Dim@>(_size),
+    @Pointer@Pointer<Type, @Dim@>(_size),
+    @HostMemoryReference@HostMemoryReference@Dim@D<Type>(),
+    @Name@<Type, @Dim@>(_size, _image)
   {
   }
 };

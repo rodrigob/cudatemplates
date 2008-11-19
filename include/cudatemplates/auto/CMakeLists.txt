@@ -97,8 +97,10 @@ set(specdim_template specdim_reference)
 specialize_dims(DeviceMemoryReference DeviceMemory 1)
 specialize_dims(HostMemoryReference HostMemory 1)
 specialize_dims(GilReference HostMemoryReference 1)
-specialize_dims(IplReference HostMemoryReference 1)
 specialize_dims(ItkReference HostMemoryReference 1)
+
+set(specdim_template specdim_iplreference)
+specialize_dims(IplReference HostMemoryReference 1)
 
 specialize_plan(real    complex 1)
 specialize_plan(complex real    1)
