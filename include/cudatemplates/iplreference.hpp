@@ -50,7 +50,7 @@ public:
 
   /**
      Constructor.
-     This allocates memory for the Ipl image of the given size.
+     This allocates memory for the IplImage of the given size.
      @param _size size of image
      @param _image pointer to IplImage to be referenced.
   */
@@ -62,10 +62,18 @@ public:
     setImage(_image);
   }
 
-private:
   /**
-     Extract image information from IPL image.
-     @param image IPL image
+     Returns the IplImage pointer
+  */
+  inline IplImage* getIplImage()
+    {
+      return(image_ptr);
+    }
+
+protected:
+  /**
+     Extract image information from IplImage.
+     @param image IplImage to be referenced.
   */
   void setImage(IplImage *image)
   {
@@ -80,7 +88,7 @@ private:
   }
 
   /**
-     Pointer to IPL image.  This pointer is not used in the
+     Pointer to IplImage.  This pointer is not used in the
      IplReference class, but it offers the possibility to handle smart
      pointers at some time. In future the IplReference should handle
      the memory of the referenced IplImage.
