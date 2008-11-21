@@ -36,10 +36,18 @@
 
 
 namespace Cuda {
+
+/**
+   This namespace wraps the CUBLAS functionality.
+*/
 namespace BLAS {
 
 typedef cuComplex complex;
 
+/**
+   CUBLAS initialization.
+   Must be called once before using Cuda::BLAS.
+*/
 static inline void init()
 {
   cublasInit();

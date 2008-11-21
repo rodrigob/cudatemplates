@@ -189,6 +189,9 @@ public:
 
 /**
    Equality operator.
+   @param s1 first size
+   @param s2 second size
+   @return true if first and second size are equal, otherwise false
 */
 template <unsigned Dim>
 bool operator==(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
@@ -202,6 +205,9 @@ bool operator==(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
 
 /**
    Inequality operator.
+   @param s1 first size
+   @param s2 second size
+   @return true if first and second size are not equal, otherwise false
 */
 template <unsigned Dim>
 bool operator!=(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
@@ -213,7 +219,7 @@ bool operator!=(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
   return false;
 }
 
-}
+}  // namespace Cuda
 
 
 #endif

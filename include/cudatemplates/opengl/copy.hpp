@@ -32,6 +32,10 @@
 
 
 namespace Cuda {
+
+/**
+   This namespace contains all OpenGL-related classes and functions of the CUDA templates.
+*/
 namespace OpenGL {
 
 /**
