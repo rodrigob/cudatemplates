@@ -31,9 +31,9 @@
 using namespace std;
 
 
-const size_t SIZE    =   1024;  // image size
-const int    COUNT   = 100000;  // number of FFTs to perform
-const float  EPSILON =   1e-6;  // error threshold
+const size_t SIZE    =  256;  // image size
+const int    COUNT   = 1000;  // number of FFTs to perform
+const float  EPSILON = 1e-5;  // error threshold
 
 
 double
@@ -48,25 +48,28 @@ main()
   int err = 0;
 
   try {
-    Cuda::HostMemoryHeap1D    <Cuda::FFT::real>    data1_h(SIZE);
-    Cuda::DeviceMemoryLinear1D<Cuda::FFT::real>    data1_g(SIZE);
-    Cuda::DeviceMemoryLinear1D<Cuda::FFT::complex> data_fft_g(SIZE / 2 + 1);
-    Cuda::DeviceMemoryLinear1D<Cuda::FFT::real>    data2_g(SIZE);
-    Cuda::HostMemoryHeap1D    <Cuda::FFT::real>    data2_h(SIZE);
+    Cuda::Size<2> index;
+    Cuda::HostMemoryHeap2D    <Cuda::FFT::real>    data1_h(SIZE, SIZE);
+    Cuda::DeviceMemoryLinear2D<Cuda::FFT::real>    data1_g(SIZE, SIZE);
+    Cuda::DeviceMemoryLinear2D<Cuda::FFT::complex> data_fft_g(SIZE, SIZE);  // can this be smaller?
+    Cuda::DeviceMemoryLinear2D<Cuda::FFT::real>    data2_g(SIZE, SIZE);
+    Cuda::HostMemoryHeap2D    <Cuda::FFT::real>    data2_h(SIZE, SIZE);
 
     // allocate memory:
-    Cuda::FFT::Plan<Cuda::FFT::real, Cuda::FFT::complex, 1> plan_r2c_1d(data1_g.size);
-    Cuda::FFT::Plan<Cuda::FFT::complex, Cuda::FFT::real, 1> plan_c2r_1d(data1_g.size);
+    Cuda::FFT::Plan<Cuda::FFT::real, Cuda::FFT::complex, 2> plan_r2c_1d(data1_g.size);
+    Cuda::FFT::Plan<Cuda::FFT::complex, Cuda::FFT::real, 2> plan_c2r_1d(data1_g.size);
 
     // create random data:
-    for(int i = SIZE; i--;)
-      (data1_h.getBuffer())[i] = rand() / (float)RAND_MAX;
+    for(index[0] = SIZE; index[0]--;)
+      for(index[1] = SIZE; index[1]--;)
+	data1_h[index] = rand() / (float)RAND_MAX;
 
     // copy data to device memory:
     copy(data1_g, data1_h);
 
     // execute FFT and measure performance:
     struct timeval t1, t2;
+    cudaThreadSynchronize();
     gettimeofday(&t1, 0);
 
     for(int i = COUNT; i--;) {
@@ -74,22 +77,25 @@ main()
       plan_c2r_1d.exec(data_fft_g, data2_g);
     }
 
+    cudaThreadSynchronize();
     gettimeofday(&t2, 0);
     double t = t2 - t1;
     cout
       << "total time: " << t << " seconds\n"
-      << "FFTs per second (size = " << SIZE << ", forward and inverse): " << (COUNT / t) << endl;
+      << "FFTs per second (size = " << SIZE << "x" << SIZE << ", forward and inverse): " << (COUNT / t) << endl;
 
     // copy data to host memory:
     copy(data2_h, data2_g);
 
     // verify results:
-    for(int i = SIZE; i--;) {
-      float d = (data2_h.getBuffer())[i] / SIZE - (data1_h.getBuffer())[i];
-
-      if(fabs(d) > EPSILON) {
-	cerr << "FFT failed\n";
-	return 1;
+    for(index[0] = SIZE; index[0]--;) {
+      for(index[1] = SIZE; index[1]--;) {
+	float d = data2_h[index] / (SIZE * SIZE) - data1_h[index];
+	
+	if(fabs(d) > EPSILON) {
+	  cerr << "FFT failed\n";
+	  return 1;
+	}
       }
     }
   }
