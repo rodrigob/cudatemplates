@@ -3,17 +3,17 @@
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -22,56 +22,51 @@
 ${warning}
 
 
-template <int N>
-int iamax(const Vector<${type}, N> &x)
+int iamax(const Vector<${type}> &x)
 {
-  return cublasI${t}amax(N, x, x.inc());
+  return cublasI${t}amax(x.getSize(), x, x.inc());
 }
 
-template <int N>
-int iamin(const Vector<${type}, N> &x)
+int iamin(const Vector<${type}> &x)
 {
-  return cublasI${t}amin(N, x, x.inc());
+  return cublasI${t}amin(x.getSize(), x, x.inc());
 }
 
-template <int N>
-${type} asum(const Vector<${type}, N> &x)
+${normtype} asum(const Vector<${type}> &x)
 {
-  return cublas${T}asum(N, x, x.inc());
+  return cublas${N}${c}asum(x.getSize(), x, x.inc());
 }
 
-template <int N>
-void axpy(${type} alpha, const Vector<${type}, N> &x, Vector<${type}, N> &y)
+void axpy(${type} alpha, const Vector<${type}> &x, Vector<${type}> &y)
 {
-  cublas${T}axpy(N, alpha, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublas${T}axpy(x.getSize(), alpha, x, x.inc(), y, y.inc());
 }
 
-template <int N>
-void copy(const Vector<${type}, N> &x, Vector<${type}, N> &y)
+void copy(const Vector<${type}> &x, Vector<${type}> &y)
 {
-  cublas${T}copy(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublas${T}copy(x.getSize(), x, x.inc(), y, y.inc());
 }
 
-template <int N>
-${type} dot(const Vector<${type}, N> &x, Vector<${type}, N> &y)
+${type} dot${c}(const Vector<${type}> &x, const Vector<${type}> &y)
 {
-  return cublas${T}dot(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  return cublas${T}dot${c}(x.getSize(), x, x.inc(), y, y.inc());
 }
 
-template <int N>
-${type} nrm2(const Vector<${type}, N> &x)
+${normtype} nrm2(const Vector<${type}> &x)
 {
-  return cublas${T}nrm2(N, x, x.inc());
+  return cublas${N}${c}nrm2(x.getSize(), x, x.inc());
 }
 
-template <int N>
-void scal(${type} alpha, const Vector<${type}, N> &x)
+void scal(${type} alpha, Vector<${type}> &x)
 {
-  cublas${T}scal(N, alpha, x, x.inc());
+  cublas${T}scal(x.getSize(), alpha, x, x.inc());
 }
 
-template <int N>
-void swap(Vector<${type}, N> &x, Vector<${type}, N> &y)
+void swap(Vector<${type}> &x, Vector<${type}> &y)
 {
-  cublas${T}swap(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublas${T}swap(x.getSize(), x, x.inc(), y, y.inc());
 }

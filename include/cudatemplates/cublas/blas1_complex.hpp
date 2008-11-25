@@ -3,17 +3,17 @@
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,56 +25,51 @@
 */
 
 
-template <int N>
-int iamax(const Vector<complex, N> &x)
+int iamax(const Vector<complex> &x)
 {
-  return cublasIcamax(N, x, x.inc());
+  return cublasIcamax(x.getSize(), x, x.inc());
 }
 
-template <int N>
-int iamin(const Vector<complex, N> &x)
+int iamin(const Vector<complex> &x)
 {
-  return cublasIcamin(N, x, x.inc());
+  return cublasIcamin(x.getSize(), x, x.inc());
 }
 
-template <int N>
-complex asum(const Vector<complex, N> &x)
+float asum(const Vector<complex> &x)
 {
-  return cublasCasum(N, x, x.inc());
+  return cublasScasum(x.getSize(), x, x.inc());
 }
 
-template <int N>
-void axpy(complex alpha, const Vector<complex, N> &x, Vector<complex, N> &y)
+void axpy(complex alpha, const Vector<complex> &x, Vector<complex> &y)
 {
-  cublasCaxpy(N, alpha, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublasCaxpy(x.getSize(), alpha, x, x.inc(), y, y.inc());
 }
 
-template <int N>
-void copy(const Vector<complex, N> &x, Vector<complex, N> &y)
+void copy(const Vector<complex> &x, Vector<complex> &y)
 {
-  cublasCcopy(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublasCcopy(x.getSize(), x, x.inc(), y, y.inc());
 }
 
-template <int N>
-complex dot(const Vector<complex, N> &x, Vector<complex, N> &y)
+complex dotc(const Vector<complex> &x, const Vector<complex> &y)
 {
-  return cublasCdot(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  return cublasCdotc(x.getSize(), x, x.inc(), y, y.inc());
 }
 
-template <int N>
-complex nrm2(const Vector<complex, N> &x)
+float nrm2(const Vector<complex> &x)
 {
-  return cublasCnrm2(N, x, x.inc());
+  return cublasScnrm2(x.getSize(), x, x.inc());
 }
 
-template <int N>
-void scal(complex alpha, const Vector<complex, N> &x)
+void scal(complex alpha, Vector<complex> &x)
 {
-  cublasCscal(N, alpha, x, x.inc());
+  cublasCscal(x.getSize(), alpha, x, x.inc());
 }
 
-template <int N>
-void swap(Vector<complex, N> &x, Vector<complex, N> &y)
+void swap(Vector<complex> &x, Vector<complex> &y)
 {
-  cublasCswap(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublasCswap(x.getSize(), x, x.inc(), y, y.inc());
 }

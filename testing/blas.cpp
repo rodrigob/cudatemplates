@@ -50,19 +50,19 @@ main()
 
   // create single data:
   float sa = 3;
-  Cuda::BLAS::Vector<float, 3> sx, sy;
-  Cuda::BLAS::Matrix<float, 3, 3> sm;
+  Cuda::BLAS::Vector<float> sx(3), sy(3);
+  Cuda::BLAS::Matrix<float> sm(3, 3);
   Cuda::BLAS::complex ca;
 
   // create complex data:
   ca.x = sa;
   ca.y = 0;
-  Cuda::BLAS::Vector<Cuda::BLAS::complex, 3> cx, cy;
-  Cuda::BLAS::Matrix<Cuda::BLAS::complex, 3, 3> cm;
+  Cuda::BLAS::Vector<Cuda::BLAS::complex> cx(3), cy(3);
+  Cuda::BLAS::Matrix<Cuda::BLAS::complex> cm(3, 3);
 
   // apply single functions:
   Cuda::BLAS::axpy(sa, sx, sy);
-  Cuda::BLAS::gemv(sa, sm, sx, sa, sy);
+  Cuda::BLAS::gemv('n', sa, sm, sx, sa, sy);
 
   // apply complex functions:
   Cuda::BLAS::axpy(ca, cx, cy);

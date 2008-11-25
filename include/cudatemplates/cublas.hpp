@@ -31,8 +31,8 @@
 #include <cudatemplates/error.hpp>
 
 
-//!!! #define CUBLAS_CHECK(call) { result_t_t err = call; if(err != CUBLAS_SUCCESS) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
-#define CUBLAS_CHECK(call) call
+#define CUBLAS_CHECK(call) { cublasStatus err = call; if(err != CUBLAS_STATUS_SUCCESS) throw Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
+// #define CUBLAS_CHECK(call) call
 
 
 namespace Cuda {
@@ -53,48 +53,139 @@ static inline void init()
   cublasInit();
 }
 
-template <class T, int N>
+template <class T>
 class Vector
 {
 public:
-  Vector()
+  typedef T value_type;
+  typedef unsigned size_type;
+	
+  inline int inc() const { return 1; }  // not yet used
+  inline operator T*() { return m_devicePtr; }
+  inline operator const T*() const { return m_devicePtr; }
+
+  /*	
+  inline T &operator()(size_type i)
   {
-    CUBLAS_CHECK(cublasAlloc(N, sizeof(T), (void **)&devicePtr));
+    return m_devicePtr[i];
   }
+  */
+
+  Vector():
+    m_devicePtr(0), m_size(0)
+  {
+  }
+	
+  Vector(size_type size)
+  {
+    CUBLAS_CHECK(cublasAlloc(size, sizeof(T), (void **)&m_devicePtr));
+    m_size = size;
+  }
+  
+  /*
+  Vector(const Vector &host)
+  {
+    CUBLAS_CHECK(cublasAlloc(host.m_size, sizeof(T), (void **)&m_devicePtr));
+    CUBLAS_CHECK(cublasSetVector(host.m_size, sizeof(T), host, 1, m_devicePtr, 1));
+    m_size = host.m_size;
+  }
+  */
 
   ~Vector()
   {
-    CUBLAS_CHECK(cublasFree(devicePtr));
+    CUBLAS_CHECK(cublasFree(m_devicePtr));
+    m_devicePtr = 0;
+    m_size = 0;
+  }
+  
+  /*
+  void makeZero() {
+    for (int i=0; i<m_size; i++)
+      m_devicePtr[i] = 0;
+  }
+  */
+
+  void setValues(const T *values)
+  {
+    CUBLAS_CHECK(cublasSetVector(m_size, sizeof(T), values, 1, m_devicePtr, 1));
+  }
+	
+  const size_type getSize() const
+  {
+    return m_size;
   }
 
-  inline int inc() const { return 1; }  // not yet used
-  inline operator T *() { return devicePtr; }
-  inline operator const T *() const { return devicePtr; }
-
 private:
-  T *devicePtr;
+  size_type m_size;
+  T *m_devicePtr;
 };
 
 
-template <class T, int M, int N>
+template <class T>
 class Matrix
 {
 public:
-  Matrix()
-  {
-    CUBLAS_CHECK(cublasAlloc(N * M, sizeof(T), (void **)&devicePtr));
+  typedef T value_type;
+  typedef unsigned size_type;
+	
+  inline operator T*() { return m_devicePtr; }
+  inline operator const T*() const { return m_devicePtr; }
+	
+  inline T &operator()(size_type i, size_type j) {
+    return m_devicePtr[i * m_width + j];
   }
-
+	
+  inline T &operator()(size_type i, size_type j) const {
+    return m_devicePtr[i * m_width + j];
+  }
+	
+  Matrix():
+    m_width(0), m_height(0), m_devicePtr(0)
+  {
+  }
+	
+  Matrix(size_type width, size_type height)
+  {
+    CUBLAS_CHECK(cublasAlloc(width * height, sizeof(T), (void **)&m_devicePtr));
+    m_width = width;
+    m_height = height;
+  }
+	
   ~Matrix()
   {
-    CUBLAS_CHECK(cublasFree(devicePtr));
+    CUBLAS_CHECK(cublasFree(m_devicePtr));
+    m_width = 0;
+    m_height = 0;
+    m_devicePtr = 0;
   }
 
-  inline operator T *() { return devicePtr; }
-  inline operator const T *() const { return devicePtr; }
+  /*	
+  void setMatrix(const Matrix& host)
+  {
+    assert(m_width == host.getWidth() && m_height == host.getHeight());
+    CUBLAS_CHECK(cublasSetMatrix(m_height, m_width, sizeof(T), host, m_width, m_devicePtr, m_width));
+  }
+  */
 
+  void setValues(const T *values)
+  {
+    CUBLAS_CHECK(cublasSetMatrix(m_height, m_width, sizeof(T), values, m_width, m_devicePtr, m_width));
+  }
+	
+  const size_type getWidth() const
+  {
+    return m_width;
+  }
+	
+  const size_type getHeight() const
+  {
+    return m_height;
+  }
+	
 private:
-  T *devicePtr;
+  size_type m_width;
+  size_type m_height;
+  T *m_devicePtr;
 };
 
 

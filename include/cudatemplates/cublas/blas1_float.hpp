@@ -3,17 +3,17 @@
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,56 +25,51 @@
 */
 
 
-template <int N>
-int iamax(const Vector<float, N> &x)
+int iamax(const Vector<float> &x)
 {
-  return cublasIsamax(N, x, x.inc());
+  return cublasIsamax(x.getSize(), x, x.inc());
 }
 
-template <int N>
-int iamin(const Vector<float, N> &x)
+int iamin(const Vector<float> &x)
 {
-  return cublasIsamin(N, x, x.inc());
+  return cublasIsamin(x.getSize(), x, x.inc());
 }
 
-template <int N>
-float asum(const Vector<float, N> &x)
+float asum(const Vector<float> &x)
 {
-  return cublasSasum(N, x, x.inc());
+  return cublasSasum(x.getSize(), x, x.inc());
 }
 
-template <int N>
-void axpy(float alpha, const Vector<float, N> &x, Vector<float, N> &y)
+void axpy(float alpha, const Vector<float> &x, Vector<float> &y)
 {
-  cublasSaxpy(N, alpha, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublasSaxpy(x.getSize(), alpha, x, x.inc(), y, y.inc());
 }
 
-template <int N>
-void copy(const Vector<float, N> &x, Vector<float, N> &y)
+void copy(const Vector<float> &x, Vector<float> &y)
 {
-  cublasScopy(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublasScopy(x.getSize(), x, x.inc(), y, y.inc());
 }
 
-template <int N>
-float dot(const Vector<float, N> &x, Vector<float, N> &y)
+float dot(const Vector<float> &x, const Vector<float> &y)
 {
-  return cublasSdot(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  return cublasSdot(x.getSize(), x, x.inc(), y, y.inc());
 }
 
-template <int N>
-float nrm2(const Vector<float, N> &x)
+float nrm2(const Vector<float> &x)
 {
-  return cublasSnrm2(N, x, x.inc());
+  return cublasSnrm2(x.getSize(), x, x.inc());
 }
 
-template <int N>
-void scal(float alpha, const Vector<float, N> &x)
+void scal(float alpha, Vector<float> &x)
 {
-  cublasSscal(N, alpha, x, x.inc());
+  cublasSscal(x.getSize(), alpha, x, x.inc());
 }
 
-template <int N>
-void swap(Vector<float, N> &x, Vector<float, N> &y)
+void swap(Vector<float> &x, Vector<float> &y)
 {
-  cublasSswap(N, x, x.inc(), y, y.inc());
+  assert(x.getSize() == y.getSize()); 
+  cublasSswap(x.getSize(), x, x.inc(), y, y.inc());
 }
