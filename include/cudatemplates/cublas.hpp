@@ -59,7 +59,7 @@ class Vector
 public:
   typedef T value_type;
   typedef unsigned size_type;
-	
+
   inline int inc() const { return 1; }  // not yet used
   inline operator T*() { return m_devicePtr; }
   inline operator const T*() const { return m_devicePtr; }
@@ -75,21 +75,17 @@ public:
     m_devicePtr(0), m_size(0)
   {
   }
-	
+
   Vector(size_type size)
   {
     CUBLAS_CHECK(cublasAlloc(size, sizeof(T), (void **)&m_devicePtr));
     m_size = size;
+    makeZero();
   }
-  
-  /*
-  Vector(const Vector &host)
-  {
-    CUBLAS_CHECK(cublasAlloc(host.m_size, sizeof(T), (void **)&m_devicePtr));
-    CUBLAS_CHECK(cublasSetVector(host.m_size, sizeof(T), host, 1, m_devicePtr, 1));
-    m_size = host.m_size;
-  }
-  */
+
+
+  Vector(const Vector &v);
+
 
   ~Vector()
   {
@@ -97,19 +93,27 @@ public:
     m_devicePtr = 0;
     m_size = 0;
   }
-  
-  /*
+
+
   void makeZero() {
-    for (int i=0; i<m_size; i++)
-      m_devicePtr[i] = 0;
+    void* zeros = calloc(m_size, sizeof(T));
+    CUBLAS_CHECK(cublasSetVector(m_size, sizeof(T), zeros, 1, m_devicePtr, 1));
+    free(zeros);
   }
-  */
+
 
   void setValues(const T *values)
   {
     CUBLAS_CHECK(cublasSetVector(m_size, sizeof(T), values, 1, m_devicePtr, 1));
   }
-	
+
+  const T* getValues(void)
+  {
+    T* v = new T[m_size];
+    CUBLAS_CHECK(cublasGetVector(m_size, sizeof(T), m_devicePtr, 1, v, 1));
+    return v;
+  }
+
   const size_type getSize() const
   {
     return m_size;
@@ -188,13 +192,18 @@ private:
   T *m_devicePtr;
 };
 
-
 #include "cublas/blas1_float.hpp"
 #include "cublas/blas1_complex.hpp"
 #include "cublas/blas1_double.hpp"
 #include "cublas/blas2_float.hpp"
 #include "cublas/blas3_float.hpp"
 
+template <class T>
+	Vector<T>::Vector(const Vector<T> &v) {
+	CUBLAS_CHECK(cublasAlloc(v.m_size, sizeof(T), (void **)&m_devicePtr));
+	m_size = v.m_size;
+	copy(v, *this);
+}
 
 }  // namespace BLAS
 }  // namespace Cuda
