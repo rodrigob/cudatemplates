@@ -47,11 +47,28 @@ public:
   */
   struct KernelData
   {
+    /**
+       Data pointer.
+    */
     Type *data;
+
+    /**
+       Data size.
+    */
     size_t size[Dim];
 
+    /**
+       Default constructor.
+    */
     KernelData(): data(0) {}
 
+    /**
+       Constructor.
+       This constructor is invoked when a kernel expecting a KernelData
+       argument is called with an instance of DeviceMemory, i.e., you don't
+       have to construct the KernelData object explicitly.
+       @param mem reference to device memory object
+    */
     KernelData(DeviceMemory<Type, Dim> &mem):
       data(mem.getBuffer())
     {
