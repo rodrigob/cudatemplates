@@ -28,6 +28,7 @@
 #include <cudatemplates/hostmemory.hpp>
 #include <cudatemplates/hostmemoryreference.hpp>
 #include <cudatemplates/staticassert.hpp>
+#include <cudatemplates/symbol.hpp>
 
 
 /**
@@ -691,6 +692,90 @@ copy(Array<Type, Dim> &dst, const Array<Type, Dim> &src,
     p.kind = cudaMemcpyDeviceToDevice;
     CUDA_CHECK(cudaMemcpy3D(&p));
   }
+}
+
+//------------------------------------------------------------------------------
+/**
+   Generic copy method from CUDA symbol to host/device memory.
+   It is not recommended to call this function directly since its correct
+   behaviour depends on the kind parameter (just as the underlying CUDA
+   functions).
+   @param dst generic destination pointer
+   @param src source CUDA symbol
+   @param kind direction of copy
+*/
+template<class Type, unsigned Dim>
+void
+copyFromSymbol(Pointer<Type, Dim> &dst, const Symbol<Type, Dim> &src, cudaMemcpyKind kind)
+{
+  CUDA_CHECK_SIZE;
+  CUDA_CHECK(cudaMemcpyFromSymbol(dst.getBuffer(), src.getSymbol(), dst.getBytes(), 0, kind));
+}
+
+/**
+   Copy CUDA symbol to host memory.
+   @param dst destination pointer (host memory)
+   @param src source symbol (device memory)
+*/
+template<class Type, unsigned Dim>
+void
+copy(HostMemory<Type, Dim> &dst, const Symbol<Type, Dim> &src)
+{
+  copyFromSymbol(dst, src, cudaMemcpyDeviceToHost);
+}
+
+/**
+   Copy CUDA symbol to device memory.
+   @param dst destination pointer (device memory)
+   @param src source symbol (device memory)
+*/
+template<class Type, unsigned Dim>
+void
+copy(DeviceMemory<Type, Dim> &dst, const Symbol<Type, Dim> &src)
+{
+  copyFromSymbol(dst, src, cudaMemcpyDeviceToDevice);
+}
+
+//------------------------------------------------------------------------------
+/**
+   Generic copy method from host/device memory to CUDA symbol.
+   It is not recommended to call this function directly since its correct
+   behaviour depends on the kind parameter (just as the underlying CUDA
+   functions).
+   @param dst destination CUDA symbol
+   @param src generic source pointer
+   @param kind direction of copy
+*/
+template<class Type, unsigned Dim>
+void
+copyToSymbol(Symbol<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind)
+{
+  CUDA_CHECK_SIZE;
+  CUDA_CHECK(cudaMemcpyToSymbol(dst.getSymbol(), src.getBuffer(), src.getBytes(), 0, kind));
+}
+
+/**
+   Copy host memory to CUDA symbol.
+   @param dst destination symbol (device memory)
+   @param src source pointer (host memory)
+*/
+template<class Type, unsigned Dim>
+void
+copy(Symbol<Type, Dim> &dst, const HostMemory<Type, Dim> &src)
+{
+  copyToSymbol(dst, src, cudaMemcpyHostToDevice);
+}
+
+/**
+   Copy device memory to CUDA symbol.
+   @param dst destination symbol (device memory)
+   @param src source pointer (device memory)
+*/
+template<class Type, unsigned Dim>
+void
+copy(Symbol<Type, Dim> &dst, const DeviceMemory<Type, Dim> &src)
+{
+  copyToSymbol(dst, src, cudaMemcpyDeviceToDevice);
 }
 
 }

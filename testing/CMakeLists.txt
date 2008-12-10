@@ -1,5 +1,4 @@
 # Boost:
-set(Boost_ADDITIONAL_VERSIONS "1_37")
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
@@ -81,6 +80,8 @@ add_executable(buffer_object buffer_object.cpp)
 target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${PNG_LIBRARIES})
 
 cuda_add_executable(compat compat.cu)
+
+cuda_add_executable(symbol symbol.cu)
 
 # run tests:
 

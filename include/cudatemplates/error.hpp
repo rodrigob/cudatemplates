@@ -23,7 +23,7 @@
 
 
 #ifndef __GNUC__
-#define __PRETTY_FUNCTION__ "(unknown function)"
+#define __PRETTY_FUNCTION__ "unknown function"
 #endif
 
 
@@ -32,8 +32,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) abort(); }
 #define CUDA_ERROR(msg) { fprintf(stderr, "%s:%d (%s):\n%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__, msg); abort(); }
+#define CUDA_CHECK(call) { cudaError_t err = call; if(err != cudaSuccess) CUDA_ERROR(cudaGetErrorString(err)); }
 
 #else  // defined(__CUDACC__) || defined(NVCC)
 
