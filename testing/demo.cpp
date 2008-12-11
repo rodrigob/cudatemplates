@@ -33,26 +33,28 @@ using namespace std;
 
 const size_t SIZE[] = { 16, 32, 64 };
 
+int seed;
+
 
 void
-check(float *buf, bool init)
+init(float *buf)
 {
-  static int seed;
   size_t size = SIZE[0] * SIZE[1] * SIZE[2];
+  seed = time(0);
+  srand(seed);
 
-  if(init) {
-    seed = time(0);
-    srand(seed);
+  while(size--)
+    *(buf++) = rand();
+}
 
-    while(size--)
-      *(buf++) = rand();
-  }
-  else {
-    srand(seed);
+void
+verify(const float *buf)
+{
+  size_t size = SIZE[0] * SIZE[1] * SIZE[2];
+  srand(seed);
 
-    while(size--)
-      assert(*(buf++) == rand());
-  }
+  while(size--)
+    assert(*(buf++) == rand());
 }
 
 void
@@ -68,7 +70,7 @@ demo_plain()
   }
   
   // init host memory:
-  check(mem_host1, true);
+  init(mem_host1);
 
   // allocate device memory:
   cudaExtent extent;
@@ -102,8 +104,8 @@ demo_plain()
   p.kind = cudaMemcpyDeviceToHost;
   CUDA_CHECK(cudaMemcpy3D(&p));
 
-  // verification:
-  check(mem_host2, false);
+  // verify host memory:
+  verify(mem_host2);
 
   // free memory:
   CUDA_CHECK(cudaFree(mem_device.ptr));
@@ -120,7 +122,7 @@ demo_cudatemplates()
     Cuda::HostMemoryHeap3D<float> mem_host2(SIZE[0], SIZE[1], SIZE[2]);
 
     // init host memory:
-    check(mem_host1.getBuffer(), true);
+    init(mem_host1.getBuffer());
 
     // allocate device memory:
     Cuda::DeviceMemoryPitched3D<float> mem_device(SIZE[0], SIZE[1], SIZE[2]);
@@ -131,8 +133,8 @@ demo_cudatemplates()
     // copy from device memory to host memory:
     copy(mem_host2, mem_device);
 
-    // verification:
-    check(mem_host2.getBuffer(), false);
+    // verify host memory:
+    verify(mem_host2.getBuffer());
   }
   catch(const exception &e) {
     cerr << e.what();

@@ -4,7 +4,7 @@
 
 \section intro Introduction
 
-"CUDA Templates" is a collection of C++ template classes and functions
+The "CUDA templates" are a collection of C++ template classes and functions
 which provide a consistent interface to
 <a href="http://www.nvidia.com">NVIDIA</a>'s "Compute Unified Device Architecture"
 (<a href="http://www.nvidia.com/object/cuda_home.html">CUDA</a>),
@@ -31,7 +31,9 @@ are provided for convenience.
 
 \section example Example
 
-Here is a small example which demonstrates the basic features of CUDA templates.
+Here is a small
+<a href="https://cudatemplates.svn.sourceforge.net/svnroot/cudatemplates/trunk/testing/demo.cpp">example</a>
+which demonstrates the basic features of the CUDA templates.
 It allocates two three-dimensional arrays in host memory and one corresponding array in device memory.
 Data is copied from the first host array to the device and then back to the second host array.
 Finally the allocated resources are freed. Full error checking is provided.
@@ -47,7 +49,10 @@ if((mem_host1 == 0) || (mem_host2 == 0)) {
   cerr << "out of memory\n";
   exit(1);
 }
-  
+
+// init host memory:
+init(mem_host1);
+
 // allocate device memory:
 cudaExtent extent;
 extent.width = SIZE[0];
@@ -80,6 +85,9 @@ p.dstPtr.pitch = SIZE[0] * sizeof(float);
 p.kind = cudaMemcpyDeviceToHost;
 CUDA_CHECK(cudaMemcpy3D(&p));
 
+// verify host memory:
+verify(mem_host2);
+
 // free memory:
 CUDA_CHECK(cudaFree(mem_device.ptr));
 free(mem_host2);
@@ -97,7 +105,7 @@ try {
   Cuda::HostMemoryHeap3D<float> mem_host2(SIZE[0], SIZE[1], SIZE[2]);
 
   // init host memory:
-  check(mem_host1.getBuffer(), true);
+  init(mem_host1.getBuffer());
 
   // allocate device memory:
   Cuda::DeviceMemoryPitched3D<float> mem_device(SIZE[0], SIZE[1], SIZE[2]);
@@ -108,8 +116,8 @@ try {
   // copy from device memory to host memory:
   copy(mem_host2, mem_device);
 
-  // verification:
-  check(mem_host2.getBuffer(), false);
+  // verify host memory:
+  verify(mem_host2.getBuffer());
 }
 catch(const exception &e) {
   cerr << e.what();
