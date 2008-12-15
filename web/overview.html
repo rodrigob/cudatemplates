@@ -6,17 +6,25 @@
 </head>
 <body>
 <h1><i>&lt;Cuda&gt;</i> templates</h1>
-<h2>memory types</h2>
-NVIDIA's GPUs support various types of memory, each optimized for a particular access pattern.
-The CUDA toolkit provides function for allocating memory of each type and for data transfer
-between the different memory types (including host/device transfer).
-<ul>
-<li>heap memory</li>
-<li>locked heap memory</li>
-<li>linear device memory</li>
-<li>pitched device memory</li>
-<li>array</li>
-<li>constant memory</li>
+<h2>Memory types</h2>
+<p>NVIDIA's GPUs support various types of memory, each optimized for a particular access pattern.
+The CUDA toolkit provides function for allocating memory of each type and for copying data
+between the different memory types (including host/device data transfer).</p>
+<h3>Host memory</h3>
+<p><b>Heap memory</b> is regular pageable host memory allocated by <tt>malloc()</tt>.
+CUDA supports copying data between heap memory and any type of device memory,
+though performance is not optimal.</p>
+<p><b>Page-locked host memory</b> is mapped into the address space of the GPU
+and can be accessed directly, thus increasing bandwidth.
+Moreover, some devices can also perform copies between page-locked host memory and
+device memory concurrently with kernel execution.
+Page-locked host memory is therefore best used as a data exchange area
+for data which need to be updated frequently.</p>
+<h3>Device memory</h3>
+<p><b>linear device memory</b></p>
+<p><b>pitched device memory</b></p>
+<p><b>array</b></p>
+<p><b>constant memory</b></p>
 </ul>
 </body>
 </html>
