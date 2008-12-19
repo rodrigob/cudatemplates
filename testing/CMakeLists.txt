@@ -1,6 +1,8 @@
 # Boost:
-find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
+find_package(Boost)
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIR})
+endif(Boost_FOUND)
 
 # Cuda:
 set(CUDA_BUILD_CUBIN OFF)
@@ -10,13 +12,15 @@ find_package(Cuda REQUIRED)
 include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 
 # cudatemplates
-FIND_PACKAGE(CudaTemplates REQUIRED)
+find_package(CudaTemplates REQUIRED)
 include_directories(${CUDATEMPLATES_INCLUDE_DIR})
 cuda_include_directories(${CUDATEMPLATES_INCLUDE_DIR})
 
 # ITK:
-find_package(ITK REQUIRED)
-include(${ITK_USE_FILE})
+find_package(ITK)
+if(ITK_FOUND)
+  include(${ITK_USE_FILE})
+endif(ITK_FOUND)
 
 # OpenCV:
 find_package(OpenCV)
@@ -55,11 +59,15 @@ target_link_libraries(fft ${CUDA_TARGET_LINK} ${CUFFT_TARGET_LINK})
 add_executable(blas blas.cpp)
 target_link_libraries(blas ${CUDA_TARGET_LINK} ${CUBLAS_TARGET_LINK})
 
-add_executable(itk itk.cpp)
-target_link_libraries(itk ${CUDA_TARGET_LINK} ${ITK_LIBRARIES})
+if(ITK_FOUND)
+  add_executable(itk itk.cpp)
+  target_link_libraries(itk ${CUDA_TARGET_LINK} ${ITK_LIBRARIES})
+endif(ITK_FOUND)
 
-add_executable(gil gil.cpp)
-target_link_libraries(gil ${CUDA_TARGET_LINK} ${PNG_LIBRARIES})
+if(Boost_FOUND)
+  add_executable(gil gil.cpp)
+  target_link_libraries(gil ${CUDA_TARGET_LINK} ${PNG_LIBRARIES})
+endif(Boost_FOUND)
 
 if(OpenCV_FOUND)
   add_executable(ipl ipl.cpp)
