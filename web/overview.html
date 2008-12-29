@@ -9,8 +9,12 @@
 <h2>Memory types</h2>
 <p>NVIDIA's GPUs support various types of memory, each optimized for a particular access pattern.
 The CUDA toolkit provides function for allocating memory of each type and for copying data
-between the different memory types (including host/device data transfer).</p>
-<h3>Host memory</h3>
+between the different memory types (including host/device data transfer).
+Only issues relevant to CUDA templates are discussed here,
+please see the
+<a href="http://developer.download.nvidia.com/compute/cuda/2_0/docs/NVIDIA_CUDA_Programming_Guide_2.0.pdf">CUDA Programming guide</a>
+for more information.</p>
+<h3>Host memory (CPU)</h3>
 <p><b>Heap memory</b> is regular pageable host memory allocated by <tt>malloc()</tt>.
 CUDA supports copying data between heap memory and any type of device memory,
 though performance is not optimal.</p>
@@ -20,10 +24,25 @@ Moreover, some devices can also perform copies between page-locked host memory a
 device memory concurrently with kernel execution.
 Page-locked host memory is therefore best used as a data exchange area
 for data which need to be updated frequently.</p>
-<h3>Device memory</h3>
-<p><b>linear device memory</b></p>
-<p><b>pitched device memory</b></p>
-<p><b>array</b></p>
+<h3>Device memory (GPU)</h3>
+<p>The dynamic memory on the graphics card is available to the GPU
+via its <b>linear device memory</b> interface.
+It is not cached, but highly optimized for stream processing,
+therefore irregular access patterns significantly degrade performance.
+A relatively small amount of static shared memory is available
+to overcome the restrictions of linear memory.
+However, since shared memory cannot be allocated dynamically,
+and the host cannot access the GPU's shared memory,
+there is no CUDA templates representation of it.</p>
+<p>Performance depends on well aligned memory addresses.
+To ensure proper alignment of more-dimensional data,
+several <b>pitched device memory</b> functions are available.
+These automatically insert sufficient bytes of padding
+(e.g., at the end of each row in an image
+such that the next row starts at a well aligned memory address).</p>
+<p>A CUDA <b>array</b> is used to access the GPU's texture units in CUDA.
+Texture units support various optimizations useful for accessing images
+such as linear interpolation and caching.</p>
 <p><b>constant memory</b></p>
 </ul>
 </body>
