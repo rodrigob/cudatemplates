@@ -5,14 +5,15 @@
 <title>CUDA templates overview</title>
 </head>
 <body>
+
 <h1><i>&lt;Cuda&gt;</i> templates</h1>
 <h2>Memory types</h2>
 <p>NVIDIA's GPUs support various types of memory, each optimized for a particular access pattern.
-The CUDA toolkit provides function for allocating memory of each type and for copying data
+The CUDA toolkit provides functions for allocating memory of each type and for copying data
 between the different memory types (including host/device data transfer).
-Only issues relevant to CUDA templates are discussed here,
+Only issues relevant to the CUDA templates are discussed here,
 please see the
-<a href="http://developer.download.nvidia.com/compute/cuda/2_0/docs/NVIDIA_CUDA_Programming_Guide_2.0.pdf">CUDA Programming guide</a>
+<a href="http://developer.download.nvidia.com/compute/cuda/2_0/docs/NVIDIA_CUDA_Programming_Guide_2.0.pdf">CUDA Programming Guide</a>
 for more information.</p>
 <h3>Host memory (CPU)</h3>
 <p><b>Heap memory</b> is regular pageable host memory allocated by <tt>malloc()</tt>.
@@ -43,7 +44,31 @@ such that the next row starts at a well aligned memory address).</p>
 <p>A CUDA <b>array</b> is used to access the GPU's texture units in CUDA.
 Texture units support various optimizations useful for accessing images
 such as linear interpolation and caching.</p>
-<p><b>constant memory</b></p>
-</ul>
+<p>A separate region of <b>constant memory</b> is available
+for program parameters and similar purposes.
+It is cached and is therefore well suited for frequently accessed constant data
+without consuming register space.</p>
+<h3>OpenGL interoperability</h3>
+<p>...</p>
+<h2>Consistent interface</h2>
+<p>Access to all above-mentioned memory types is implemented in the CUDA toolkit.
+However, function signatures largely differ depending on the particular memory type involved.
+Moreover, the size of the data to be processed is given in bytes for some functions
+and in terms of elements (e.g., floats) for other functions.
+Error conditions must be checked explicitly,
+otherwise the program continues in an undefined state.</p>
+<p>The main goal of the CUDA templates is to provide a
+<b>clean and consistent interface</b>
+to the underlying functions of the CUDA toolkit.
+Each of the different memory types is represented as a class template
+parameterized by the element data type and the dimension
+(most of them with specializations for one, two, and three dimensions).
+Since the data type (i.e., the type of memory to be accessed) is known at compile time,
+all the details about different data access methods are left to the compiler,
+therefore a single template function <tt>copy()</tt> can handle all possible memory transactions.
+Other benefits of the object-oriented approach are
+the mapping of CUDA errors to corresponding exceptions
+and the automatic deallocation of resources in the class destructors.</p>
+<p>foreign imaging libraries</p>
 </body>
 </html>
