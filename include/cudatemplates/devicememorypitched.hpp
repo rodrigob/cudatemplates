@@ -91,6 +91,7 @@ template <class Type, unsigned Dim>
 void DeviceMemoryPitched<Type, Dim>::
 alloc()
 {
+  CUDA_STATIC_ASSERT(Dim >= 2);
   this->free();
 
   if(Dim == 2) {
