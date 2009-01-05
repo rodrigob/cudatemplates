@@ -11,10 +11,9 @@ set(CUDA_BUILD_TYPE Device)
 find_package(Cuda REQUIRED)
 include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 
-# cudatemplates
-find_package(CudaTemplates REQUIRED)
-include_directories(${CUDATEMPLATES_INCLUDE_DIR})
-cuda_include_directories(${CUDATEMPLATES_INCLUDE_DIR})
+# CUDA templates:
+include_directories(${CMAKE_SOURCE_DIR}/include)
+cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # ITK:
 find_package(ITK)
