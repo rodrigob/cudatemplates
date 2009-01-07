@@ -7,7 +7,10 @@
 <body>
 
 <h1><i>&lt;Cuda&gt;</i> templates</h1>
-<h2>Memory types</h2>
+<p>This document gives a brief introduction into memory-related CUDA features
+and discusses benefits provided by the CUDA template classes.</p>
+
+<h2>1. Memory types</h2>
 <p>NVIDIA's GPUs support various types of memory, each optimized for a particular access pattern.
 The CUDA toolkit provides functions for allocating memory of each type and for copying data
 between the different memory types (including host/device data transfer).
@@ -16,17 +19,20 @@ please see the
 <a href="http://developer.download.nvidia.com/compute/cuda/2_0/docs/NVIDIA_CUDA_Programming_Guide_2.0.pdf">CUDA Programming Guide</a>
 for more information.</p>
 <h3>Host memory (CPU)</h3>
-<p><b>Heap memory</b> is regular pageable host memory allocated by <tt>malloc()</tt>.
+<ul>
+<li><b>Heap memory</b> is regular pageable host memory allocated by <tt>malloc()</tt>.
 CUDA supports copying data between heap memory and any type of device memory,
-though performance is not optimal.</p>
-<p><b>Page-locked host memory</b> is mapped into the address space of the GPU
+though performance is not optimal.</li>
+<li><b>Page-locked host memory</b> is mapped into the address space of the GPU
 and can be accessed directly, thus increasing bandwidth.
 Moreover, some devices can also perform copies between page-locked host memory and
 device memory concurrently with kernel execution.
 Page-locked host memory is therefore best used as a data exchange area
-for data which need to be updated frequently.</p>
+for data which need to be updated frequently.</li>
+</ul>
 <h3>Device memory (GPU)</h3>
-<p>The dynamic memory on the graphics card is available to the GPU
+<ul>
+<li>The dynamic memory on the graphics card is available to the GPU
 via its <b>linear device memory</b> interface.
 It is not cached, but highly optimized for stream processing,
 therefore irregular access patterns significantly degrade performance.
@@ -34,23 +40,30 @@ A relatively small amount of static shared memory is available
 to overcome the restrictions of linear memory.
 However, since shared memory cannot be allocated dynamically,
 and the host cannot access the GPU's shared memory,
-there is no CUDA templates representation of it.</p>
-<p>Performance depends on well aligned memory addresses.
+there is no CUDA templates representation of it.</li>
+<li>Performance depends on well aligned memory addresses.
 To ensure proper alignment of more-dimensional data,
 several <b>pitched device memory</b> functions are available.
 These automatically insert sufficient bytes of padding
 (e.g., at the end of each row in an image
-such that the next row starts at a well aligned memory address).</p>
-<p>A CUDA <b>array</b> is used to access the GPU's texture units in CUDA.
+such that the next row starts at a well aligned memory address).</li>
+<li>A CUDA <b>array</b> is used to access the GPU's texture units in CUDA.
 Texture units support various optimizations useful for accessing images
-such as linear interpolation and caching.</p>
-<p>A separate region of <b>constant memory</b> is available
+such as linear interpolation and caching.</li>
+<li>A separate region of <b>constant memory</b> is available
 for program parameters and similar purposes.
-It is cached and is therefore well suited for frequently accessed constant data
-without consuming register space.</p>
+It is cached and therefore well suited for frequently accessed constant data
+without consuming register space.</li>
+</ul>
 <h3>OpenGL interoperability</h3>
-<p>...</p>
-<h2>Consistent interface</h2>
+<p>CUDA supports direct data exchange between OpenGL and CUDA applications.
+This typically involves access to an OpenGL <b>buffer object</b>,
+which can be mapped into the address space of a CUDA application.
+Buffer objects can be used in various ways in OpenGL,
+e.g., as a data source in texture creation commands.
+For this purpose, an OpenGL <b>texture</b> class is included in the CUDA templates.</p>
+
+<h2>2. Consistent interface</h2>
 <p>Access to all above-mentioned memory types is implemented in the CUDA toolkit.
 However, function signatures largely differ depending on the particular memory type involved.
 Moreover, the size of the data to be processed is given in bytes for some functions
@@ -69,6 +82,22 @@ therefore a single template function <tt>copy()</tt> can handle all possible mem
 Other benefits of the object-oriented approach are
 the mapping of CUDA errors to corresponding exceptions
 and the automatic deallocation of resources in the class destructors.</p>
-<p>foreign imaging libraries</p>
+
+<h2>3. Image libraries</h2>
+<p>To simplify integration of CUDA with existing applications,
+the CUDA templates include compatibility classes for the following image libraries:</p>
+<ul>
+<li><a href="http://www.itk.org">Insight Toolkit</a> by <a href="http://www.kitware.com">Kitware, Inc.</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_37_0/libs/gil/doc/index.html">Generic Image Library</a>
+distributed with <a href="http://www.boost.org">boost</a></li>
+<li><a href="http://sourceforge.net/projects/opencvlibrary">OpenCV</a></li>
+</ul>
+<p>Image data created by one of these libraries can be used with the CUDA templates
+in the same way as data natively allocated by some CUDA template class.
+The CUDA templates do not define their own image I/O methods,
+but instead allow the programmer to use his favourite library for this purpose
+(or easily add integration for other libraries if none of the above matches).</p>
+<p><a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=234769&amp;type=4" width="125" height="37" border="0" alt="SourceForge.net Logo"></a></p>
+<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-html401-blue" alt="Valid HTML 4.01 Transitional" height="31" width="88"></a></p>
 </body>
 </html>

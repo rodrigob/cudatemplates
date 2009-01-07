@@ -4,7 +4,8 @@
     <itemcursorpositions/>
     <uploadprofiles defaultProfile="Sourceforge" >
       <profile remote_host="web.sourceforge.net" remote_port="" remote_path="/home/groups/c/cu/cudatemplates/htdocs" remote_protocol="sftp" user="mgrabner,cudatemplates" name="Sourceforge" >
-        <uploadeditem upload_time="1229004117" url="index.html" />
+        <uploadeditem upload_time="1231333334" url="index.html" />
+        <uploadeditem upload_time="1231333382" url="overview.html" />
       </profile>
     </uploadprofiles>
   </session>
