@@ -33,7 +33,7 @@ namespace Cuda {
    Reference to existing IPL image.
 */
 template <class Type, unsigned Dim>
-class IplReference: public HostMemoryReference<Type, Dim>
+class IplReference : public HostMemoryReference<Type, Dim>
 {
 public:
   /**
@@ -44,7 +44,7 @@ public:
     Layout<Type, Dim>(),
     Pointer<Type, Dim>(),
     HostMemoryReference<Type, Dim>()
-  {
+      {
     setImage(image);
   }
 
@@ -55,8 +55,8 @@ public:
      @param _image pointer to IplImage to be referenced.
   */
   inline IplReference(const Size<Dim> &_size, IplImage *_image):
-    Layout<Type, Dim>(),
-    Pointer<Type, Dim>(),
+    Layout<Type, Dim>(_size),
+    Pointer<Type, Dim>(_size),
     HostMemoryReference<Type, Dim>()
   {
     setImage(_image);
@@ -79,8 +79,8 @@ protected:
   {
     image_ptr = image;
 
-    this->size[0] = image->width;
-    this->size[1] = image->height;
+    this->size = Size<2>(image->width, image->height);
+    this->region_size = this->size;
     this->setPitch(image->widthStep);
 
     // buffer is always interpreted as given template type -> TODO convert function?
