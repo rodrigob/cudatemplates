@@ -52,7 +52,7 @@ public:
      Default constructor.
   */
   inline BufferObject():
-    bufname(0)
+    bufname(0), target(GL_ARRAY_BUFFER), usage(GL_STATIC_DRAW)
   {
   }
 #endif
@@ -61,11 +61,11 @@ public:
      Constructor.
      @param _size requested size of memory block.
   */
-  inline BufferObject(const Size<Dim> &_size):
-    bufname(0),
+  inline BufferObject(const Size<Dim> &_size, GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW):
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
-    DeviceMemoryStorage<Type, Dim>(_size)
+    DeviceMemoryStorage<Type, Dim>(_size),
+    bufname(0), target(t), usage(u)
   {
     alloc();
   }
@@ -74,11 +74,11 @@ public:
      Constructor.
      @param layout requested size of memory block.
   */
-  inline BufferObject(const Layout<Type, Dim> &layout):
-    bufname(0),
+  inline BufferObject(const Layout<Type, Dim> &layout, GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW):
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
-    DeviceMemoryStorage<Type, Dim>(layout)
+    DeviceMemoryStorage<Type, Dim>(layout),
+    bufname(0), target(t), usage(u)
   {
     alloc();
   }
@@ -102,6 +102,11 @@ public:
   }
 
   /**
+     Bind the buffer object.
+  */
+  inline void bind() { CUDA_OPENGL_CHECK(glBindBuffer(target, bufname)); }
+
+  /**
      Register and map buffer object.
      If you called disconnect(), this must be called before using the buffer
      memory in a CUDA kernel.
@@ -122,11 +127,26 @@ public:
 
   inline GLuint getName() const { return bufname; }
 
+  /**
+     Unbind the buffer object.
+  */
+  inline void unbind() { CUDA_OPENGL_CHECK(glBindBuffer(target, 0)); }
+
 private:
   /**
      Buffer object name.
   */
   GLuint bufname;
+
+  /**
+     Specifies the target to which the buffer object is bound.
+  */
+  GLenum target;
+
+  /**
+     Specifies the expected usage pattern of the data store.
+  */
+  GLenum usage;
 };
 
 template <class Type, unsigned Dim>
@@ -167,9 +187,9 @@ alloc()
     p *= this->size[i];
 
   CUDA_OPENGL_CHECK(glGenBuffers(1, &bufname));
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, bufname));
-  CUDA_OPENGL_CHECK(glBufferData(GL_ARRAY_BUFFER, p * sizeof(Type), 0, GL_DYNAMIC_DRAW));
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  bind();
+  CUDA_OPENGL_CHECK(glBufferData(target, p * sizeof(Type), 0, usage));
+  unbind();
   connect();
 }
 
@@ -181,7 +201,7 @@ free()
     return;
 
   disconnect();
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(target, 0);
   glDeleteBuffers(1, &bufname);
   bufname = 0;
 }

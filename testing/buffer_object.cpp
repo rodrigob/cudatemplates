@@ -36,14 +36,15 @@
 using namespace std;
 
 
-// GLuint texname;
+#define WIREFRAME 0
+
+
 typedef unsigned char PixelType;
 Cuda::OpenGL::Texture<PixelType, 2> texture;
 
-const int SUBDIV = 8;
+const int SUBDIV = 32;
 
-GLfloat coords[(SUBDIV + 1) * (SUBDIV + 1) * 3];
-int vertices[SUBDIV * SUBDIV * 4];
+int coordindex[SUBDIV * SUBDIV * 4];
 
 
 void
@@ -69,7 +70,7 @@ display()
 
   glTranslatef(-1, 1, 0);
   glScalef(2, -2, 1);
-  glDrawElements(GL_QUADS, SUBDIV * SUBDIV * 4, GL_UNSIGNED_INT, vertices);
+  glDrawElements(GL_QUADS, SUBDIV * SUBDIV * 4, GL_UNSIGNED_INT, coordindex);
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -108,33 +109,7 @@ main(int argc, char *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    GLfloat *p = coords;
-
-    for(int i = 0; i <= SUBDIV; ++i)
-      for(int j = 0; j <= SUBDIV; ++j) {
-	*(p++) = (float)i / SUBDIV;
-	*(p++) = (float)j / SUBDIV;
-	*(p++) = 0;
-      }
-
-    int *v = vertices;
-
-    for(int i = 0; i < SUBDIV; ++i)
-      for(int j = 0; j < SUBDIV; ++j) {
-	int v0 = i * (SUBDIV + 1) + j;
-	*(v++) = v0;
-	*(v++) = v0 + 1;
-	*(v++) = v0 + SUBDIV + 2;
-	*(v++) = v0 + SUBDIV + 1;
-      }
-    
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, coords);
-    glTexCoordPointer(2, GL_FLOAT, 3 * sizeof(coords[0]), coords);
-
-#if 1
-    // create buffer object:
+    // create buffer object for image:
     Cuda::OpenGL::BufferObject<PixelType, 2> bufobj(image.size);
 
     // copy image to buffer object:
@@ -142,9 +117,68 @@ main(int argc, char *argv[])
 
     // copy buffer object to texture:
     copy(texture, bufobj);
-#else
-    // copy image to texture:
-    copy(texture, image);
+
+    bufobj.disconnect();
+
+    // create coordinate array:
+    GLfloat coords[(SUBDIV + 1) * (SUBDIV + 1) * 3];
+    GLfloat texcoords[(SUBDIV + 1) * (SUBDIV + 1) * 2];
+    GLfloat *pc = coords, *pt = texcoords;
+
+    for(int i = 0; i <= SUBDIV; ++i)
+      for(int j = 0; j <= SUBDIV; ++j) {
+	float dx = (float)i / SUBDIV - 0.5;
+	float dy = (float)j / SUBDIV - 0.5;
+	float d = sqrt(dx * dx + dy * dy);
+	float c = (d > 0) ? pow(d, 0.2) : 0;
+	*(pc++) = 0.5 + c * dx;
+	*(pc++) = 0.5 + c * dy;
+	*(pc++) = 0;
+	*(pt++) = (float)i / SUBDIV;
+	*(pt++) = (float)j / SUBDIV;
+      }
+
+    // create coordinate index array:
+    int *pi = coordindex;
+
+    for(int i = 0; i < SUBDIV; ++i)
+      for(int j = 0; j < SUBDIV; ++j) {
+	int v0 = i * (SUBDIV + 1) + j;
+	*(pi++) = v0;
+	*(pi++) = v0 + 1;
+	*(pi++) = v0 + SUBDIV + 2;
+	*(pi++) = v0 + SUBDIV + 1;
+      }
+
+    // create CUDA templates references to the arrays:
+    Cuda::HostMemoryReference<GLfloat, 1> ref_coords(Cuda::Size<1>((SUBDIV + 1) * (SUBDIV + 1) * 3), coords);
+    Cuda::HostMemoryReference<GLfloat, 1> ref_texcoords(Cuda::Size<1>((SUBDIV + 1) * (SUBDIV + 1) * 2), texcoords);
+    Cuda::HostMemoryReference<int, 1> ref_coordindex(Cuda::Size<1>(SUBDIV * SUBDIV * 4), coordindex);
+
+    // create CUDA template OpenGL buffer objects:
+    Cuda::OpenGL::BufferObject<GLfloat, 1> bufobj_coords((SUBDIV + 1) * (SUBDIV + 1) * 3);
+    Cuda::OpenGL::BufferObject<GLfloat, 1> bufobj_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2);
+    Cuda::OpenGL::BufferObject<int, 1> bufobj_coordindex(SUBDIV * SUBDIV * 4);
+
+    // copy data to buffer objects:
+    copy(bufobj_coords, ref_coords);
+    copy(bufobj_texcoords, ref_texcoords);
+    copy(bufobj_coordindex, ref_coordindex);
+
+    bufobj_coords.disconnect();
+    bufobj_texcoords.disconnect();
+    bufobj_coordindex.disconnect();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    bufobj_coords.bind();
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+    bufobj_texcoords.bind();
+    glTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+#if WIREFRAME
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
 
     // enter main loop:
