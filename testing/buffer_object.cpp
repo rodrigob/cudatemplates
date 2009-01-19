@@ -77,32 +77,35 @@ keyboard(unsigned char c, int, int)
 }
 
 void
-init_geometry(Cuda::OpenGL::BufferObject1D<GLfloat> &bufobj_coords,
-	      Cuda::OpenGL::BufferObject1D<GLfloat> &bufobj_texcoords)
+init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
+	      Cuda::OpenGL::BufferObject2D<float2> &bufobj_texcoords)
 {
-
   // create coordinate array:
-  GLfloat coords[(SUBDIV + 1) * (SUBDIV + 1) * 4];
-  GLfloat texcoords[(SUBDIV + 1) * (SUBDIV + 1) * 2];
-  GLfloat *pc = coords, *pt = texcoords;
+  float4 coords   [SUBDIV + 1][SUBDIV + 1];
+  float2 texcoords[SUBDIV + 1][SUBDIV + 1];
 
   for(int i = 0; i <= SUBDIV; ++i)
     for(int j = 0; j <= SUBDIV; ++j) {
+      // coordinates:
       float dx = (float)i / SUBDIV - 0.5;
       float dy = 0.5 - (float)j / SUBDIV;
       float d = sqrt(dx * dx + dy * dy);
-      float c = (d > 0) ? 2 * pow(d, 0.2) : 0;
-      *(pc++) = c * dx;
-      *(pc++) = c * dy;
-      *(pc++) = 0;
-      *(pc++) = 1;
-      *(pt++) = (float)i / SUBDIV;
-      *(pt++) = (float)j / SUBDIV;
+      float f = (d > 0) ? 2 * pow(d, 0.2) : 0;
+      float4 &c = coords[i][j];
+      c.x = f * dx;
+      c.y = f * dy;
+      c.z = 0;
+      c.w = 1;
+
+      // texture coordinates:
+      float2 &tc = texcoords[i][j];
+      tc.x = (float)i / SUBDIV;
+      tc.y = (float)j / SUBDIV;
     }
 
   // create CUDA templates references to the arrays:
-  Cuda::HostMemoryReference1D<GLfloat> ref_coords((SUBDIV + 1) * (SUBDIV + 1) * 4, coords);
-  Cuda::HostMemoryReference1D<GLfloat> ref_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2, texcoords);
+  Cuda::HostMemoryReference2D<float4> ref_coords   (SUBDIV + 1, SUBDIV + 1, (float4 *)coords);
+  Cuda::HostMemoryReference2D<float2> ref_texcoords(SUBDIV + 1, SUBDIV + 1, (float2 *)texcoords);
 
   // copy data to buffer objects:
   copy(bufobj_coords, ref_coords);
@@ -161,13 +164,7 @@ main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
 
     // create OpenGL texture:
-    // texture.alloc(image.size);
     Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // create buffer object for image:
     Cuda::OpenGL::BufferObject2D<PixelType> bufobj(image.size);
@@ -185,8 +182,8 @@ main(int argc, char *argv[])
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     // create CUDA template OpenGL buffer objects:
-    Cuda::OpenGL::BufferObject1D<GLfloat> bufobj_coords((SUBDIV + 1) * (SUBDIV + 1) * 4);
-    Cuda::OpenGL::BufferObject1D<GLfloat> bufobj_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2);
+    Cuda::OpenGL::BufferObject2D<float4> bufobj_coords   (SUBDIV + 1, SUBDIV + 1);
+    Cuda::OpenGL::BufferObject2D<float2> bufobj_texcoords(SUBDIV + 1, SUBDIV + 1);
     Cuda::OpenGL::BufferObject1D<int> bufobj_coordindex(SUBDIV * SUBDIV * 4, GL_ELEMENT_ARRAY_BUFFER);
 
     // init buffer objects:
