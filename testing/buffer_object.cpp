@@ -76,6 +76,72 @@ keyboard(unsigned char c, int, int)
     exit(0);
 }
 
+void
+init_geometry(Cuda::OpenGL::BufferObject1D<GLfloat> &bufobj_coords,
+	      Cuda::OpenGL::BufferObject1D<GLfloat> &bufobj_texcoords)
+{
+
+  // create coordinate array:
+  GLfloat coords[(SUBDIV + 1) * (SUBDIV + 1) * 4];
+  GLfloat texcoords[(SUBDIV + 1) * (SUBDIV + 1) * 2];
+  GLfloat *pc = coords, *pt = texcoords;
+
+  for(int i = 0; i <= SUBDIV; ++i)
+    for(int j = 0; j <= SUBDIV; ++j) {
+      float dx = (float)i / SUBDIV - 0.5;
+      float dy = 0.5 - (float)j / SUBDIV;
+      float d = sqrt(dx * dx + dy * dy);
+      float c = (d > 0) ? 2 * pow(d, 0.2) : 0;
+      *(pc++) = c * dx;
+      *(pc++) = c * dy;
+      *(pc++) = 0;
+      *(pc++) = 1;
+      *(pt++) = (float)i / SUBDIV;
+      *(pt++) = (float)j / SUBDIV;
+    }
+
+  // create CUDA templates references to the arrays:
+  Cuda::HostMemoryReference1D<GLfloat> ref_coords((SUBDIV + 1) * (SUBDIV + 1) * 4, coords);
+  Cuda::HostMemoryReference1D<GLfloat> ref_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2, texcoords);
+
+  // copy data to buffer objects:
+  copy(bufobj_coords, ref_coords);
+  copy(bufobj_texcoords, ref_texcoords);
+  bufobj_coords.disconnect();
+  bufobj_texcoords.disconnect();
+
+  bufobj_coords.bind();
+  glVertexPointer(4, GL_FLOAT, 0, 0);
+  bufobj_texcoords.bind();
+  glTexCoordPointer(2, GL_FLOAT, 0, 0);
+}
+
+void
+init_topology(Cuda::OpenGL::BufferObject1D<int> &bufobj_coordindex)
+{
+  // create coordinate index array:
+  int coordindex[SUBDIV * SUBDIV * 4];
+  int *pi = coordindex;
+
+  for(int i = 0; i < SUBDIV; ++i)
+    for(int j = 0; j < SUBDIV; ++j) {
+      int v0 = i * (SUBDIV + 1) + j;
+      *(pi++) = v0;
+      *(pi++) = v0 + 1;
+      *(pi++) = v0 + SUBDIV + 2;
+      *(pi++) = v0 + SUBDIV + 1;
+    }
+
+  // create CUDA templates reference to the array:
+  Cuda::HostMemoryReference1D<int> ref_coordindex(SUBDIV * SUBDIV * 4, coordindex);
+
+  // copy data to buffer object:
+  copy(bufobj_coordindex, ref_coordindex);
+
+  bufobj_coordindex.disconnect();
+  bufobj_coordindex.bind();
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -104,7 +170,7 @@ main(int argc, char *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // create buffer object for image:
-    Cuda::OpenGL::BufferObject<PixelType, 2> bufobj(image.size);
+    Cuda::OpenGL::BufferObject2D<PixelType> bufobj(image.size);
 
     // copy image to buffer object:
     copy(bufobj, image);
@@ -115,64 +181,17 @@ main(int argc, char *argv[])
     bufobj.disconnect();
     texture.bind();
 
-    // create coordinate array:
-    GLfloat coords[(SUBDIV + 1) * (SUBDIV + 1) * 3];
-    GLfloat texcoords[(SUBDIV + 1) * (SUBDIV + 1) * 2];
-    GLfloat *pc = coords, *pt = texcoords;
-
-    for(int i = 0; i <= SUBDIV; ++i)
-      for(int j = 0; j <= SUBDIV; ++j) {
-	float dx = (float)i / SUBDIV - 0.5;
-	float dy = 0.5 - (float)j / SUBDIV;
-	float d = sqrt(dx * dx + dy * dy);
-	float c = (d > 0) ? 2 * pow(d, 0.2) : 0;
-	*(pc++) = c * dx;
-	*(pc++) = c * dy;
-	*(pc++) = 0;
-	*(pt++) = (float)i / SUBDIV;
-	*(pt++) = (float)j / SUBDIV;
-      }
-
-    // create coordinate index array:
-    int coordindex[SUBDIV * SUBDIV * 4];
-    int *pi = coordindex;
-
-    for(int i = 0; i < SUBDIV; ++i)
-      for(int j = 0; j < SUBDIV; ++j) {
-	int v0 = i * (SUBDIV + 1) + j;
-	*(pi++) = v0;
-	*(pi++) = v0 + 1;
-	*(pi++) = v0 + SUBDIV + 2;
-	*(pi++) = v0 + SUBDIV + 1;
-      }
-
-    // create CUDA templates references to the arrays:
-    Cuda::HostMemoryReference<GLfloat, 1> ref_coords(Cuda::Size<1>((SUBDIV + 1) * (SUBDIV + 1) * 3), coords);
-    Cuda::HostMemoryReference<GLfloat, 1> ref_texcoords(Cuda::Size<1>((SUBDIV + 1) * (SUBDIV + 1) * 2), texcoords);
-    Cuda::HostMemoryReference<int, 1> ref_coordindex(Cuda::Size<1>(SUBDIV * SUBDIV * 4), coordindex);
-
-    // create CUDA template OpenGL buffer objects:
-    Cuda::OpenGL::BufferObject<GLfloat, 1> bufobj_coords((SUBDIV + 1) * (SUBDIV + 1) * 3);
-    Cuda::OpenGL::BufferObject<GLfloat, 1> bufobj_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2);
-    Cuda::OpenGL::BufferObject<int, 1> bufobj_coordindex(SUBDIV * SUBDIV * 4, GL_ELEMENT_ARRAY_BUFFER);
-
-    // copy data to buffer objects:
-    copy(bufobj_coords, ref_coords);
-    copy(bufobj_texcoords, ref_texcoords);
-    copy(bufobj_coordindex, ref_coordindex);
-
-    bufobj_coords.disconnect();
-    bufobj_texcoords.disconnect();
-    bufobj_coordindex.disconnect();
-
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    bufobj_coords.bind();
-    glVertexPointer(3, GL_FLOAT, 0, 0);
-    bufobj_texcoords.bind();
-    glTexCoordPointer(2, GL_FLOAT, 0, 0);
-    bufobj_coordindex.bind();
+    // create CUDA template OpenGL buffer objects:
+    Cuda::OpenGL::BufferObject1D<GLfloat> bufobj_coords((SUBDIV + 1) * (SUBDIV + 1) * 4);
+    Cuda::OpenGL::BufferObject1D<GLfloat> bufobj_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2);
+    Cuda::OpenGL::BufferObject1D<int> bufobj_coordindex(SUBDIV * SUBDIV * 4, GL_ELEMENT_ARRAY_BUFFER);
+
+    // init buffer objects:
+    init_geometry(bufobj_coords, bufobj_texcoords);
+    init_topology(bufobj_coordindex);
 
 #if WIREFRAME
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
