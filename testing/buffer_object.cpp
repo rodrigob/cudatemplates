@@ -40,11 +40,8 @@ using namespace std;
 
 
 typedef unsigned char PixelType;
-Cuda::OpenGL::Texture<PixelType, 2> texture;
 
 const int SUBDIV = 32;
-
-int coordindex[SUBDIV * SUBDIV * 4];
 
 
 void
@@ -66,11 +63,7 @@ display()
   glEnable(GL_TEXTURE_2D);
   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-  texture.bind();
-
-  glTranslatef(-1, 1, 0);
-  glScalef(2, -2, 1);
-  glDrawElements(GL_QUADS, SUBDIV * SUBDIV * 4, GL_UNSIGNED_INT, coordindex);
+  glDrawElements(GL_QUADS, SUBDIV * SUBDIV * 4, GL_UNSIGNED_INT, 0);
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -102,7 +95,8 @@ main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
 
     // create OpenGL texture:
-    texture.alloc(image.size);
+    // texture.alloc(image.size);
+    Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -119,6 +113,7 @@ main(int argc, char *argv[])
     copy(texture, bufobj);
 
     bufobj.disconnect();
+    texture.bind();
 
     // create coordinate array:
     GLfloat coords[(SUBDIV + 1) * (SUBDIV + 1) * 3];
@@ -128,17 +123,18 @@ main(int argc, char *argv[])
     for(int i = 0; i <= SUBDIV; ++i)
       for(int j = 0; j <= SUBDIV; ++j) {
 	float dx = (float)i / SUBDIV - 0.5;
-	float dy = (float)j / SUBDIV - 0.5;
+	float dy = 0.5 - (float)j / SUBDIV;
 	float d = sqrt(dx * dx + dy * dy);
-	float c = (d > 0) ? pow(d, 0.2) : 0;
-	*(pc++) = 0.5 + c * dx;
-	*(pc++) = 0.5 + c * dy;
+	float c = (d > 0) ? 2 * pow(d, 0.2) : 0;
+	*(pc++) = c * dx;
+	*(pc++) = c * dy;
 	*(pc++) = 0;
 	*(pt++) = (float)i / SUBDIV;
 	*(pt++) = (float)j / SUBDIV;
       }
 
     // create coordinate index array:
+    int coordindex[SUBDIV * SUBDIV * 4];
     int *pi = coordindex;
 
     for(int i = 0; i < SUBDIV; ++i)
@@ -158,7 +154,7 @@ main(int argc, char *argv[])
     // create CUDA template OpenGL buffer objects:
     Cuda::OpenGL::BufferObject<GLfloat, 1> bufobj_coords((SUBDIV + 1) * (SUBDIV + 1) * 3);
     Cuda::OpenGL::BufferObject<GLfloat, 1> bufobj_texcoords((SUBDIV + 1) * (SUBDIV + 1) * 2);
-    Cuda::OpenGL::BufferObject<int, 1> bufobj_coordindex(SUBDIV * SUBDIV * 4);
+    Cuda::OpenGL::BufferObject<int, 1> bufobj_coordindex(SUBDIV * SUBDIV * 4, GL_ELEMENT_ARRAY_BUFFER);
 
     // copy data to buffer objects:
     copy(bufobj_coords, ref_coords);
@@ -176,6 +172,7 @@ main(int argc, char *argv[])
     glVertexPointer(3, GL_FLOAT, 0, 0);
     bufobj_texcoords.bind();
     glTexCoordPointer(2, GL_FLOAT, 0, 0);
+    bufobj_coordindex.bind();
 
 #if WIREFRAME
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
