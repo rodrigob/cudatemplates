@@ -135,7 +135,7 @@ alloc(const Layout<Type, Dim> &layout)
   alloc();
 }
 
-}
+}  // namespace Cuda
 
 
 #endif

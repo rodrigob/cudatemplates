@@ -76,7 +76,7 @@ protected:
 
 };
 
-}
+}  // namespace Cuda
 
 
 #include "auto/specdim_hostmemoryreference.hpp"

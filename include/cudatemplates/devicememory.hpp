@@ -190,7 +190,7 @@ DeviceMemoryStorage<Type, Dim>::
   this->free();
 }
 
-}
+}  // namespace Cuda
 
 
 #endif

@@ -91,7 +91,15 @@ specialize_dims(DeviceMemoryLinear DeviceMemoryStorage 1)
 specialize_dims(DeviceMemoryPitched DeviceMemoryStorage 1)
 specialize_dims(HostMemoryHeap HostMemoryStorage 1)
 specialize_dims(HostMemoryLocked HostMemoryStorage 1)
+specialize_dims(Symbol Layout 1)
 specialize_dims(Array Storage 0)
+
+set(specdim_template specdim_opengl)
+specialize_dims(Texture Storage 1)
+
+set(ConstrExtraArgDecl ", GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW")
+set(ConstrExtraArgs ", t, u")
+specialize_dims(BufferObject DeviceMemoryStorage 1)
 
 set(specdim_template specdim_reference)
 specialize_dims(DeviceMemoryReference DeviceMemory 1)

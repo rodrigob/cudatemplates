@@ -213,10 +213,11 @@ BufferObject<Type, Dim>::
   this->free();
 }
 
-// #include "auto/specdim_opengl_bufferobject.hpp"
+}  // namespace OpenGL
+}  // namespace Cuda
 
-}
-}
+
+#include "../auto/specdim_bufferobject.hpp"
 
 
 #endif

@@ -80,7 +80,7 @@ private:
   std::string message;
 };
 
-};
+}  // namespace Cuda
 
 #endif  // defined(__CUDACC__) || defined(NVCC)
 

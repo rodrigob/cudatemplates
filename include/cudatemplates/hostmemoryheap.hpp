@@ -111,7 +111,7 @@ free()
   this->buffer = 0;
 }
 
-}
+}  // namespace Cuda
 
 
 #include "auto/specdim_hostmemoryheap.hpp"

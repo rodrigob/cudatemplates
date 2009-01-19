@@ -147,7 +147,7 @@ initMem(int val, bool sync)
     cudaThreadSynchronize();
 }
 
-}
+}  // namespace Cuda
 
 
 #include "auto/specdim_devicememorypitched.hpp"

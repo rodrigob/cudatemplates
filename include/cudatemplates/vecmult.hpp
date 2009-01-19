@@ -83,7 +83,7 @@ void vecmult_complex(DeviceMemory<Type, Dim> &x1, const DeviceMemory<Type, Dim> 
   Cuda::vecmult_complex(x1.getSize(), x1.getBuffer(), x2.getBuffer(), x3.getBuffer());
 }
 
-};
+}  // namespace Cuda
 
 
 #endif

@@ -209,7 +209,7 @@ public:
   float spacing[Dim];
 };
 
-}
+}  // namespace Cuda
 
 
 #endif

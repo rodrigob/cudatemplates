@@ -82,7 +82,7 @@ protected:
 
 };
 
-}
+}  // namespace Cuda
 
 
 #endif

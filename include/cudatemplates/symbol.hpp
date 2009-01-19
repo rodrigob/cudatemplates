@@ -114,8 +114,6 @@ public:
   */
   inline Type *getBuffer() { return const_cast<Type *>(const_cast<const Symbol<Type, Dim> *>(this)->getBuffer()); }
 
-  // #include "auto/copy_symbol.hpp"
-
 private:
   Type *symbol;
 
@@ -130,10 +128,10 @@ private:
   }
 };
 
-}
+}  // namespace Cuda
 
 
-// #include "auto/specdim_symbol.hpp"
+#include "auto/specdim_symbol.hpp"
 
 
 #endif

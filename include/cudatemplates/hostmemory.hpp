@@ -134,7 +134,7 @@ protected:
   }
 };
 
-}
+}  // namespace Cuda
 
 
 #endif

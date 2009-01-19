@@ -778,7 +778,7 @@ copy(Symbol<Type, Dim> &dst, const DeviceMemory<Type, Dim> &src)
   copyToSymbol(dst, src, cudaMemcpyDeviceToDevice);
 }
 
-}
+}  // namespace Cuda
 
 
 #undef CUDA_CHECK_SIZE

@@ -91,8 +91,6 @@ public:
     free();
   }
 
-  // #include "auto/copy_opengl_texture.hpp"
-
   /**
      Allocate texture memory.
   */
@@ -230,10 +228,11 @@ free()
   init();
 }
 
-// #include "auto/specdim_opengl_texture.hpp"
+}  // namespace OpenGL
+}  // namespace Cuda
 
-}
-}
+
+#include "../auto/specdim_texture.hpp"
 
 
 #endif

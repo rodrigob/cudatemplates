@@ -1,0 +1,170 @@
+/*
+  NOTE: THIS FILE HAS BEEN CREATED AUTOMATICALLY,
+  ANY CHANGES WILL BE OVERWRITTEN WITHOUT NOTICE!
+*/
+
+/* 
+  Cuda Templates.
+
+  Copyright (C) 2008 Institute for Computer Graphics and Vision,
+                     Graz University of Technology
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef CUDA_@NAME@@Dim@D_H
+#define CUDA_@NAME@@Dim@D_H
+
+
+#include <cudatemplates/opengl/@name@.hpp>
+
+
+namespace Cuda {
+namespace OpenGL {
+
+/**
+   @Name@ template specialized for @Dim@ dimension(s).
+*/
+template <class Type>
+class @Name@@Dim@D: public @Name@<Type, @Dim@>
+{
+public:
+#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
+  /**
+     Default constructor.
+  */
+  inline @Name@@Dim@D()
+  {
+  }
+#endif
+
+  /**
+     Constructor.
+     @param _size requested size of memory block.
+  */
+  inline @Name@@Dim@D(const Size<@Dim@> &_size@ConstrExtraArgDecl@):
+    Layout<Type, @Dim@>(_size),
+    @Pointer@Pointer<Type, @Dim@>(_size),
+    @Name@<Type, @Dim@>(_size@ConstrExtraArgs@)
+  {
+  }
+
+  /**
+     Constructor.
+     @param layout requested layout of memory block.
+  */
+  inline @Name@@Dim@D(const Layout<Type, @Dim@> &layout@ConstrExtraArgDecl@):
+    Layout<Type, @Dim@>(layout),
+    @Pointer@Pointer<Type, @Dim@>(layout),
+    @Name@<Type, @Dim@>(layout@ConstrExtraArgs@)
+  {
+  }
+
+  /**
+     Constructor.
+  */
+  inline @Name@@Dim@D(@SizeArgDecl@@ConstrExtraArgDecl@):
+    Layout<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
+    @Pointer@Pointer<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
+    @Name@<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)@ConstrExtraArgs@)
+  {
+  }
+
+  /**
+     Copy constructor.
+     @param x instance of @Name@@Dim@D to be copied
+  */
+  inline @Name@@Dim@D(const @Name@@Dim@D<Type> &x):
+    Layout<Type, @Dim@>(x),
+    @Pointer@Pointer<Type, @Dim@>(x),
+    @Name@<Type, @Dim@>(x)
+  {
+  }
+
+  /**
+     Constructor.
+     Initialization from different type.
+     @param x instance of different type to be copied
+  */
+  template<class Name>
+    inline @Name@@Dim@D(const Name &x):
+    Layout<Type, @Dim@>(x),
+    @Pointer@Pointer<Type, @Dim@>(x),
+    @Name@<Type, @Dim@>(x)
+  {
+  }
+
+  /**
+     Constructor.
+     Initialization of region from same or different type.
+     @param x instance to be copied
+     @param ofs offset of region
+     @param size size of region
+  */
+  template<class Name>
+    inline @Name@@Dim@D(const Name &x, const Size<@Dim@> &ofs, const Size<@Dim@> &size):
+    Layout<Type, @Dim@>(size),
+    @Pointer@Pointer<Type, @Dim@>(size),
+    @Name@<Type, @Dim@>(x, ofs, size)
+  {
+  }
+
+  /**
+     Constructor.
+     Initialization of region from same or different type.
+     @param x instance to be copied
+     @param @OfsArgs@ offset of region
+     @param @SizeArgs@ size of region
+  */
+  template<class Name>
+    inline @Name@@Dim@D(const Name &x, @OfsArgDecl@, @SizeArgDecl@):
+    Layout<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
+    @Pointer@Pointer<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
+    @Name@<Type, @Dim@>(x, Size<@Dim@>(@OfsArgs@), Size<@Dim@>(@SizeArgs@))
+  {
+  }
+
+  /**
+     Allocate memory.
+  */
+  inline void alloc()
+  {
+    @Name@<Type, @Dim@>::alloc();
+  }
+
+  /**
+     Allocate memory.
+     @param _size size to be allocated
+  */
+  inline void alloc(const Size<@Dim@> &_size)
+  {
+    Storage<Type, @Dim@>::alloc(_size);
+  }
+
+  /**
+     Allocate memory.
+     @SizeArgs@ size to be allocated
+  */
+  inline void alloc(@SizeArgDecl@)
+  {
+    Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
+  }
+
+};
+
+}  // namespace OpenGL
+}  // namespace Cuda
+
+
+#endif
