@@ -18,6 +18,25 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+
+  This example demonstrates three different use cases for OpenGL buffer objects
+  in CUDA:
+
+  *) using a buffer object as temporary storage for pixel data (bufobj_image)
+
+  *) initializing a buffer object in a CUDA kernel and using the data as arrays
+  of vertex and texture coordinates (bufobj_coords and bufobj_texcoords)
+
+  *) initializing a buffer object by the CPU and using the data as an array of
+  coordinate indices (bufobj_coordindex)
+
+  Note that the CUDA templates representation of OpenGL buffer objects can be
+  multidimensional arrays of compound data types (such as float4), although
+  OpenGL interprets buffer objects as linear arrays of elementary data types.
+
+*/
+
 #include <iostream>
 #include <stdexcept>
 
@@ -36,8 +55,8 @@
 using namespace std;
 
 
-#define SUBDIV_X  64
-#define SUBDIV_Y  32
+#define SUBDIV_X  127
+#define SUBDIV_Y  127
 
 #define WIREFRAME 0
 
@@ -57,6 +76,7 @@ reshape(int w, int h)
 void
 display()
 {
+  // initialize frame:
   glClearColor(1.0, 1.0, 1.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
@@ -64,11 +84,10 @@ display()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  glEnable(GL_TEXTURE_2D);
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
+  // render vertex array:
   glDrawElements(GL_QUADS, SUBDIV_X * SUBDIV_Y * 4, GL_UNSIGNED_INT, 0);
 
+  // postprocess:
   glutSwapBuffers();
   glutPostRedisplay();
 }
@@ -93,7 +112,7 @@ main(int argc, char *argv[])
 
     // init GLUT:
     glutInit(&argc, argv);
-    glutInitWindowSize(image.size[0], image.size[1]);
+    glutInitWindowSize(image.size[0] * 2, image.size[1] * 2);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow("OpenGL buffer object demo");
     glutReshapeFunc(reshape);
@@ -101,16 +120,21 @@ main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
 
     // create OpenGL buffer object for image and copy data:
-    Cuda::OpenGL::BufferObject2D<PixelType> bufobj(image.size);
-    copy(bufobj, image);
+    Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(image.size);
+    copy(bufobj_image, image);
 
     // create OpenGL texture and copy data
     // (note that the image data could also be copied directly to the texture,
     // this is just to demonstrate the use of a buffer object for pixel data):
     Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
-    copy(texture, bufobj);
-    bufobj.disconnect();
+    copy(texture, bufobj_image);
+    bufobj_image.disconnect();
     texture.bind();
+
+    // enable textures and set parameters:
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // enable arrays:
     glEnableClientState(GL_VERTEX_ARRAY);

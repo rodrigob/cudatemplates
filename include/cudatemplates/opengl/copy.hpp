@@ -54,9 +54,9 @@ copy(Texture<Type, Dim> &dst, const BufferObject<Type, Dim> &src)
   BufferObject<Type, Dim> *src2 = const_cast<BufferObject<Type, Dim> *>(&src);
 
   src2->disconnect();
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, src.getName()));
+  src2->bind(GL_PIXEL_UNPACK_BUFFER);
   dst.glTexSubImage(0);
-  CUDA_OPENGL_CHECK(glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
+  src2->unbind(GL_PIXEL_UNPACK_BUFFER);
   src2->connect();
 }
 

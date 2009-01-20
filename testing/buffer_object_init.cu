@@ -28,6 +28,9 @@
 #include <cudatemplates/opengl/copy.hpp>
 
 
+const int BLOCK_SIZE = 8;
+
+
 /**
    Integer division (rounding up the result).
 */
@@ -76,7 +79,7 @@ init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
   assert(bufobj_coords.size == bufobj_texcoords.size);
 
   // launch kernel:
-  dim3 dimBlock(8, 8, 1);
+  dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE, 1);
   dim3 dimGrid(div_up(bufobj_coords.size[0], dimBlock.x), div_up(bufobj_coords.size[1], dimBlock.y), 1);
   init_geometry_kernel<<<dimBlock, dimGrid>>>(bufobj_coords, bufobj_texcoords);
   cudaThreadSynchronize();

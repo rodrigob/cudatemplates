@@ -102,9 +102,15 @@ public:
   }
 
   /**
-     Bind the buffer object.
+     Bind the buffer object to the target specified in the constructor.
   */
   inline void bind() { CUDA_OPENGL_CHECK(glBindBuffer(target, bufname)); }
+
+  /**
+     Bind the buffer object to the given target.
+     @param t target to which the buffer object should be bound
+  */
+  inline void bind(GLenum t) { CUDA_OPENGL_CHECK(glBindBuffer(t, bufname)); }
 
   /**
      Register and map buffer object.
@@ -128,9 +134,15 @@ public:
   inline GLuint getName() const { return bufname; }
 
   /**
-     Unbind the buffer object.
+     Unbind the buffer object from the target specified in the constructor.
   */
   inline void unbind() { CUDA_OPENGL_CHECK(glBindBuffer(target, 0)); }
+
+  /**
+     Unbind the buffer object from the given target.
+     @param t target from which the buffer object should be unbound
+  */
+  inline void unbind(GLenum t) { CUDA_OPENGL_CHECK(glBindBuffer(t, 0)); }
 
 private:
   /**
