@@ -23,7 +23,7 @@
 #include <assert.h>
 
 #include <cudatemplates/copy.hpp>
-#include <cudatemplates/hostmemoryreference.hpp>
+#include <cudatemplates/hostmemoryheap.hpp>
 #include <cudatemplates/opengl/bufferobject.hpp>
 #include <cudatemplates/opengl/copy.hpp>
 
@@ -34,11 +34,11 @@ init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
 {
   assert(bufobj_coords.size == bufobj_texcoords.size);
 
-  // create coordinate array:
-  float4 *coords    = new float4[bufobj_coords   .getSize()];
-  float2 *texcoords = new float2[bufobj_texcoords.getSize()];
-  float4 *pc = coords;
-  float2 *pt = texcoords;
+  // create geometry arrays:
+  Cuda::HostMemoryHeap2D<float4> coords   (bufobj_coords.size);
+  Cuda::HostMemoryHeap2D<float2> texcoords(bufobj_texcoords.size);
+  float4 *pc = coords.getBuffer();
+  float2 *pt = texcoords.getBuffer();
 
   for(int i = 0; i < bufobj_coords.size[1]; ++i) {
     float fi = (float)i / bufobj_coords.size[1];
@@ -58,13 +58,9 @@ init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
     }
   }
 
-  // create CUDA templates references to the arrays:
-  Cuda::HostMemoryReference2D<float4> ref_coords   (bufobj_coords.size   , coords);
-  Cuda::HostMemoryReference2D<float2> ref_texcoords(bufobj_texcoords.size, texcoords);
-
   // copy data to buffer objects:
-  copy(bufobj_coords, ref_coords);
-  copy(bufobj_texcoords, ref_texcoords);
+  copy(bufobj_coords, coords);
+  copy(bufobj_texcoords, texcoords);
   bufobj_coords.disconnect();
   bufobj_texcoords.disconnect();
 
@@ -72,17 +68,14 @@ init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
   glVertexPointer(4, GL_FLOAT, 0, 0);
   bufobj_texcoords.bind();
   glTexCoordPointer(2, GL_FLOAT, 0, 0);
-
-  delete[] coords;
-  delete[] texcoords;
 }
 
 void
 init_topology(Cuda::OpenGL::BufferObject2D<int4> &bufobj_coordindex)
 {
-  // create coordinate index array:
-  int4 *coordindex = new int4[bufobj_coordindex.getSize()];
-  int4 *pi = coordindex;
+  // create topology array:
+  Cuda::HostMemoryHeap2D<int4> coordindex(bufobj_coordindex.size);
+  int4 *pi = coordindex.getBuffer();
 
   for(int i = 0; i < bufobj_coordindex.size[1]; ++i)
     for(int j = 0; j < bufobj_coordindex.size[0]; ++j) {
@@ -93,14 +86,9 @@ init_topology(Cuda::OpenGL::BufferObject2D<int4> &bufobj_coordindex)
 			  v0 + bufobj_coordindex.size[0] + 1);
     }
 
-  // create CUDA templates reference to the array:
-  Cuda::HostMemoryReference2D<int4> ref_coordindex(bufobj_coordindex.size, coordindex);
-
   // copy data to buffer object:
-  copy(bufobj_coordindex, ref_coordindex);
+  copy(bufobj_coordindex, coordindex);
 
   bufobj_coordindex.disconnect();
   bufobj_coordindex.bind();
-
-  delete[] coordindex;
 }
