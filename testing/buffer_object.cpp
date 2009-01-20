@@ -41,7 +41,8 @@ using namespace std;
 
 typedef unsigned char PixelType;
 
-const int SUBDIV = 32;
+const int SUBDIV_X = 64;
+const int SUBDIV_Y = 32;
 
 
 void init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
@@ -69,7 +70,7 @@ display()
   glEnable(GL_TEXTURE_2D);
   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-  glDrawElements(GL_QUADS, SUBDIV * SUBDIV * 4, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_QUADS, SUBDIV_X * SUBDIV_Y * 4, GL_UNSIGNED_INT, 0);
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -119,9 +120,9 @@ main(int argc, char *argv[])
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     // create CUDA template OpenGL buffer objects:
-    Cuda::OpenGL::BufferObject2D<float4> bufobj_coords   (SUBDIV + 1, SUBDIV + 1);
-    Cuda::OpenGL::BufferObject2D<float2> bufobj_texcoords(SUBDIV + 1, SUBDIV + 1);
-    Cuda::OpenGL::BufferObject2D<int4> bufobj_coordindex (SUBDIV, SUBDIV, GL_ELEMENT_ARRAY_BUFFER);
+    Cuda::OpenGL::BufferObject2D<float4> bufobj_coords    (SUBDIV_X + 1, SUBDIV_Y + 1);
+    Cuda::OpenGL::BufferObject2D<float2> bufobj_texcoords (SUBDIV_X + 1, SUBDIV_Y + 1);
+    Cuda::OpenGL::BufferObject2D<int4>   bufobj_coordindex(SUBDIV_X,     SUBDIV_Y,     GL_ELEMENT_ARRAY_BUFFER);
 
     // init buffer objects:
     init_geometry(bufobj_coords, bufobj_texcoords);

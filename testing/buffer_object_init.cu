@@ -47,14 +47,14 @@ init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
       float fj = (float)j / bufobj_coords.size[0];
 
       // coordinates:
-      float dx = fi - 0.5;
-      float dy = 0.5 - fj;
+      float dx = fj - 0.5;
+      float dy = 0.5 - fi;
       float d = sqrt(dx * dx + dy * dy);
       float f = (d > 0) ? 2 * pow(d, 0.2) : 0;
       *(pc++) = make_float4(f * dx, f * dy, 0, 1);
 
       // texture coordinates:
-      *(pt++) = make_float2(fi, fj);
+      *(pt++) = make_float2(fj, fi);
     }
   }
 
