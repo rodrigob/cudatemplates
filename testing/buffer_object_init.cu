@@ -28,48 +28,73 @@
 #include <cudatemplates/opengl/copy.hpp>
 
 
+/**
+   Integer division (rounding up the result).
+*/
+static inline int
+div_up(int x, int y)
+{
+  return (x + y - 1) / y;
+}
+
+/**
+   Compute vertex and texture coordinates.
+*/
+__global__ void
+init_geometry_kernel(Cuda::OpenGL::BufferObject2D<float4>::KernelData coords,
+		     Cuda::OpenGL::BufferObject2D<float2>::KernelData texcoords)
+{
+  int i = threadIdx.y + blockDim.y * blockIdx.y;
+  int j = threadIdx.x + blockDim.x * blockIdx.x;
+
+  if((i >= coords.size[1]) || (j >= coords.size[0]))
+    return;
+
+  int ofs = i * coords.size[0] + j;
+
+  float fi = (float)i / coords.size[1];
+  float fj = (float)j / coords.size[0];
+
+  // coordinates:
+  float dx = fj - 0.5;
+  float dy = 0.5 - fi;
+  float d = sqrtf(dx * dx + dy * dy);
+  float f = (d > 0) ? 2 * powf(d, 0.2) : 0;
+  coords.data[ofs] = make_float4(f * dx, f * dy, 0, 1);
+
+  // texture coordinates:
+  texcoords.data[ofs] = make_float2(fj, fi);
+}
+
+/**
+   Init mesh geometry on GPU.
+*/
 void
 init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
 	      Cuda::OpenGL::BufferObject2D<float2> &bufobj_texcoords)
 {
   assert(bufobj_coords.size == bufobj_texcoords.size);
 
-  // create geometry arrays:
-  Cuda::HostMemoryHeap2D<float4> coords   (bufobj_coords.size);
-  Cuda::HostMemoryHeap2D<float2> texcoords(bufobj_texcoords.size);
-  float4 *pc = coords.getBuffer();
-  float2 *pt = texcoords.getBuffer();
+  // launch kernel:
+  dim3 dimBlock(8, 8, 1);
+  dim3 dimGrid(div_up(bufobj_coords.size[0], dimBlock.x), div_up(bufobj_coords.size[1], dimBlock.y), 1);
+  init_geometry_kernel<<<dimBlock, dimGrid>>>(bufobj_coords, bufobj_texcoords);
+  cudaThreadSynchronize();
 
-  for(int i = 0; i < bufobj_coords.size[1]; ++i) {
-    float fi = (float)i / bufobj_coords.size[1];
-
-    for(int j = 0; j < bufobj_coords.size[0]; ++j) {
-      float fj = (float)j / bufobj_coords.size[0];
-
-      // coordinates:
-      float dx = fj - 0.5;
-      float dy = 0.5 - fi;
-      float d = sqrt(dx * dx + dy * dy);
-      float f = (d > 0) ? 2 * pow(d, 0.2) : 0;
-      *(pc++) = make_float4(f * dx, f * dy, 0, 1);
-
-      // texture coordinates:
-      *(pt++) = make_float2(fj, fi);
-    }
-  }
-
-  // copy data to buffer objects:
-  copy(bufobj_coords, coords);
-  copy(bufobj_texcoords, texcoords);
+  // use coordinates for OpenGL:
   bufobj_coords.disconnect();
-  bufobj_texcoords.disconnect();
-
   bufobj_coords.bind();
   glVertexPointer(4, GL_FLOAT, 0, 0);
+
+  // use texture coordinates for OpenGL:
+  bufobj_texcoords.disconnect();
   bufobj_texcoords.bind();
   glTexCoordPointer(2, GL_FLOAT, 0, 0);
 }
 
+/**
+   Init mesh topology on CPU.
+*/
 void
 init_topology(Cuda::OpenGL::BufferObject2D<int4> &bufobj_coordindex)
 {

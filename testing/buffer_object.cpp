@@ -36,19 +36,16 @@
 using namespace std;
 
 
+#define SUBDIV_X  64
+#define SUBDIV_Y  32
+
 #define WIREFRAME 0
 
 
-typedef unsigned char PixelType;
+extern void init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
+			  Cuda::OpenGL::BufferObject2D<float2> &bufobj_texcoords);
 
-const int SUBDIV_X = 64;
-const int SUBDIV_Y = 32;
-
-
-void init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
-		   Cuda::OpenGL::BufferObject2D<float2> &bufobj_texcoords);
-
-void init_topology(Cuda::OpenGL::BufferObject2D<int4>   &bufobj_coordindex);
+extern void init_topology(Cuda::OpenGL::BufferObject2D<int4>   &bufobj_coordindex);
 
 
 void
@@ -87,6 +84,8 @@ int
 main(int argc, char *argv[])
 {
   try {
+    typedef unsigned char PixelType;
+
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
     boost::gil::png_read_image("cameraman.png", gil_image);
@@ -101,25 +100,23 @@ main(int argc, char *argv[])
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 
-    // create OpenGL texture:
-    Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
-
-    // create buffer object for image:
+    // create OpenGL buffer object for image and copy data:
     Cuda::OpenGL::BufferObject2D<PixelType> bufobj(image.size);
-
-    // copy image to buffer object:
     copy(bufobj, image);
 
-    // copy buffer object to texture:
+    // create OpenGL texture and copy data
+    // (note that the image data could also be copied directly to the texture,
+    // this is just to demonstrate the use of a buffer object for pixel data):
+    Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
     copy(texture, bufobj);
-
     bufobj.disconnect();
     texture.bind();
 
+    // enable arrays:
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    // create CUDA template OpenGL buffer objects:
+    // create OpenGL buffer objects for geometry and topology:
     Cuda::OpenGL::BufferObject2D<float4> bufobj_coords    (SUBDIV_X + 1, SUBDIV_Y + 1);
     Cuda::OpenGL::BufferObject2D<float2> bufobj_texcoords (SUBDIV_X + 1, SUBDIV_Y + 1);
     Cuda::OpenGL::BufferObject2D<int4>   bufobj_coordindex(SUBDIV_X,     SUBDIV_Y,     GL_ELEMENT_ARRAY_BUFFER);
