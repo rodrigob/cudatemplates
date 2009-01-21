@@ -36,7 +36,10 @@ namespace Cuda {
    HostMemoryHeap template specialized for 1 dimension(s).
 */
 template <class Type>
-class HostMemoryHeap1D: public HostMemoryHeap<Type, 1>
+class HostMemoryHeap1D:
+    virtual public Layout<Type, 1>,
+    virtual public Pointer<Type, 1>,
+    public HostMemoryHeap<Type, 1>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

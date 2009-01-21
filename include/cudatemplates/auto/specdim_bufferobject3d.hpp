@@ -37,7 +37,10 @@ namespace OpenGL {
    BufferObject template specialized for 3 dimension(s).
 */
 template <class Type>
-class BufferObject3D: public BufferObject<Type, 3>
+class BufferObject3D:
+    virtual public Layout<Type, 3>,
+    virtual public Pointer<Type, 3>,
+    public BufferObject<Type, 3>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

@@ -36,7 +36,10 @@ namespace Cuda {
    HostMemoryHeap template specialized for 2 dimension(s).
 */
 template <class Type>
-class HostMemoryHeap2D: public HostMemoryHeap<Type, 2>
+class HostMemoryHeap2D:
+    virtual public Layout<Type, 2>,
+    virtual public Pointer<Type, 2>,
+    public HostMemoryHeap<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

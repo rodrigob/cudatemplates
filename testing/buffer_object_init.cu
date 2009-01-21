@@ -105,8 +105,8 @@ init_topology(Cuda::OpenGL::BufferObject2D<int4> &bufobj_coordindex)
   Cuda::HostMemoryHeap2D<int4> coordindex(bufobj_coordindex.size);
   int4 *pi = coordindex.getBuffer();
 
-  for(int i = 0; i < bufobj_coordindex.size[1]; ++i)
-    for(int j = 0; j < bufobj_coordindex.size[0]; ++j) {
+  for(unsigned i = 0; i < bufobj_coordindex.size[1]; ++i)
+    for(unsigned j = 0; j < bufobj_coordindex.size[0]; ++j) {
       int v0 = i * (bufobj_coordindex.size[0] + 1) + j;
       *(pi++) = make_int4(v0,
 			  v0 + 1,

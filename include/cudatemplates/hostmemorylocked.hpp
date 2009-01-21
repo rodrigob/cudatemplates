@@ -35,7 +35,10 @@ namespace Cuda {
    This can be used for DMA transfers between CPU and GPU memory.
 */
 template <class Type, unsigned Dim>
-class HostMemoryLocked: public HostMemoryStorage<Type, Dim>
+class HostMemoryLocked:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public HostMemoryStorage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

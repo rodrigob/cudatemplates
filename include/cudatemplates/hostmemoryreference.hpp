@@ -33,12 +33,28 @@ namespace Cuda {
    managed by other libraries.
 */
 template <class Type, unsigned Dim>
-class HostMemoryReference: public HostMemory<Type, Dim>
+class HostMemoryReference:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public HostMemory<Type, Dim>
 {
 public:
   /**
      Constructor.
-     @param requested layout
+     @param _size requested size
+     @param _buffer pointer to CPU memory
+  */
+  inline HostMemoryReference(const Size<Dim> &_size, Type *_buffer):
+    Layout<Type, Dim>(_size),
+    Pointer<Type, Dim>(_size),
+    HostMemory<Type, Dim>(_size)
+  {
+    this->buffer = _buffer;
+  }
+
+  /**
+     Constructor.
+     @param layout requested layout
      @param _buffer pointer to CPU memory
   */
   inline HostMemoryReference(const Layout<Type, Dim> &layout, Type *_buffer):
@@ -53,8 +69,6 @@ public:
      Constructor.
      The current implementation only works if the resulting object refers to a
      contiguous block of memory.
-     @param requested layout
-     @param _buffer pointer to CPU memory
   */
   inline HostMemoryReference(HostMemory<Type, Dim> &data, const Size<Dim> &ofs, const Size<Dim> &_size):
     Layout<Type, Dim>(data),

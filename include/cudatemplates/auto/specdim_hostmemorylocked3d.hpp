@@ -36,7 +36,10 @@ namespace Cuda {
    HostMemoryLocked template specialized for 3 dimension(s).
 */
 template <class Type>
-class HostMemoryLocked3D: public HostMemoryLocked<Type, 3>
+class HostMemoryLocked3D:
+    virtual public Layout<Type, 3>,
+    virtual public Pointer<Type, 3>,
+    public HostMemoryLocked<Type, 3>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

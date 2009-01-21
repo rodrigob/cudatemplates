@@ -36,7 +36,10 @@ namespace Cuda {
    HostMemoryLocked template specialized for 2 dimension(s).
 */
 template <class Type>
-class HostMemoryLocked2D: public HostMemoryLocked<Type, 2>
+class HostMemoryLocked2D:
+    virtual public Layout<Type, 2>,
+    virtual public Pointer<Type, 2>,
+    public HostMemoryLocked<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

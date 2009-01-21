@@ -30,7 +30,7 @@ main()
   kernel<<<dim3(1, 1, 1), dim3(SIZE, 1, 1)>>>(dbuf);
   copy(hbuf, dbuf);
 
-  int i;
+  unsigned i;
 
   for(i = 0; i < SIZE; ++i)
     if(hbuf[i] == 0)

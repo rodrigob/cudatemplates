@@ -75,6 +75,7 @@ set(CPACK_IGNORE_FILES
   "makedist.sh"
   "moc_"
   "progress.make"
+  "Testing"
   "~$"
 )
 

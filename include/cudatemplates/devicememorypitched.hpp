@@ -35,7 +35,10 @@ namespace Cuda {
    Appropriate padding is added to maximize access performance.
 */
 template <class Type, unsigned Dim>
-class DeviceMemoryPitched: public DeviceMemoryStorage<Type, Dim>
+class DeviceMemoryPitched:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public DeviceMemoryStorage<Type, Dim>
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
 

@@ -40,7 +40,10 @@ namespace Cuda {
    Reference to existing boost::gil image.
 */
 template <class Type>
-class GilReference2D: public HostMemoryReference2D<Type>
+class GilReference2D:
+    virtual public Layout<Type, 2>,
+    virtual public Pointer<Type, 2>,
+    public HostMemoryReference2D<Type>
 {
 public:
   typedef boost::gil::image<boost::gil::pixel<typename gil::typeconv<Type>::dst, boost::gil::gray_layout_t>, false> gil_image_t;

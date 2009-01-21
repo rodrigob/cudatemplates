@@ -33,7 +33,10 @@ namespace Cuda {
    Reference to existing IPL image.
 */
 template <class Type, unsigned Dim>
-class IplReference : public HostMemoryReference<Type, Dim>
+class IplReference:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public HostMemoryReference<Type, Dim>
 {
 public:
   /**

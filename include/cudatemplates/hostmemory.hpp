@@ -38,7 +38,9 @@ template <class Type, unsigned Dim> class HostMemoryReference;
    This is the base class for all kind of CPU memory.
 */
 template <class Type, unsigned Dim>
-class HostMemory: virtual public Pointer<Type, Dim>
+class HostMemory:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>
 {
 public:
   typedef HostMemoryReference<Type, Dim> Reference;
@@ -86,7 +88,11 @@ protected:
    management is performed by the CUDA Toolkit.
 */
 template <class Type, unsigned Dim>
-class HostMemoryStorage: public HostMemory<Type, Dim>, public PointerStorage<Type, Dim>
+class HostMemoryStorage:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public HostMemory<Type, Dim>,
+    public PointerStorage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

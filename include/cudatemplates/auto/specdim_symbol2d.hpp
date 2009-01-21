@@ -36,7 +36,10 @@ namespace Cuda {
    Symbol template specialized for 2 dimension(s).
 */
 template <class Type>
-class Symbol2D: public Symbol<Type, 2>
+class Symbol2D:
+    virtual public Layout<Type, 2>,
+    virtual public Pointer<Type, 2>,
+    public Symbol<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

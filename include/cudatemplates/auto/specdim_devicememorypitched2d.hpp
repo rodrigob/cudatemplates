@@ -36,7 +36,10 @@ namespace Cuda {
    DeviceMemoryPitched template specialized for 2 dimension(s).
 */
 template <class Type>
-class DeviceMemoryPitched2D: public DeviceMemoryPitched<Type, 2>
+class DeviceMemoryPitched2D:
+    virtual public Layout<Type, 2>,
+    virtual public Pointer<Type, 2>,
+    public DeviceMemoryPitched<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

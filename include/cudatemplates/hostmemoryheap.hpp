@@ -32,7 +32,10 @@ namespace Cuda {
    Representation of heap memory on the CPU.
 */
 template <class Type, unsigned Dim>
-class HostMemoryHeap: public HostMemoryStorage<Type, Dim>
+class HostMemoryHeap:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public HostMemoryStorage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

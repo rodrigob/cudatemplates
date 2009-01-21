@@ -37,7 +37,10 @@ namespace OpenGL {
    @Name@ template specialized for @Dim@ dimension(s).
 */
 template <class Type>
-class @Name@@Dim@D: public @Name@<Type, @Dim@>
+class @Name@@Dim@D:
+    virtual public Layout<Type, @Dim@>,
+    @Pointer@virtual public Pointer<Type, @Dim@>,
+    public @Name@<Type, @Dim@>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

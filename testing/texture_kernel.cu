@@ -4,6 +4,9 @@
 
 __global__ void kernel(memdev_t::KernelData res)
 {
+  CUDA_STATIC_ASSERT(1 > 0);
+  CUDA_STATIC_ASSERT(2 > 0);
+
   int x1 = threadIdx.x + blockDim.x * blockIdx.x;
   int y1 = threadIdx.y + blockDim.y * blockIdx.y;
   int x2 = res.size[0] - 1 - x1;

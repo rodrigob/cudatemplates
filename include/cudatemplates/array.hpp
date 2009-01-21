@@ -39,7 +39,9 @@ namespace Cuda {
    CUDA arrays allow access to texture hardware.
 */
 template <class Type, unsigned Dim>
-class Array: public Storage<Type, Dim>
+class Array:
+    virtual public Layout<Type, Dim>,
+    public Storage<Type, Dim>
 {
 public:
 

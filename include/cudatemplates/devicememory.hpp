@@ -36,7 +36,9 @@ template <class Type, unsigned Dim> class DeviceMemoryReference;
    obtained for read and write access (i.e., no CUDA arrays).
 */
 template <class Type, unsigned Dim>
-class DeviceMemory: virtual public Pointer<Type, Dim>
+class DeviceMemory:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>
 {
 public:
   typedef DeviceMemoryReference<Type, Dim> Reference;
@@ -121,7 +123,11 @@ protected:
    performed by the CUDA templates and (i.e., no CUDA arrays).
 */
 template <class Type, unsigned Dim>
-class DeviceMemoryStorage: public DeviceMemory<Type, Dim>, public PointerStorage<Type, Dim>
+class DeviceMemoryStorage:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public DeviceMemory<Type, Dim>,
+    public PointerStorage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

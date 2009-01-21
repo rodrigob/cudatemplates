@@ -36,7 +36,10 @@ namespace Cuda {
    Array template specialized for 1 dimension(s).
 */
 template <class Type>
-class Array1D: public Array<Type, 1>
+class Array1D:
+    virtual public Layout<Type, 1>,
+    // virtual public Pointer<Type, 1>,
+    public Array<Type, 1>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

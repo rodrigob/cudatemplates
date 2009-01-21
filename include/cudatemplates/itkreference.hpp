@@ -33,7 +33,10 @@ namespace Cuda {
    Reference to existing ITK image.
 */
 template <class Type, unsigned Dim>
-class ItkReference: public HostMemoryReference<Type, Dim>
+class ItkReference:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public HostMemoryReference<Type, Dim>
 {
 public:
   typedef typename itk::Image<Type, Dim> ImageType;

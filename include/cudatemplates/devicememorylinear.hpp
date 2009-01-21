@@ -34,7 +34,10 @@ namespace Cuda {
    No padding is performed, i.e., efficiency of access may be suboptimal.
 */
 template <class Type, unsigned Dim>
-class DeviceMemoryLinear: public DeviceMemoryStorage<Type, Dim>
+class DeviceMemoryLinear:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public DeviceMemoryStorage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

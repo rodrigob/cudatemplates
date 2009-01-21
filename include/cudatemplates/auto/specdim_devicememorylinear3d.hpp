@@ -36,7 +36,10 @@ namespace Cuda {
    DeviceMemoryLinear template specialized for 3 dimension(s).
 */
 template <class Type>
-class DeviceMemoryLinear3D: public DeviceMemoryLinear<Type, 3>
+class DeviceMemoryLinear3D:
+    virtual public Layout<Type, 3>,
+    virtual public Pointer<Type, 3>,
+    public DeviceMemoryLinear<Type, 3>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

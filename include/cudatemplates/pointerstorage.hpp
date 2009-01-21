@@ -33,7 +33,10 @@ namespace Cuda {
    and is accessible via a typed pointer.
 */
 template <class Type, unsigned Dim>
-class PointerStorage: public Storage<Type, Dim>, virtual public Pointer<Type, Dim>
+class PointerStorage:
+    virtual public Layout<Type, Dim>,
+    virtual public Pointer<Type, Dim>,
+    public Storage<Type, Dim>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

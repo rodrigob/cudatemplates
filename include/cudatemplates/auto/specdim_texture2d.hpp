@@ -37,7 +37,10 @@ namespace OpenGL {
    Texture template specialized for 2 dimension(s).
 */
 template <class Type>
-class Texture2D: public Texture<Type, 2>
+class Texture2D:
+    virtual public Layout<Type, 2>,
+    virtual public Pointer<Type, 2>,
+    public Texture<Type, 2>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
