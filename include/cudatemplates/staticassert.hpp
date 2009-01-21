@@ -26,7 +26,7 @@
 
 // With nvcc V0.2.1221, the Boost static assertion macro
 // triggers an internal compiler bug, so leave if out for now:
-#define CUDA_STATIC_ASSERT(x)
+#define CUDA_STATIC_ASSERT(x) typedef int make_the_compiler_really_happy
 
 #else
 
