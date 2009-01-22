@@ -23,6 +23,7 @@
 
 
 #include <GL/gl.h>
+#include <GL/glu.h>
 
 
 #ifndef __GNUC__
