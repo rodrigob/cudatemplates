@@ -22,6 +22,8 @@
 #define CUDA_OPENGL_TEXTURE_H
 
 
+#include <string.h>
+
 #include <GL/gl.h>
 
 #ifndef _WIN32
@@ -160,9 +162,20 @@ template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 alloc()
 {
-  for(int i = Dim; i--;)
-    if((this->size[i] & (this->size[i] - 1)) != 0)
-      CUDA_ERROR("Texture size must be power of two");
+  // check for non-power-of-two extension:
+  static bool has_npot_extension, init_npot_extension = false;
+
+  if(!init_npot_extension) {
+    const GLubyte *str = glGetString(GL_EXTENSIONS);
+    has_npot_extension = (strstr((const char *)str, "GL_ARB_texture_non_power_of_two") != 0);
+    init_npot_extension = true;
+  }
+
+  // if not available, check for power-of-two texture image dimensions:
+  if(!has_npot_extension)
+    for(int i = Dim; i--;)
+      if((this->size[i] & (this->size[i] - 1)) != 0)
+	CUDA_ERROR("Texture size must be power of two");
 
   this->free();
   CUDA_OPENGL_CHECK(glGenTextures(1, &texname));
