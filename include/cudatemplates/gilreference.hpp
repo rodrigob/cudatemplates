@@ -31,9 +31,49 @@
 namespace Cuda {
 
   namespace gil {
-    // pass types through to boost::gil except float:
-    template <class src> struct typeconv { typedef src dst; };
-    template <> struct typeconv<float> { typedef boost::gil::bits32f dst; };
+    template <class T> struct pixel {};
+
+    // supported types:
+
+#define CUDA_GIL_PIXEL(T, c, l) template <> struct pixel<T> { typedef c channel; typedef boost::gil::l ## _layout_t layout; }
+
+    CUDA_GIL_PIXEL(char, char, gray);
+    CUDA_GIL_PIXEL(struct char1, char, gray);
+    CUDA_GIL_PIXEL(struct char3, char, rgb);
+    CUDA_GIL_PIXEL(struct char4, char, rgba);
+
+    CUDA_GIL_PIXEL(unsigned char, unsigned char, gray);
+    CUDA_GIL_PIXEL(struct uchar1, unsigned char, gray);
+    CUDA_GIL_PIXEL(struct uchar3, unsigned char, rgb);
+    CUDA_GIL_PIXEL(struct uchar4, unsigned char, rgba);
+
+    CUDA_GIL_PIXEL(short, short, gray);
+    CUDA_GIL_PIXEL(struct short1, short, gray);
+    CUDA_GIL_PIXEL(struct short3, short, rgb);
+    CUDA_GIL_PIXEL(struct short4, short, rgba);
+
+    CUDA_GIL_PIXEL(unsigned short, unsigned short, gray);
+    CUDA_GIL_PIXEL(struct ushort1, unsigned short, gray);
+    CUDA_GIL_PIXEL(struct ushort3, unsigned short, rgb);
+    CUDA_GIL_PIXEL(struct ushort4, unsigned short, rgba);
+
+    CUDA_GIL_PIXEL(int, int, gray);
+    CUDA_GIL_PIXEL(struct int1, int, gray);
+    CUDA_GIL_PIXEL(struct int3, int, rgb);
+    CUDA_GIL_PIXEL(struct int4, int, rgba);
+
+    CUDA_GIL_PIXEL(unsigned int, unsigned int, gray);
+    CUDA_GIL_PIXEL(struct uint1, unsigned int, gray);
+    CUDA_GIL_PIXEL(struct uint3, unsigned int, rgb);
+    CUDA_GIL_PIXEL(struct uint4, unsigned int, rgba);
+
+    CUDA_GIL_PIXEL(float, boost::gil::bits32f, gray);
+    CUDA_GIL_PIXEL(struct float1, boost::gil::bits32f, gray);
+    CUDA_GIL_PIXEL(struct float3, boost::gil::bits32f, rgb);
+    CUDA_GIL_PIXEL(struct float4, boost::gil::bits32f, rgba);
+
+#undef CUDA_GIL_PIXEL
+
   }
 
 /**
@@ -46,7 +86,9 @@ class GilReference2D:
     public HostMemoryReference2D<Type>
 {
 public:
-  typedef boost::gil::image<boost::gil::pixel<typename gil::typeconv<Type>::dst, boost::gil::gray_layout_t>, false> gil_image_t;
+  typedef boost::gil::image<boost::gil::pixel<typename Cuda::gil::pixel<Type>::channel,
+					      typename Cuda::gil::pixel<Type>::layout>,
+			    false> gil_image_t;
 
   /**
      Constructor.

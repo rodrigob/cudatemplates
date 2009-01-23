@@ -103,11 +103,11 @@ int
 main(int argc, char *argv[])
 {
   try {
-    typedef unsigned char PixelType;
+    typedef struct uchar3 PixelType;
 
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
-    boost::gil::png_read_image("cameraman.png", gil_image);
+    boost::gil::png_read_image("ladybug.png", gil_image);  // must match PixelType!
     Cuda::GilReference2D<PixelType> image(gil_image);
 
     // init GLUT:

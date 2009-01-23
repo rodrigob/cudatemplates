@@ -181,17 +181,21 @@ alloc()
   CUDA_OPENGL_CHECK(glGenTextures(1, &texname));
   CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
 
+  GLint internalFormat = getInternalFormat<Type>();
+  GLenum format = getFormat<Type>();
+  GLenum type = getType<Type>();
+
   switch(Dim) {
   case 1:
-    CUDA_OPENGL_CHECK(glTexImage1D(target(), 0, GL_LUMINANCE, this->size[0], 0, GL_LUMINANCE, getType<Type>(), 0));
+    CUDA_OPENGL_CHECK(glTexImage1D(target(), 0, internalFormat, this->size[0], 0, format, type, 0));
     break;
 
   case 2:
-    CUDA_OPENGL_CHECK(glTexImage2D(target(), 0, GL_LUMINANCE, this->size[0], this->size[1], 0, GL_LUMINANCE, getType<Type>(), 0));
+    CUDA_OPENGL_CHECK(glTexImage2D(target(), 0, internalFormat, this->size[0], this->size[1], 0, format, type, 0));
     break;
 
   case 3:
-    CUDA_OPENGL_CHECK(glTexImage3D(target(), 0, GL_LUMINANCE, this->size[0], this->size[1], this->size[2], 0, GL_LUMINANCE, getType<Type>(), 0));
+    CUDA_OPENGL_CHECK(glTexImage3D(target(), 0, internalFormat, this->size[0], this->size[1], this->size[2], 0, format, type, 0));
   }
 
   // A minimal set of texture parameters is required, otherwise the texture
@@ -208,23 +212,26 @@ glTexSubImage(const GLvoid *pixels)
 {
   bind();
 
+  GLenum format = getFormat<Type>();
+  GLenum type = getType<Type>();
+
   switch(Dim) {
   case 1:
     CUDA_OPENGL_CHECK(glTexSubImage1D(target(), 0,
 				      0, this->size[0],
-				      GL_LUMINANCE, getType<Type>(), pixels));
+				      format, type, pixels));
     break;
 
   case 2:
     CUDA_OPENGL_CHECK(glTexSubImage2D(target(), 0,
 				      0, 0, this->size[0], this->size[1],
-				      GL_LUMINANCE, getType<Type>(), pixels));
+				      format, type, pixels));
     break;
 
   case 3:
     CUDA_OPENGL_CHECK(glTexSubImage3D(target(), 0,
 				      0, 0, 0, this->size[0], this->size[1], this->size[2],
-				      GL_LUMINANCE, getType<Type>(), pixels));
+				      format, type, pixels));
   }
 
   unbind();

@@ -85,4 +85,9 @@ private:
 #endif  // defined(__CUDACC__) || defined(NVCC)
 
 
+#ifndef __GNUC__
+#undef __PRETTY_FUNCTION__
+#endif
+
+
 #endif
