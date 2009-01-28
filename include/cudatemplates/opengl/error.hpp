@@ -26,7 +26,7 @@
 #include <GL/glu.h>
 
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) && !defined(__PRETTY_FUNCTION__) 
 #define __PRETTY_FUNCTION__ "(unknown function)"
 #endif
 
@@ -101,11 +101,6 @@ private:
 }  // namespace Cuda
 
 #endif  // defined(__CUDACC__) || defined(NVCC)
-
-
-#ifndef __GNUC__
-#undef __PRETTY_FUNCTION__
-#endif
 
 
 #endif
