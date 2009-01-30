@@ -59,19 +59,6 @@ ostream &operator<<(ostream &s, const Cuda::SizeBase<Dim> &sz)
   return s << ')';
 }
 
-template <unsigned Dim>
-bool increment(Cuda::SizeBase<Dim> &index, const Cuda::SizeBase<Dim> &size)
-{
-  for(unsigned j = 0; j < Dim; ++j) {
-    if(++index[j] < size[j])
-      return true;
-    
-    index[j] = 0;
-  }
-  
-  return false;
-}
-
 template <class T1, class T2>
 int
 test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
@@ -118,12 +105,8 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 
     // compare results:
     cudaThreadSynchronize();
-    Cuda::Size<Dim> index;
 
-    for(size_t i = Dim; i--;)
-      index[i] = 0;
-
-    do {
+    for(Cuda::Iterator<Dim> index = ref2.begin(); index != ref2.end(); ++index) {
       Type x1 = buf1[ref1.getOffset(index)];
       Type x2 = buf2[ref2.getOffset(index)];
       Type x3 = buf3[ref3.getOffset(index)];
@@ -138,7 +121,6 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 	return 1;
       }
     }
-    while(increment(index, size));
 
     delete[] buf1;
     delete[] buf2;
@@ -188,7 +170,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     for(size_t i = Dim; i--;)
       index[i] = 0;
 
-    do {
+    for(Cuda::Iterator<Dim> index = ref2.begin(); index != ref2.end(); ++index) {
       // check if current index is inside copied area:
       bool inside = true;
 
@@ -227,7 +209,6 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 #endif
       }
     }
-    while(increment(index, size2));
 
     delete[] buf1;
     delete[] buf2;

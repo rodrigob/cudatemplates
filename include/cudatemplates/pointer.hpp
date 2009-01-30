@@ -22,6 +22,7 @@
 #define CUDA_POINTER_H
 
 
+#include <cudatemplates/iterator.hpp>
 #include <cudatemplates/layout.hpp>
 
 
@@ -37,6 +38,8 @@ template <class Type, unsigned Dim>
 class Pointer: virtual public Layout<Type, Dim>
 {
 public:
+  typedef Iterator<Dim> iterator;
+
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**
      Default constructor.
@@ -101,6 +104,16 @@ public:
      @return value at index i
   */
   inline const Type &operator[](const Size<Dim> &i) const { return buffer[this->getOffset(i)]; }
+
+  /**
+     Get iterator for begin of data.
+  */
+  inline iterator begin() const { return iterator(this->size); }
+
+  /**
+     Get iterator for end of data.
+  */
+  inline iterator end() const { return iterator(this->size).setEnd(); }
 
   /**
      Get buffer pointer.
