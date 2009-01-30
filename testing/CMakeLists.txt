@@ -49,6 +49,9 @@ cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(copy copy.cpp)
 target_link_libraries(copy ${CUDA_TARGET_LINK})
 
+add_executable(convert convert.cpp)
+target_link_libraries(convert ${CUDA_TARGET_LINK})
+
 add_executable(demo demo.cpp)
 target_link_libraries(demo ${CUDA_TARGET_LINK})
 

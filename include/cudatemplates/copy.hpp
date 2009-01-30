@@ -50,9 +50,9 @@
 
 namespace Cuda {
 
-template<class Type, unsigned Dim>
+template<class Type1, class Type2, unsigned Dim>
 static void
-check_bounds(const Layout<Type, Dim> &dst, const Layout<Type, Dim> &src,
+check_bounds(const Layout<Type1, Dim> &dst, const Layout<Type2, Dim> &src,
 	     const Size<Dim> &dst_ofs, const Size<Dim> &src_ofs, const Size<Dim> &size)
 {
   for(size_t i = Dim; i--;) {
@@ -779,9 +779,6 @@ copy(Symbol<Type, Dim> &dst, const DeviceMemory<Type, Dim> &src)
 }
 
 }  // namespace Cuda
-
-
-#undef CUDA_CHECK_SIZE
 
 
 #endif

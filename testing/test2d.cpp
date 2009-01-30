@@ -1,3 +1,5 @@
+err |= test2<Cuda::HostMemoryHeap<float, 2>, Cuda::HostMemoryHeap<double, 2> >(size2a, size2b, pos2a, pos2b, size2, smax2);
+err |= test2<Cuda::HostMemoryHeap<double, 2>, Cuda::HostMemoryHeap<float, 2> >(size2a, size2b, pos2a, pos2b, size2, smax2);
 err |= test2<Cuda::HostMemoryHeap<float, 2>, Cuda::HostMemoryHeap<float, 2> >(size2a, size2b, pos2a, pos2b, size2, smax2);
 err |= test2<Cuda::HostMemoryHeap<float, 2>, Cuda::HostMemoryLocked<float, 2> >(size2a, size2b, pos2a, pos2b, size2, smax2);
 err |= test2<Cuda::HostMemoryHeap<float, 2>, Cuda::DeviceMemoryLinear<float, 2> >(size2a, size2b, pos2a, pos2b, size2, smax2);

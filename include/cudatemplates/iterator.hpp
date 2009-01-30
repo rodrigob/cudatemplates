@@ -31,7 +31,7 @@ namespace Cuda {
    Generic iterator over n-dimensional data.
 */
 template <unsigned Dim>
-class Iterator: public Size<Dim>
+class Iterator: public SizeBase<Dim>
 {
   CUDA_STATIC_ASSERT(Dim > 0);
 
@@ -40,7 +40,7 @@ public:
      Constructor iterator for given size.
      @param _imax maximum
   */
-  inline Iterator(const Size<Dim> &_imax):
+  inline Iterator(const SizeBase<Dim> &_imax):
     imax(_imax)
   {
   }
@@ -50,8 +50,8 @@ public:
      @param _imin minimum
      @param _imax maximum
   */
-  inline Iterator(const Size<Dim> &_imin, const Size<Dim> &_imax):
-    Size<Dim>(_imin),
+  inline Iterator(const SizeBase<Dim> &_imin, const SizeBase<Dim> &_imax):
+    SizeBase<Dim>(_imin),
     imin(_imin), imax(_imax)
   {
   }
@@ -60,11 +60,12 @@ public:
   {
     for(unsigned j = 0; j < Dim; ++j) {
       if(++this->size[j] < imax[j])
-	break;
+	return *this;
       
       this->size[j] = imin[j];
     }
     
+    setEnd();
     return *this;
   }
 
@@ -72,19 +73,27 @@ public:
      Set iterator to begin of data.
      @return updated iterator
   */
-  inline const Iterator &setBegin() { *this = imin; return *this; }
+  inline const Iterator &setBegin()
+  {
+    SizeBase<Dim>::operator=(imin);
+    return *this;
+  }
 
   /**
      Set iterator to end of data.
      @return updated iterator
   */
-  inline const Iterator &setEnd() { *this = imax; return *this; }
+  inline const Iterator &setEnd()
+  {
+    SizeBase<Dim>::operator=(imax);
+    return *this;
+  }
 
 protected:
   /**
      The iterator range.
   */
-  Size<Dim> imin, imax;
+  SizeBase<Dim> imin, imax;
 };
 
 }  // namespace Cuda

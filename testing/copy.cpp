@@ -30,6 +30,7 @@
 #define TEST_REFERENCE 0
 
 #include <cudatemplates/array.hpp>
+#include <cudatemplates/convert.hpp>
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
@@ -44,8 +45,9 @@ using namespace std;
 static float
 my_random()
 {
-  // return rand() % 100;
-  return rand() / (float)RAND_MAX;
+  // non-integer number with exact representation in float and double:
+  const int BITS = 20;
+  return (float)(rand() & ((1 << BITS) - 1)) / (1 << (BITS / 2));
 }
 
 template <unsigned Dim>
@@ -65,7 +67,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
       const Cuda::Size<T1::Dim> &size, bool use_region)
 {
-  BOOST_STATIC_ASSERT(T1::Dim == T2::Dim);
+  BOOST_STATIC_ASSERT((int)T1::Dim == (int)T2::Dim);
   
   // extract some types and constants:
   typedef typename T1::Type Type;
@@ -75,7 +77,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     // create objects to be tested:
     T1 obj1(size);
     Cuda::Layout<Type, Dim> layout(obj1);
-    T2 obj2(layout);
+    T2 obj2(size);
 
     // allocate plain C arrays and create HostMemoryReferences to them:
     Type *buf1 = new Type[layout.getSize()];
@@ -230,7 +232,7 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
       const Cuda::Size<T1::Dim> &size, size_t size_max)
 {
-  BOOST_STATIC_ASSERT(T1::Dim == T2::Dim);
+  BOOST_STATIC_ASSERT((int)T1::Dim == (int)T2::Dim);
 
   int err = 0;
 
@@ -293,6 +295,8 @@ main(int argc, char *argv[])
       size1a(smax1), size1b(smax1),
       pos1a(smax1 / 16), pos1b(smax1 / 16),
       size1(smax1 / 2);
+
+    err |= test2<Cuda::HostMemoryHeap<float, 1>, Cuda::HostMemoryHeap<double, 1> >(size1a, size1b, pos1a, pos1b, size1, smax1);
 
 #include "test1d.cpp"
 

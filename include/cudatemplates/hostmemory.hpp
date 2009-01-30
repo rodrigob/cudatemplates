@@ -128,6 +128,20 @@ public:
   {
   }
 
+  /**
+     Constructor from different data type.
+     Don't try to replicate layout, just use size.
+     @param x host memory data of different data type
+  */
+  template <class Type2>
+  inline HostMemoryStorage(const HostMemory<Type2, Dim> &x):
+    Layout<Type, Dim>(x.size),
+    Pointer<Type, Dim>(x.size),
+    HostMemory<Type, Dim>(x.size),
+    PointerStorage<Type, Dim>(x.size)
+  {
+  }
+
   inline void init() { this->buffer = 0; }
 
 protected:

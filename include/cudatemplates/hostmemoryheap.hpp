@@ -74,6 +74,21 @@ public:
 #include "auto/copy_hostmemoryheap.hpp"
 
   /**
+     Constructor from different data type.
+     @param x host memory data of different data type
+  */
+  template <class Type2>
+  inline HostMemoryHeap(const HostMemoryHeap<Type2, Dim> &x):
+    Layout<Type, Dim>(x.size),
+    Pointer<Type, Dim>(x.size),
+    HostMemoryStorage<Type, Dim>(x.size)
+  {
+    this->init();
+    this->alloc();
+    copy(*this, x);
+  }
+
+  /**
      Destructor.
   */
   ~HostMemoryHeap()
