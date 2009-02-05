@@ -219,6 +219,56 @@ bool operator!=(const SizeBase<Dim> &s1, const SizeBase<Dim> &s2)
   return false;
 }
 
+/**
+   Division operator.
+   Note that if a division with a factor 0 is executed the behaviour is not defined.
+   @param lhs dividend
+   @param rhs divisor
+   @return qotient of division of \a lhs (dividend) and given factor \a rhs (divisor)
+*/
+template <unsigned Dim>
+Cuda::Size<Dim> operator/(const Cuda::Size<Dim> &lhs, const float &rhs) {
+  if (rhs == 0)
+    fprintf(stderr, "Division by zero!!\n");
+  Cuda::Size<Dim> out = lhs;
+  for(size_t i = 0; i < Dim; ++i)
+    out[i] /= rhs;
+  
+  return out;
+}
+
+// /**
+//    Subtraction Assignment operator.
+//    Note that the size is unsigned in each dimension, i.e., you will get an
+//    overflow if you subtract a larger from a smaller quantity.
+//    @param other subtrahend size to be subtracted
+//    @return difference of \a this and \a other
+// */
+// template <unsigned Dim>
+// Cuda::Size<Dim>& operator-=(const Cuda::Size<Dim> &other) {
+//   Cuda::Size<Dim> out;
+//   for(size_t i = Dim; i--;)
+//     out[i]= (*this)[i] - other[i];
+//   return out;
+// }
+
+/**
+   Subtraction operator.
+   Note that the size is unsigned in each dimension, i.e., you will get an
+   overflow if you subtract a larger from a smaller quantity.
+   @param lhs minuend size of subtraction
+   @param rhs subtrahend size to be subtracted
+   @return difference of \a lhs and \a rhs
+*/
+template <unsigned Dim>
+Cuda::Size<Dim> operator-(const Cuda::Size<Dim> &lhs, const Cuda::Size<Dim> &rhs) {
+  Cuda::Size<Dim> out = lhs;
+  for(size_t i = Dim; i--;)
+    out[i]-= rhs[i];
+  return out;
+}
+
+
 }  // namespace Cuda
 
 
