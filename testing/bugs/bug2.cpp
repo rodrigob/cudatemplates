@@ -7,13 +7,13 @@
 
 int main() {
 
-    printf("\n--- is there a bug using large arrays? --- \n");
+    printf("--- is there a bug using large arrays? --- \n");
 
     const int num_tests = 4;
     int cols[4] = {1, 1, 16384, 16385};
     int rows[4] = {1, 32768, 1, 1};
 
-    printf("\n maximum size for array: w: %5.0f h: %5.0f ", pow(2.0f,16), pow(2.0f,15));
+    printf(" maximum size for array: w: %5.0f h: %5.0f \n", pow(2.0f,16), pow(2.0f,15));
 
     for (int test = 0; test < num_tests; test++) {    
         // init reference        
@@ -32,7 +32,7 @@ int main() {
         for (int i = 0; i < cols[test] * rows[test]; i++)
             sum += abs(reference_hmh.getBuffer()[i] - test_hmh.getBuffer()[i]);
 
-        printf("\n summed copy error for size w: %d h: %d = %f", cols[test], rows[test], sum);
+        printf(" summed copy error for size w: %d h: %d = %f\n", cols[test], rows[test], sum);
     }
     return 0;
 }
