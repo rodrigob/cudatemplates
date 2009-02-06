@@ -52,7 +52,7 @@ public:
      Default constructor.
   */
   inline BufferObject():
-    bufname(0), target(GL_ARRAY_BUFFER), usage(GL_STATIC_DRAW)
+    bufname(0), target(GL_ARRAY_BUFFER), usage(GL_STATIC_DRAW), registered(false)
   {
   }
 #endif
@@ -65,7 +65,7 @@ public:
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
     DeviceMemoryStorage<Type, Dim>(_size),
-    bufname(0), target(t), usage(u)
+    bufname(0), target(t), usage(u), registered(false)
   {
     alloc();
   }
@@ -78,7 +78,8 @@ public:
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
     DeviceMemoryStorage<Type, Dim>(layout),
-    bufname(0), target(t), usage(u)
+    bufname(0), target(t), usage(u),
+    registered(false)
   {
     alloc();
   }
@@ -127,6 +128,34 @@ public:
   void disconnect();
 
   /**
+     Register abuffer object.
+     If you called disconnect() or unregister, this must be called before using t
+     he buffer memory in a CUDA kernel.
+  */
+  void registerObject();
+
+  /**
+     Unregister buffer object.
+     This must be called before accessing the buffer memory in OpenGL for
+     writing, e.g., copying the buffer data from a texture.
+  */
+  void unregisterObject();
+
+  /**
+     Map buffer object.
+     This must be called before accessing  buffer memory in Cuda. Note,
+     that the buffer object must be registered in Cuda
+  */
+  void mapBuffer();
+
+  /**
+     Unmap buffer object.
+     This must be called before read-accessing  buffer memory in OpenGL. Note,
+     that the buffer object must be registered in Cuda.
+  */
+  void unmapBuffer();
+
+  /**
      Free buffer memory.
   */
   void free();
@@ -159,6 +188,10 @@ private:
      Specifies the expected usage pattern of the data store.
   */
   GLenum usage;
+  /** 
+      Specifies whether a buffer is registered in Cuda
+  */
+  bool registered;
 };
 
 template <class Type, unsigned Dim>
@@ -168,7 +201,11 @@ connect()
   if(this->buffer != 0)
     return;
 
-  CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
+  if (!registered) 
+    {
+      CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
+      registered = true;
+    }
   CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, bufname));
 
   if(this->buffer == 0)
@@ -183,7 +220,58 @@ disconnect()
     return;
 
   CUDA_CHECK(cudaGLUnmapBufferObject(bufname));
-  CUDA_CHECK(cudaGLUnregisterBufferObject(bufname));
+  if (registered) 
+    {
+      CUDA_CHECK(cudaGLUnregisterBufferObject(bufname));
+      registered = false;
+    }
+  this->buffer = 0;
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
+registerObject()
+{
+  if (!registered)
+    {
+      CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
+      registered = true;
+    }
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
+unregisterObject()
+{
+  if (registered)
+    {
+      CUDA_CHECK(cudaGLUnregisterBufferObject(bufname));
+      registered = false;
+    }
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
+mapBuffer()
+{
+  if(this->buffer != 0)
+    return;
+
+  if (!registered) CUDA_ERROR("map buffer object failed - register it first");
+  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, bufname));
+
+  if(this->buffer == 0)
+    CUDA_ERROR("map buffer object failed");
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
+unmapBuffer()
+{
+  if(this->buffer == 0)
+    return;
+  if (!registered) CUDA_ERROR("unmap of unregistered buffer object failed");
+  CUDA_CHECK(cudaGLUnmapBufferObject(bufname));
   this->buffer = 0;
 }
 
