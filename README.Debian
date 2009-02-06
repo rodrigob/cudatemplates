@@ -1,0 +1,23 @@
+If you want to build your own Debian package just do the following:
+
+ * Make sure you have the dpkg-dev package installed
+
+   apt-get install dpkg-dev 
+
+   ... should do the job
+
+ * Build the package
+
+   In the base directory call
+
+   dpkg-buildpackage
+
+   This will produce a .deb file in ../
+
+ * Install the package
+
+   dpkg -i ../cudatemplates<some version stuff>.deb
+
+Have fun!
+
+Note: It should be possible to build packages on any debianish Linux distribution, e.g. Ubuntu.
