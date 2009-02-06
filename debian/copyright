@@ -1,0 +1,22 @@
+This package was debianized by Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at> on
+Wed, 12 Nov 2008 13:45:14 +0100.
+
+It was downloaded from <https://cudatemplates.svn.sourceforge.net/svnroot/cudatemplates/trunk>
+
+Upstream Author(s):
+
+    Markus Grabner   
+
+Copyright:
+
+    <Copyright (C) 2008 Markus Grabner>
+
+License:
+
+    GPL-3
+
+The Debian packaging is copyright 2008, Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

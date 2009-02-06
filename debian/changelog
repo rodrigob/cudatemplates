@@ -1,0 +1,23 @@
+cudatemplates (0.1.0-4) unstable; urgency=low
+
+  * new version
+
+ -- Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at>  Fri, 23 Jan 2009 13:51:49 +0100
+
+cudatemplates (0.1.0-3) unstable; urgency=low
+
+  * with FindCudaTemplates 
+
+ -- Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at>  Thu, 04 Dec 2008 07:48:01 +0100
+
+cudatemplates (0.1.0-2) unstable; urgency=low
+
+  * new upstream version 
+
+ -- Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at>  Wed, 03 Dec 2008 08:33:50 +0100
+
+cudatemplates (0.1.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at>  Wed, 12 Nov 2008 13:45:14 +0100

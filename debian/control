@@ -1,0 +1,14 @@
+Source: cudatemplates
+Priority: extra
+Maintainer: Alexander Bornik <bornik@zarathustra.icg.tu-graz.ac.at>
+Build-Depends: debhelper (>= 7), autotools-dev, uuid-dev
+Standards-Version: 3.8.0
+Section: devel
+Homepage:
+
+Package: cudatemplates
+Section: devel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CUDA template library
+ This library provides some convenient templates for data type conversion between C++ and Cuda.
