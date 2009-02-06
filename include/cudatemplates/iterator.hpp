@@ -59,10 +59,10 @@ public:
   inline const Iterator &operator++()
   {
     for(unsigned j = 0; j < Dim; ++j) {
-      if(++this->size[j] < imax[j])
+      if(++(*this)[j] < imax[j])
 	return *this;
       
-      this->size[j] = imin[j];
+      (*this)[j] = imin[j];
     }
     
     setEnd();

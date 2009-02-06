@@ -1,9 +1,3 @@
-# Boost:
-find_package(Boost)
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIR})
-endif(Boost_FOUND)
-
 # Cuda:
 set(CUDA_BUILD_CUBIN OFF)
 set(CUDA_BUILD_TYPE Device)
@@ -14,6 +8,13 @@ include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 # CUDA templates:
 include_directories(${CMAKE_SOURCE_DIR}/include)
 cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Boost:
+find_package(Boost)
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIR})
+  cuda_include_directories(${Boost_INCLUDE_DIR})
+endif(Boost_FOUND)
 
 # ITK:
 find_package(ITK)
@@ -92,6 +93,8 @@ target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GL
 cuda_add_executable(compat compat.cu)
 
 cuda_add_executable(symbol symbol.cu)
+
+cuda_add_executable(vector vector.cpp)
 
 cuda_add_executable(precision_sm_10 precision.cu)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")

@@ -22,6 +22,9 @@
 #define CUDA_SIZE_H
 
 
+// #define CUDA_USE_OLD_SIZE
+
+
 #ifdef WIN32
 #pragma warning(disable: 4127)  // "conditional expression is constant": yes, this is called "template metaprogramming"
 #pragma warning(disable: 4710)  // "function not inlined": what exactly is the problem here?
@@ -30,8 +33,14 @@
 
 #include <cudatemplates/staticassert.hpp>
 
+#ifndef CUDA_USE_OLD_SIZE
+#include <cudatemplates/vector.hpp>
+#endif
+
 
 namespace Cuda {
+
+#ifdef CUDA_USE_OLD_SIZE
 
 /**
    Base class for multi-dimensional size type.
@@ -268,6 +277,109 @@ Cuda::Size<Dim> operator-(const Cuda::Size<Dim> &lhs, const Cuda::Size<Dim> &rhs
   return out;
 }
 
+#else
+
+/**
+   Base class for multi-dimensional size type.
+   Think of it as a multi-dimensional variant of size_t.
+*/
+template <unsigned Dim>
+class SizeBase: public VectorBase<size_t, Dim>
+{
+public:
+  /**
+     Get total number of elements.
+     This is the product of the sizes in each dimension.
+     @return total number of elements
+  */
+  size_t getSize() const {
+    size_t s = 1;
+
+    for(int i = Dim; i--;)
+      s *= this->data[i];
+
+    return s;
+  }
+
+  CUDA_VECTOR_OPS(SizeBase, size_t);
+};
+
+/**
+   Generic size template.
+*/
+template <unsigned Dim>
+class Size: public SizeBase<Dim>
+{
+  Size() {}
+};
+
+/**
+   Specialization of size template for 1D case.
+*/
+template <>
+class Size<1>: public SizeBase<1>
+{
+public:
+  /**
+     Default constructor.
+  */
+  Size() {}
+
+  /**
+     Constructor.
+     @param s0 size in x-direction
+  */
+  Size(size_t s0) { this->data[0] = s0; }
+
+  CUDA_VECTOR_OPS(Size<1>, size_t);
+};
+
+/**
+   Specialization of size template for 2D case.
+*/
+template <>
+class Size<2>: public SizeBase<2>
+{
+public:
+  /**
+     Default constructor.
+  */
+  Size() {}
+
+  /**
+     Constructor.
+     @param s0 size in x-direction
+     @param s1 size in y-direction
+  */
+  Size(size_t s0, size_t s1) { this->data[0] = s0; this->data[1] = s1; }
+
+  CUDA_VECTOR_OPS(Size<2>, size_t);
+};
+
+/**
+   Specialization of size template for 1D case.
+*/
+template <>
+class Size<3>: public SizeBase<3>
+{
+public:
+  /**
+     Default constructor.
+  */
+  Size() {}
+
+  /**
+     Constructor.
+     @param s0 size in x-direction
+     @param s1 size in y-direction
+     @param s2 size in z-direction
+  */
+  Size(size_t s0, size_t s1, size_t s2) { this->data[0] = s0; this->data[1] = s1; this->data[2] = s2; }
+
+  CUDA_VECTOR_OPS(Size<3>, size_t);
+};
+
+#endif
 
 }  // namespace Cuda
 
