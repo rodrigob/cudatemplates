@@ -246,21 +246,6 @@ Cuda::Size<Dim> operator/(const Cuda::Size<Dim> &lhs, const float &rhs) {
   return out;
 }
 
-// /**
-//    Subtraction Assignment operator.
-//    Note that the size is unsigned in each dimension, i.e., you will get an
-//    overflow if you subtract a larger from a smaller quantity.
-//    @param other subtrahend size to be subtracted
-//    @return difference of \a this and \a other
-// */
-// template <unsigned Dim>
-// Cuda::Size<Dim>& operator-=(const Cuda::Size<Dim> &other) {
-//   Cuda::Size<Dim> out;
-//   for(size_t i = Dim; i--;)
-//     out[i]= (*this)[i] - other[i];
-//   return out;
-// }
-
 /**
    Subtraction operator.
    Note that the size is unsigned in each dimension, i.e., you will get an
@@ -277,7 +262,7 @@ Cuda::Size<Dim> operator-(const Cuda::Size<Dim> &lhs, const Cuda::Size<Dim> &rhs
   return out;
 }
 
-#else
+#else  // CUDA_USE_OLD_SIZE
 
 /**
    Base class for multi-dimensional size type.
@@ -300,8 +285,6 @@ public:
 
     return s;
   }
-
-  // CUDA_VECTOR_OPS(SizeBase, size_t);
 };
 
 /**
@@ -310,7 +293,6 @@ public:
 template <unsigned Dim>
 class Size: public SizeBase<Dim>
 {
-  // Size() {}
 };
 
 /**
@@ -320,10 +302,6 @@ class Size: public SizeBase<Dim>
 template <unsigned Dim>
 class SSizeBase: public VectorBase<ssize_t, Dim>
 {
-  /*
-public:
-  CUDA_VECTOR_OPS(SSizeBase, ssize_t);
-  */
 };
 
 /**
@@ -336,7 +314,7 @@ class SSize: public SSizeBase<Dim>
 };
 
 
-#endif
+#endif  // CUDA_USE_OLD_SIZE
 
 }  // namespace Cuda
 
