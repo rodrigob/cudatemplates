@@ -45,7 +45,19 @@ cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
 
 #add_definitions(-Wall)
 
+if(UNIX)
+  add_definitions(-std=c++0x)
+endif(UNIX)
+
+if(WINDOWS)
+  # TODO: enable "decltype" keyword for Windows (unless enabled by default)
+endif(WINDOWS)
+
+
 # test programs:
+
+add_executable(border border.cpp)
+target_link_libraries(border ${CUDA_TARGET_LINK})
 
 add_executable(copy copy.cpp)
 target_link_libraries(copy ${CUDA_TARGET_LINK})

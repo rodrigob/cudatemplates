@@ -50,6 +50,12 @@
 
 namespace Cuda {
 
+typedef enum {
+  BORDER_CLAMP/*,
+  BORDER_MIRROR,
+  BORDER_REPEAT*/
+} border_t;
+
 template<class Type1, class Type2, unsigned Dim>
 static void
 check_bounds(const Layout<Type1, Dim> &dst, const Layout<Type2, Dim> &src,
@@ -776,6 +782,115 @@ void
 copy(Symbol<Type, Dim> &dst, const DeviceMemory<Type, Dim> &src)
 {
   copyToSymbol(dst, src, cudaMemcpyDeviceToDevice);
+}
+
+/**
+   Generic copy method with border handling.
+   @param dst destination
+   @param src source
+   @param dst_ofs destination offset
+   @param src_ofs source offset
+   @param size size of region to be copied
+   @param border border handling for source data
+*/
+template<class TypeDst, class TypeSrc>
+void
+copy(TypeDst &dst, const TypeSrc &src,
+     const Size<TypeDst::Dim> &dst_ofs, const SSize<TypeSrc::Dim> &src_ofs, const Size<TypeDst::Dim> &size,
+     border_t border)
+{
+  CUDA_STATIC_ASSERT((unsigned)(TypeDst::Dim) == (unsigned)(TypeSrc::Dim));
+  enum { Dim = TypeDst::Dim };
+  Size<TypeDst::Dim> dst_ofs2 = dst_ofs;
+  Size<TypeSrc::Dim> src_ofs2 = src_ofs;
+  Size<TypeDst::Dim> size2 = size;
+
+  for(unsigned i = TypeSrc::Dim; i--;) {
+    // check minimum:
+    if(src_ofs[i] < 0) {
+      if(src_ofs[i] + size[i] < 0)
+	CUDA_ERROR("source region must not be empty");
+
+      size2[i] += src_ofs[i];
+      dst_ofs2[i] -= src_ofs[i];
+      src_ofs2[i] = 0;
+    }
+
+    // check maximum:
+    if(src_ofs[i] + size[i] >= src.size[i]) {
+      if(src_ofs[i] >= src.size[i])
+	CUDA_ERROR("source region must not be empty");
+
+      size2[i] -= src_ofs[i] + size[i] - src.size[i];
+    }
+  }
+
+  // copy interior data:
+  copy(dst, src, dst_ofs2, src_ofs2, size2);
+
+  // border handling:
+  Size<Dim> dst_ofs3 = dst_ofs2;
+  Size<Dim> src_ofs3 = dst_ofs2;
+  Size<Dim> size3 = size2;
+
+  for(unsigned i = Dim; i--;) {
+    /*
+    for(unsigned j = Dim; j--;) {
+      if(j > i) {
+	// dimension j has already been processed:
+	src_ofs3[j] = dst_ofs3[k] = dst_ofs[k];
+	size3[k] = size[k];
+      }
+      else if(j < i) {
+	// dimension j has not yet been processed:
+	src_ofs3[j] = dst_ofs3[k] = dst_ofs2[k];
+	size3[k] = size2[k];
+      }
+      // the case j == i is handled below
+    }
+    */
+
+    if(src_ofs[i] < 0) {
+      for(unsigned j = -src_ofs[i]; j--;) {
+	// find region to be copied according to border mode:
+	switch(border) {
+	case BORDER_CLAMP:
+	  src_ofs3[i] = dst_ofs2[i];
+	  break;
+
+	default:
+	  CUDA_ERROR("border mode not yet implemented");
+	}
+
+	dst_ofs3[i] = dst_ofs2[i] - 1 - j;
+	size3[i] = 1;
+	copy(dst, dst, dst_ofs3, src_ofs3, size3);
+      }
+    }
+
+    if(src_ofs[i] + size[i] >= src.size[i]) {
+      for(unsigned j = src_ofs[i] + size[i] - src.size[i]; j--;) {
+	// find region to be copied according to border mode:
+	switch(border) {
+	case BORDER_CLAMP:
+	  src_ofs3[i] = dst_ofs2[i] + size2[i] - 1;
+	  break;
+
+	default:
+	  CUDA_ERROR("border mode not yet implemented");
+	}
+
+	dst_ofs3[i] = dst_ofs2[i] + size2[i] + j;
+	size3[i] = 1;
+	copy(dst, dst, dst_ofs3, src_ofs3, size3);
+      }
+    }
+
+    // processing of dimension i is complete,
+    // use entire extent in dimension i for processing of remaining dimensions:
+    src_ofs3[i] = dst_ofs3[i] = dst_ofs[i];
+    size3[i] = size[i];
+  }
 }
 
 }  // namespace Cuda

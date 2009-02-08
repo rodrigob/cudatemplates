@@ -28,10 +28,18 @@
 #endif
 
 
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || defined(__HOWEVER_THIS_IS_CALLED_FOR_WINDOWS__)
+#define CUDA_HAS_DECLTYPE 1
+#else
+#define CUDA_HAS_DECLTYPE 0
+#endif
+
+
 #include <cudatemplates/error.hpp>
 #include <cudatemplates/staticassert.hpp>
 
 
+/*
 #define CUDA_VECTOR_OPS(vector_t, scalar_t)		                                                  \
   inline vector_t operator+ (const vector_t &x) const { vector_t res; add(res, *this, x); return res  ; } \
   inline vector_t operator+=(const vector_t &x)       {               add(     *this, x); return *this; } \
@@ -41,6 +49,7 @@
   inline vector_t operator*=(      scalar_t  x)       {               mul(     *this, x); return *this; } \
   inline vector_t operator/ (      scalar_t  x) const { vector_t res; div(res, *this, x); return res  ; } \
   inline vector_t operator/=(      scalar_t  x)       {               div(     *this, x); return *this; }
+*/
 
 
 namespace Cuda {
@@ -128,13 +137,15 @@ public:
   }
   */
 
-  CUDA_VECTOR_OPS(VectorBase, Type);
+  // CUDA_VECTOR_OPS(VectorBase, Type);
 
 protected:
   /**
      The size in each dimension.
   */
   Type data[Dim];
+
+#if 0
 
   /**
      Generic vector addition.
@@ -247,6 +258,9 @@ protected:
     for(size_t i = Dim; i--;)
       v1[i] /= s2;
   }
+
+#endif
+
 };
 
 /**
@@ -255,8 +269,11 @@ protected:
 template <class Type, unsigned Dim>
 class Vector: public VectorBase<Type, Dim>
 {
+public:
   Vector() {}
 };
+
+#if 0
 
 /**
    Specialization of vector template for 1D case.
@@ -410,8 +427,175 @@ Cuda::Vector<Type, Dim> operator-(const Cuda::Vector<Type, Dim> &lhs, const Cuda
 }
  */
 
+#endif
+
+
+/**
+   Equality operator.
+   @param v1 first vector
+   @param v2 second vector
+   @return true if first and second vector are equal, otherwise false
+*/
+template <class Type1, class Type2, unsigned Dim>
+bool
+operator==(const VectorBase<Type1, Dim> &v1, const VectorBase<Type2, Dim> &v2)
+{
+  for(unsigned i = Dim; i--;)
+    if(v1[i] != v2[i])
+      return false;
+
+  return true;
+}
+
+/**
+   Inequality operator.
+   @param v1 first vector
+   @param v2 second vector
+   @return true if first and second vector are not equal, otherwise false
+*/
+template <class Type1, class Type2, unsigned Dim>
+bool
+operator!=(const VectorBase<Type1, Dim> &v1, const VectorBase<Type2, Dim> &v2)
+{
+  for(unsigned i = Dim; i--;)
+    if(v1[i] != v2[i])
+      return true;
+
+  return false;
+}
+
+#if CUDA_HAS_DECLTYPE
+
+#define EXPR_TYPE(op1, op, op2) decltype((op1)0 op (op2)0)
+
+template <class Type1, class Type2, unsigned Dim>
+VectorBase<EXPR_TYPE(Type1, +, Type2), Dim>
+operator+(const VectorBase<Type1, Dim> &v1, const VectorBase<Type2, Dim> &v2)
+{
+  VectorBase<EXPR_TYPE(Type1, +, Type2), Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] + v2[i];
+
+  return v;
+}
+
+template <class Type1, class Type2, unsigned Dim>
+VectorBase<EXPR_TYPE(Type1, -, Type2), Dim>
+operator-(const VectorBase<Type1, Dim> &v1, const VectorBase<Type2, Dim> &v2)
+{
+  VectorBase<EXPR_TYPE(Type1, -, Type2), Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] - v2[i];
+
+  return v;
+}
+
+template <class Type1, class Type2, unsigned Dim>
+VectorBase<EXPR_TYPE(Type1, *, Type2), Dim>
+operator*(Type1 s1, const VectorBase<Type2, Dim> &v2)
+{
+  VectorBase<EXPR_TYPE(Type1, *, Type2), Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = s1 * v2[i];
+
+  return v;
+}
+
+template <class Type1, class Type2, unsigned Dim>
+VectorBase<EXPR_TYPE(Type1, *, Type2), Dim>
+operator*(const VectorBase<Type1, Dim> &v1, Type2 s2)
+{
+  VectorBase<EXPR_TYPE(Type1, *, Type2), Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] * s2;
+
+  return v;
+}
+
+template <class Type1, class Type2, unsigned Dim>
+VectorBase<EXPR_TYPE(Type1, /, Type2), Dim>
+operator/(const VectorBase<Type1, Dim> &v1, Type2 s2)
+{
+  VectorBase<EXPR_TYPE(Type1, /, Type2), Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] / s2;
+
+  return v;
+}
+
+#else  // CUDA_HAS_DECLTYPE
+
+template <class Type, unsigned Dim>
+VectorBase<Type, Dim>
+operator+(const VectorBase<Type, Dim> &v1, const VectorBase<Type, Dim> &v2)
+{
+  VectorBase<Type, Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] + v2[i];
+
+  return v;
+}
+
+template <class Type, unsigned Dim>
+VectorBase<Type, Dim>
+operator-(const VectorBase<Type, Dim> &v1, const VectorBase<Type, Dim> &v2)
+{
+  VectorBase<Type, Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] - v2[i];
+
+  return v;
+}
+
+template <class Type, unsigned Dim>
+VectorBase<Type, Dim>
+operator*(Type s1, const VectorBase<Type, Dim> &v2)
+{
+  VectorBase<Type, Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = s1 * v2[i];
+
+  return v;
+}
+
+template <class Type, unsigned Dim>
+VectorBase<Type, Dim>
+operator*(const VectorBase<Type, Dim> &v1, Type s2)
+{
+  VectorBase<Type, Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] * s2;
+
+  return v;
+}
+
+template <class Type, unsigned Dim>
+VectorBase<Type, Dim>
+operator/(const VectorBase<Type, Dim> &v1, Type s2)
+{
+  VectorBase<Type, Dim> v;
+
+  for(unsigned i = Dim; i--;)
+    v[i] = v1[i] / s2;
+
+  return v;
+}
+
+#endif  // CUDA_HAS_DECLTYPE
 
 }  // namespace Cuda
+
+
+#include "auto/specdim_vector_vector.hpp"
 
 
 #endif

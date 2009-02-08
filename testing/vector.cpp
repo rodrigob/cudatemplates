@@ -53,11 +53,19 @@ main()
 {
   Cuda::Vector<float, 1> v1a(1), v1b(2);
   Cuda::Vector<float, 2> v2a(3, 4), v2b(5, 6);
-  Cuda::Vector<float, 3> v3a(7, 8, 9), v3b(10, 11, 12);
+  Cuda::Vector<float, 3> v3a(7.5, 8.25, 9.125), v3b(10, 11, 12);
+  Cuda::Vector<int, 3> v3c(13, 14, 15);
 
   cout << v1a << (v1a + v1b) << endl;
   cout << v2a << (v2a + v2b) << endl;
   cout << v3a << (v3a + v3b) << endl;
+
+  // operator with type promotion and assignment with conversion:
+  v3b = v3a + v3c;
+  v3c = v3c + v3a;
+  cout << v3b << endl;
+  cout << v3c << endl;
+
   cout << v1a[0] << ' ' << v2a[1] << ' ' << v3a[2] << endl;
 
   Cuda::Size<1> s1a(1), s1b(2);

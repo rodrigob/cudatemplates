@@ -119,6 +119,11 @@ main(int argc, char *argv[])
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 
+    GLuint obj1 = 0, obj2 = 0;
+    glGenFramebuffersEXT(1, &obj1);
+    glGenBuffers(1, &obj2);
+    cout << obj1 << ' ' << obj2 << endl;
+
     // create OpenGL buffer object for image and copy data:
     Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(image.size);
     copy(bufobj_image, image);

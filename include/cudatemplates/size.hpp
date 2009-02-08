@@ -301,7 +301,7 @@ public:
     return s;
   }
 
-  CUDA_VECTOR_OPS(SizeBase, size_t);
+  // CUDA_VECTOR_OPS(SizeBase, size_t);
 };
 
 /**
@@ -310,78 +310,41 @@ public:
 template <unsigned Dim>
 class Size: public SizeBase<Dim>
 {
-  Size() {}
+  // Size() {}
 };
 
 /**
-   Specialization of size template for 1D case.
+   Base class for multi-dimensional ssize type.
+   Think of it as a multi-dimensional variant of ssize_t.
 */
-template <>
-class Size<1>: public SizeBase<1>
+template <unsigned Dim>
+class SSizeBase: public VectorBase<ssize_t, Dim>
 {
+  /*
 public:
-  /**
-     Default constructor.
+  CUDA_VECTOR_OPS(SSizeBase, ssize_t);
   */
-  Size() {}
-
-  /**
-     Constructor.
-     @param s0 size in x-direction
-  */
-  Size(size_t s0) { this->data[0] = s0; }
-
-  CUDA_VECTOR_OPS(Size<1>, size_t);
 };
 
 /**
-   Specialization of size template for 2D case.
+   Generic size template.
 */
-template <>
-class Size<2>: public SizeBase<2>
+template <unsigned Dim>
+class SSize: public SSizeBase<Dim>
 {
-public:
-  /**
-     Default constructor.
-  */
-  Size() {}
-
-  /**
-     Constructor.
-     @param s0 size in x-direction
-     @param s1 size in y-direction
-  */
-  Size(size_t s0, size_t s1) { this->data[0] = s0; this->data[1] = s1; }
-
-  CUDA_VECTOR_OPS(Size<2>, size_t);
+  SSize() {}
 };
 
-/**
-   Specialization of size template for 1D case.
-*/
-template <>
-class Size<3>: public SizeBase<3>
-{
-public:
-  /**
-     Default constructor.
-  */
-  Size() {}
-
-  /**
-     Constructor.
-     @param s0 size in x-direction
-     @param s1 size in y-direction
-     @param s2 size in z-direction
-  */
-  Size(size_t s0, size_t s1, size_t s2) { this->data[0] = s0; this->data[1] = s1; this->data[2] = s2; }
-
-  CUDA_VECTOR_OPS(Size<3>, size_t);
-};
 
 #endif
 
 }  // namespace Cuda
+
+
+#ifndef CUDA_USE_OLD_SIZE
+#include "auto/specdim_vector_size.hpp"
+#include "auto/specdim_vector_ssize.hpp"
+#endif
 
 
 #endif

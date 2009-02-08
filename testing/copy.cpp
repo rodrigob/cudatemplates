@@ -183,7 +183,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 	}
 
       Type x1 = inside ?
-	buf1[ref1.getOffset(index + pos1 - pos2)] :
+	buf1[ref1.getOffset(Cuda::Size<Dim>(index + pos1 - pos2))] :
 	buf2[ref2.getOffset(index)];
 
       Type x3 = buf3[ref3.getOffset(index)];
@@ -194,7 +194,7 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
       }
 
       if(inside) {
-	Type x4 = buf4[ref4.getOffset(index - pos2)];
+	Type x4 = buf4[ref4.getOffset(Cuda::Size<Dim>(index - pos2))];
 
 	if(x4 != x1) {
 	  cerr << "constructor test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";

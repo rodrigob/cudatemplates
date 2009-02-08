@@ -58,10 +58,10 @@ copy(HostMemory<Type1, Dim> &dst, const HostMemory<Type2, Dim> &src,
 	const Size<Dim> &dst_ofs, const Size<Dim> &src_ofs, const Size<Dim> &size)
 {
   check_bounds(dst, src, dst_ofs, src_ofs, size);
-  Cuda::Iterator<Dim> src_begin(src_ofs, src_ofs + size);
+  Cuda::Iterator<Dim> src_begin(src_ofs, Cuda::Size<Dim>(src_ofs + size));
   Cuda::Iterator<Dim> src_end = src_begin;
   src_end.setEnd();
-  Cuda::Iterator<Dim> dst_begin(dst_ofs, dst_ofs + size);
+  Cuda::Iterator<Dim> dst_begin(dst_ofs, Cuda::Size<Dim>(dst_ofs + size));
 
   for(Cuda::Iterator<Dim> i = src_begin, j = dst_begin; i != src_end; ++i, ++j)
     dst[j] = src[i];
