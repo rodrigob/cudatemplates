@@ -22,14 +22,12 @@
 #define CUFFT_COMMON_H
 
 
-#include <complex>
-
 #include <cufft.h>
 
 #include <cudatemplates/error.hpp>
 
 
-#define CUFFT_CHECK(call) { ::Cuda::FFT::result_t err = call; if(err != CUFFT_SUCCESS) throw ::Cuda::Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, (int)err, 0); }
+#define CUFFT_CHECK(call) { ::Cuda::FFT::result_t err = call; if(err != CUFFT_SUCCESS) CUDA_ERROR(::Cuda::FFT::getErrorString(err)); }
 
 
 namespace Cuda {
@@ -40,15 +38,42 @@ namespace Cuda {
 namespace FFT {
 
 typedef cufftReal real;
-typedef std::complex<cufftReal> std_complex;
 typedef cufftComplex complex;
 typedef cufftType_t type_t;
 typedef cufftResult_t result_t;
 
+
+/**
+   Get CuFFT error string.
+   Convert result code to error string according to the document
+   "CUDA CUFFT Library", PG-00000-003_V2.0, April 2008.
+   @param result numeric result code of CuFFT function call
+   @return corresponding error string
+*/
+static const char *getErrorString(result_t result)
+{
+  switch(result) {
+  case CUFFT_SUCCESS:         return "Any CUFFT operation is successful";
+  case CUFFT_INVALID_PLAN:    return "CUFFT is passed an invalid plan handle";
+  case CUFFT_ALLOC_FAILED:    return "CUFFT failed to allocate GPU memory.";
+  case CUFFT_INVALID_TYPE:    return "The user requests an unsupported type.";
+  case CUFFT_INVALID_VALUE:   return "The user specifies a bad memory pointer.";
+  case CUFFT_INTERNAL_ERROR:  return "Used for all internal driver errors.";
+  case CUFFT_EXEC_FAILED:     return "CUFFT failed to execute an FFT on the GPU.";
+  case CUFFT_SETUP_FAILED:    return "The CUFFT library failed to initialize.";
+    /*
+      listed in the manual, but not defined in the header:
+      case CUFFT_SHUTDOWN_FAILED: return "The CUFFT library failed to shut down.";
+    */
+  case CUFFT_INVALID_SIZE:    return "The user specifies an unsupported FFT size.";
+  default:                    return "Unknown CUFFT error.";
+  }
+}
+
 /**
    Generic FFT plan template.
-   This template is empty, all behaviour is implemented specializations of this
-   template.
+   This template is empty, all behaviour is implemented in specializations of
+   this template.
 */
 template <class TypeIn, class TypeOut, unsigned Dim>
 class Plan

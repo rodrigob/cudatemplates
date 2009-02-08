@@ -85,7 +85,7 @@ public:
   inline void exec(const DeviceMemory<@type1@, @Dim@> &idata, DeviceMemory<@type2@, @Dim@> &odata@dir_arg_decl@)
   {
     if((idata.stride[0] != idata.size[0]) || (odata.stride[0] != odata.size[0]))
-      throw Error(__FILE__, __LINE__, __PRETTY_FUNCTION__, 0, "CUFFT can only be used for contiguous memory (i.e., no padding between rows)");
+      CUDA_ERROR("CUFFT can only be used for contiguous memory (i.e., no padding between rows)");
 
     CUFFT_CHECK(cufftExec@TYPE@(plan, const_cast<@type1@ *>(idata.getBuffer()), odata.getBuffer()@dir_arg@));
   }

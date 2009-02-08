@@ -60,6 +60,11 @@ public:
     size_t size[Dim];
 
     /**
+       Data stride.
+    */
+    size_t stride[Dim];
+
+    /**
        Default constructor.
     */
     KernelData(): data(0) {}
@@ -69,13 +74,16 @@ public:
        This constructor is invoked when a kernel expecting a KernelData
        argument is called with an instance of DeviceMemory, i.e., you don't
        have to construct the KernelData object explicitly.
+       There is no distinction between const and non-const data.
        @param mem reference to device memory object
     */
-    KernelData(DeviceMemory<Type, Dim> &mem):
-      data(mem.getBuffer())
+    KernelData(const DeviceMemory<Type, Dim> &mem):
+      data(const_cast<Type *>(mem.getBuffer()))
     {
-      for(int i = Dim; i--;)
+      for(int i = Dim; i--;) {
 	size[i] = mem.size[i];
+	stride[i] = mem.stride[i];
+      }
     }
   };
 

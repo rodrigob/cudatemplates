@@ -8,14 +8,15 @@ enable_testing()
 
 set(CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
 
-add_subdirectory(include)
-add_subdirectory(testing)
-
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "1")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_NAME "cudatemplates")
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+
+add_subdirectory(include)
+add_subdirectory(src)
+add_subdirectory(testing)
 
 if(NOT WIN32)
   configure_file(${CPACK_PACKAGE_NAME}.spec.in ${CPACK_PACKAGE_NAME}.spec)

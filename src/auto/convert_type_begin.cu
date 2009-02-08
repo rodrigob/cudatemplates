@@ -1,3 +1,8 @@
+/*
+  NOTE: THIS FILE HAS BEEN CREATED AUTOMATICALLY,
+  ANY CHANGES WILL BE OVERWRITTEN WITHOUT NOTICE!
+*/
+
 /* 
   Cuda Templates.
 
@@ -18,39 +23,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cstdlib>
-#include <iostream>
-
-#include <cudatemplates/hostmemoryheap.hpp>
-#include <cudatemplates/devicememorylinear.hpp>
 
 #include <cudatemplates/convert.hpp>
-
-
-using namespace std;
-
-
-int
-main()
-{
-  const int SIZE = 10;
-  const Cuda::Size<1> size(SIZE);
-
-  Cuda::HostMemoryHeap<float, 1> obj1(size);
-
-  for(int i = SIZE; i--;)
-    obj1[i] = random() / 65536.0;
-
-  Cuda::HostMemoryHeap<double, 1> obj2(obj1);
-
-  Cuda::DeviceMemoryLinear<float, 1> obj3(obj1);
-  Cuda::DeviceMemoryLinear<int, 1> obj4(size);
-  Cuda::HostMemoryHeap<int, 1> obj5(size);
-  copy(obj4, obj3);
-  copy(obj5, obj4);
-
-  for(int i = 0; i < SIZE; ++i)
-    cout << i << ": " << obj1[i] << ' ' << obj5[i] << endl;
-
-  return 0;
-}
+#include <cudatemplates/devicememory.hpp>
