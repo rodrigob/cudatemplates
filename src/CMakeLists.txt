@@ -1,3 +1,4 @@
+set(CUDA_BUILD_TYPE Device)
 find_package(Cuda REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 cuda_include_directories(${CMAKE_SOURCE_DIR}/include)

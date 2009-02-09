@@ -33,24 +33,30 @@ using namespace std;
 int
 main()
 {
-  const int SIZE = 10;
-  const Cuda::Size<1> size(SIZE);
+  const size_t SIZE = 10;
+  const Cuda::Size<2> size(SIZE, SIZE);
 
-  Cuda::HostMemoryHeap<float, 1> obj1(size);
+  Cuda::HostMemoryHeap<float, 2> obj1(size);
+  Cuda::Size<2> i;
 
-  for(int i = SIZE; i--;)
-    obj1[i] = random() / 65536.0;
+  for(i[1] = SIZE; i[1]--;)
+    for(i[0] = SIZE; i[0]--;)
+      obj1[i] = random() / 65536.0;
 
-  Cuda::HostMemoryHeap<double, 1> obj2(obj1);
+  Cuda::HostMemoryHeap<double, 2> obj2(obj1);
 
-  Cuda::DeviceMemoryLinear<float, 1> obj3(obj1);
-  Cuda::DeviceMemoryLinear<int, 1> obj4(size);
-  Cuda::HostMemoryHeap<int, 1> obj5(size);
+  Cuda::DeviceMemoryLinear<float, 2> obj3(obj1);
+  Cuda::DeviceMemoryLinear<int, 2> obj4(size);
+  Cuda::HostMemoryHeap<int, 2> obj5(size);
   copy(obj4, obj3);
   copy(obj5, obj4);
 
-  for(int i = 0; i < SIZE; ++i)
-    cout << i << ": " << obj1[i] << ' ' << obj5[i] << endl;
+  for(i[1] = 0; i[1] < SIZE; ++i[1]) {
+    for(i[0] = 0; i[0] < SIZE; ++i[0])
+      cout << obj1[i] << '=' << obj5[i] << ' ';
+
+    cout << endl;
+  }
 
   return 0;
 }

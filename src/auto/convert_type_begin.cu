@@ -24,5 +24,18 @@
 */
 
 
+/*
+
+  TODO: implement the following optimizations:
+
+  1.) In the (very likely) case that the strides for source and destination
+  data are the same, the index only needs to be computed once.
+
+  2.) Conversions between signed and unsigned variants of the same type can
+  more efficiently be handled by a reinterpret_cast and a non-converting copy.
+  
+*/
+
+
 #include <cudatemplates/convert.hpp>
 #include <cudatemplates/devicememory.hpp>
