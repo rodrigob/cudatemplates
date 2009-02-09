@@ -264,6 +264,10 @@ Cuda::Size<Dim> operator-(const Cuda::Size<Dim> &lhs, const Cuda::Size<Dim> &rhs
 
 #else  // CUDA_USE_OLD_SIZE
 
+#ifdef WIN32
+#define ssize_t int
+#endif
+
 /**
    Base class for multi-dimensional size type.
    Think of it as a multi-dimensional variant of size_t.
