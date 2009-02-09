@@ -43,7 +43,7 @@ namespace OpenGL {
    @param dst generic destination pointer
    @param src generic source pointer
 */
-template<class Type, unsigned Dim>
+template<class Type, size_t Dim>
 void
 copy(Texture<Type, Dim> &dst, const BufferObject<Type, Dim> &src)
 {
@@ -65,7 +65,7 @@ copy(Texture<Type, Dim> &dst, const BufferObject<Type, Dim> &src)
    @param dst generic destination pointer
    @param src generic source pointer
 */
-template<class Type, unsigned Dim>
+template<class Type, size_t Dim>
 void
 copy(Texture<Type, Dim> &dst, const HostMemory<Type, Dim> &src)
 {
