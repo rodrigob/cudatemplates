@@ -18,13 +18,55 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cstdlib>
-#include <iostream>
+#include <stdio.h>
 
 #include <cudatemplates/hostmemoryheap.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
 
 #include <cudatemplates/convert.hpp>
+
+
+// conversion from float to int:
+
+/*
+template <class Type1, class Type2>
+__global__ void convert_type_nocheck_int_float_2_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+  dst.data[x + y * dst.stride[0]] = src.data[x + y * src.stride[0]];
+}
+
+template <class Type1, class Type2>
+__global__ void convert_type_check_int_float_2_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+
+  if(x < dst.size[0] && y < dst.size[1])
+    dst.data[x + y * dst.stride[0]] = src.data[x + y * src.stride[0]];
+}
+
+namespace Cuda {
+
+template <> void convert_type_nocheck
+  (DeviceMemory<int, 2>::KernelData &dst,
+   DeviceMemory<float, 2>::KernelData &src,
+   dim3 gridDim, dim3 blockDim)
+{
+  convert_type_nocheck_int_float_2_kernel<<<gridDim, blockDim>>>(dst, src);
+}
+
+template <> void convert_type_check
+  (DeviceMemory<int, 2>::KernelData &dst,
+   DeviceMemory<float, 2>::KernelData &src,
+   dim3 gridDim, dim3 blockDim)
+{
+  convert_type_check_int_float_2_kernel<<<gridDim, blockDim>>>(dst, src);
+}
+
+}
+*/
 
 
 using namespace std;
@@ -33,7 +75,7 @@ using namespace std;
 int
 main()
 {
-  const size_t SIZE = 10;
+  const size_t SIZE = 5;
   const Cuda::Size<2> size(SIZE, SIZE);
 
   Cuda::HostMemoryHeap<float, 2> obj1(size);
@@ -53,9 +95,9 @@ main()
 
   for(i[1] = 0; i[1] < SIZE; ++i[1]) {
     for(i[0] = 0; i[0] < SIZE; ++i[0])
-      cout << obj1[i] << '=' << obj5[i] << ' ';
+      printf("%9.3f = %5d  ", obj1[i], obj5[i]);
 
-    cout << endl;
+    printf("\n");
   }
 
   return 0;

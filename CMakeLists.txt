@@ -15,7 +15,6 @@ set(CPACK_PACKAGE_NAME "cudatemplates")
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
 
 add_subdirectory(include)
-add_subdirectory(src)
 add_subdirectory(testing)
 
 if(NOT WIN32)

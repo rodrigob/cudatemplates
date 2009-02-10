@@ -26,20 +26,65 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
-namespace Cuda {
-
-
-template <class Type1, class Type2>
-void convert_type_nocheck(Type1 &dst, Type2 &src, dim3 gridDim, dim3 blockDim);
+#ifdef __CUDACC__
 
 template <class Type1, class Type2>
-void convert_type_check(Type1 &dst, Type2 &src, dim3 gridDim, dim3 blockDim);
-
-static inline int divup(int a, int b)
+__global__ void convert_type_1d_nocheck_kernel(Type1 dst, Type2 src)
 {
-  return (a + b - 1) / b;
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  dst.data[x] = src.data[x];
 }
 
+template <class Type1, class Type2>
+__global__ void convert_type_1d_check_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+
+  if(x < dst.size[0])
+    dst.data[x] = src.data[x];
+}
+
+template <class Type1, class Type2>
+__global__ void convert_type_2d_nocheck_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+  dst.data[x + y * dst.stride[0]] = src.data[x + y * src.stride[0]];
+}
+
+template <class Type1, class Type2>
+__global__ void convert_type_2d_check_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+
+  if((x < dst.size[0]) && (y < dst.size[1]))
+    dst.data[x + y * dst.stride[0]] = src.data[x + y * src.stride[0]];
+}
+
+template <class Type1, class Type2>
+__global__ void convert_type_3d_nocheck_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+  int z = threadIdx.z + blockIdx.z * blockDim.z;
+  dst.data[x + y * dst.stride[0] + z * dst.stride[1]] = src.data[x + y * src.stride[0] + z * src.stride[1]];
+}
+
+template <class Type1, class Type2>
+__global__ void convert_type_3d_check_kernel(Type1 dst, Type2 src)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+  int z = threadIdx.z + blockIdx.z * blockDim.z;
+
+  if((x < dst.size[0]) && (y < dst.size[1]) && (z < dst.size[2]))
+    dst.data[x + y * dst.stride[0] + z * dst.stride[1]] = src.data[x + y * src.stride[0] + z * src.stride[1]];
+}
+
+#endif
+
+namespace Cuda {
 
 /**
    Convert data in host memory.
@@ -57,63 +102,129 @@ copy(HostMemory<Type1, Dim> &dst, const HostMemory<Type2, Dim> &src)
     dst[i] = src[i];
 }
 
+#ifdef __CUDACC__
+
+static inline int divup(int a, int b)
+{
+  return (a + b - 1) / b;
+}
+
 /**
    Convert data in device memory.
+   The generic implementation is undefined, all behaviour is implemented in
+   partial specializations for each dimension.
    @param dst destination pointer
    @param src source pointer
 */
 template<class Type1, class Type2, unsigned Dim>
 void
-copy(DeviceMemory<Type1, Dim> &dst, const DeviceMemory<Type2, Dim> &src)
+copy(DeviceMemory<Type1, Dim> &dst, const DeviceMemory<Type2, Dim> &src);
+
+/**
+   Convert one-dimensional data in device memory.
+   Since this function calls a CUDA kernel, it is only available if the file
+   from which this function is called is compiled by nvcc.
+   @param dst destination
+   @param src source
+*/
+template<class Type1, class Type2>
+void
+copy(DeviceMemory<Type1, 1> &dst, const DeviceMemory<Type2, 1> &src)
 {
   CUDA_CHECK_SIZE;
-  CUDA_STATIC_ASSERT(Dim >= 1);
-  CUDA_STATIC_ASSERT(Dim <= 3);
-
-  dim3 blockDim, gridDim;
-  typename DeviceMemory<Type1, Dim>::KernelData kdst(dst);
-  typename DeviceMemory<Type2, Dim>::KernelData ksrc(src);
-
-  switch(Dim) {
-  case 1:
-    blockDim = dim3(64, 1, 1);
-    gridDim = dim3(divup(dst.size[0], blockDim.x), 1, 1);
+  dim3 blockDim = dim3(64, 1, 1);
+  dim3 gridDim = dim3(divup(dst.size[0], blockDim.x), 1, 1);
     
-    if((dst.size[0] % blockDim.x) == 0)
-      convert_type_nocheck(kdst, ksrc, gridDim, blockDim);
-    else
-      convert_type_check(kdst, ksrc, gridDim, blockDim);
+  typename DeviceMemory<Type1, 1>::KernelData kdst(dst);
+  typename DeviceMemory<Type2, 1>::KernelData ksrc(src);
 
-    break;
-
-  case 2:
-    blockDim = dim3(32, 4, 1);
-    gridDim = dim3(divup(dst.size[0], blockDim.x),
-		   divup(dst.size[1], blockDim.y),
-		   1);
-
-    if(((dst.size[0] % blockDim.x) == 0) &&
-       ((dst.size[1] % blockDim.y) == 0))
-      convert_type_nocheck(kdst, ksrc, gridDim, blockDim);
-    else
-      convert_type_check(kdst, ksrc, gridDim, blockDim);
-
-    break;
-
-  case 3:
-    blockDim = dim3(8, 8, 8);
-    gridDim = dim3(divup(dst.size[0], blockDim.x),
-		   divup(dst.size[1], blockDim.y),
-		   divup(dst.size[2], blockDim.z));
-
-    if(((dst.size[0] % blockDim.x) == 0) &&
-       ((dst.size[1] % blockDim.y) == 0) &&
-       ((dst.size[2] % blockDim.z) == 0))
-      convert_type_nocheck(kdst, ksrc, gridDim, blockDim);
-    else
-      convert_type_check(kdst, ksrc, gridDim, blockDim);
-  }
+  if((dst.size[0] % blockDim.x) == 0)
+    convert_type_1d_nocheck_kernel<<<gridDim, blockDim>>>(kdst, ksrc);
+  else
+    convert_type_1d_check_kernel<<<gridDim, blockDim>>>(kdst, ksrc);
 }
+
+/**
+   Convert two-dimensional data in device memory.
+   Since this function calls a CUDA kernel, it is only available if the file
+   from which this function is called is compiled by nvcc.
+   @param dst destination
+   @param src source
+*/
+template<class Type1, class Type2>
+void
+copy(DeviceMemory<Type1, 2> &dst, const DeviceMemory<Type2, 2> &src)
+{
+  CUDA_CHECK_SIZE;
+  dim3 blockDim = dim3(32, 4, 1);
+  dim3 gridDim = dim3(divup(dst.size[0], blockDim.x),
+		      divup(dst.size[1], blockDim.y),
+		      1);
+    
+  typename DeviceMemory<Type1, 2>::KernelData kdst(dst);
+  typename DeviceMemory<Type2, 2>::KernelData ksrc(src);
+
+  if(((dst.size[0] % blockDim.x) == 0) &&
+     ((dst.size[1] % blockDim.y) == 0))
+    convert_type_2d_nocheck_kernel<<<gridDim, blockDim>>>(kdst, ksrc);
+  else
+    convert_type_2d_check_kernel<<<gridDim, blockDim>>>(kdst, ksrc);
+}
+
+/**
+   Convert three-dimensional data in device memory.
+   Since this function calls a CUDA kernel, it is only available if the file
+   from which this function is called is compiled by nvcc.
+   @param dst destination
+   @param src source
+*/
+template<class Type1, class Type2>
+void
+copy(DeviceMemory<Type1, 3> &dst, const DeviceMemory<Type2, 3> &src)
+{
+  CUDA_CHECK_SIZE;
+  dim3 blockDim = dim3(8, 8, 8);
+  dim3 gridDim = dim3(divup(dst.size[0], blockDim.x),
+		      divup(dst.size[1], blockDim.y),
+		      divup(dst.size[2], blockDim.z));
+
+  typename DeviceMemory<Type1, 3>::KernelData kdst(dst);
+  typename DeviceMemory<Type2, 3>::KernelData ksrc(src);
+
+  if(((dst.size[0] % blockDim.x) == 0) &&
+     ((dst.size[1] % blockDim.y) == 0) &&
+     ((dst.size[2] % blockDim.z) == 0))
+    convert_type_3d_nocheck_kernel<<<gridDim, blockDim>>>(kdst, ksrc);
+  else
+    convert_type_3d_check_kernel<<<gridDim, blockDim>>>(kdst, ksrc);
+}
+
+/**
+   Force instantiation of template kernels.
+   nvcc gets confused if it doesn't see at least one instantiation of template
+   kernels. This dummy class creates one.
+*/
+struct DummyInstantiateTemplateKernels
+{
+  DummyInstantiateTemplateKernels()
+  {
+    dim3 gridDim(1, 1, 1), blockDim(1, 1, 1);
+
+    typename DeviceMemory<int, 1>::KernelData data1;
+    convert_type_1d_nocheck_kernel<<<gridDim, blockDim>>>(data1, data1);
+    convert_type_1d_check_kernel<<<gridDim, blockDim>>>(data1, data1);
+
+    typename DeviceMemory<int, 2>::KernelData data2;
+    convert_type_2d_nocheck_kernel<<<gridDim, blockDim>>>(data2, data2);
+    convert_type_2d_check_kernel<<<gridDim, blockDim>>>(data2, data2);
+
+    typename DeviceMemory<int, 3>::KernelData data3;
+    convert_type_3d_nocheck_kernel<<<gridDim, blockDim>>>(data3, data3);
+    convert_type_3d_check_kernel<<<gridDim, blockDim>>>(data3, data3);
+  }
+};
+
+#endif
 
 /**
    Convert data in host memory.
