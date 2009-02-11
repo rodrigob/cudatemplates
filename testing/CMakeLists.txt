@@ -45,9 +45,18 @@ cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
 
 #add_definitions(-Wall)
 
+# There seems to be a problem with gcc < 4.3 and c++0x. Therefore we define the -std only if gcc >= 4.3
+# TODO: workarounf for gcc < 4.3
 if(UNIX)
-  add_definitions(-std=c++0x)
+  EXEC_PROGRAM(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
+  IF(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[3-9].*")
+    message(STATUS "GCC >= 4.3")
+    add_definitions(-std=c++0x)
+  else()
+    message(STATUS ${CMAKE_C_COMPILER_VERSION})
+  endif()
 endif(UNIX)
+
 
 if(WINDOWS)
   # TODO: enable "decltype" keyword for Windows (unless enabled by default)
