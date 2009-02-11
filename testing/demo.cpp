@@ -146,10 +146,5 @@ main()
 {
   demo_plain();
   demo_cudatemplates();
-  std::cout << "1" << std::endl;
-  Cuda::DeviceMemoryPitched2D<float3> test2d(20,20);
-  std::cout << "2" << std::endl;
-  Cuda::DeviceMemoryPitched<float3,2> test(Cuda::Size<2>(20,20));
-  std::cout << "3" << std::endl;
   return 0;
 }
