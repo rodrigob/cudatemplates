@@ -98,6 +98,13 @@ alloc()
   this->free();
 
   if(Dim == 2) {
+    // allocating empty data is not considered an error
+    // since this is a normal operation within STL containers
+    if((this->size[0] == 0) || (this->size[1] == 0)) {
+      this->setPitch(0);
+      return;
+    }
+
     size_t pitch;
     CUDA_CHECK(cudaMallocPitch((void **)&this->buffer, &pitch, this->size[0] * sizeof(Type), this->size[1]));
     this->setPitch(pitch);
@@ -111,6 +118,12 @@ alloc()
     // map 4- and more-dimensional data sets to 3D data:
     for(unsigned i = 3; i < Dim; ++i)
       extent.depth *= this->size[i];
+
+    // see comment above
+    if((extent.width == 0) || (extent.height == 0) || (extent.depth == 0)) {
+      this->setPitch(0);
+      return;
+    }
 
     cudaPitchedPtr pitchDevPtr;
     CUDA_CHECK(cudaMalloc3D(&pitchDevPtr, extent));

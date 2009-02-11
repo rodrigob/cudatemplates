@@ -106,6 +106,13 @@ alloc()
   for(size_t i = Dim; i--;)
     p *= this->size[i];
 
+  // allocating empty data is not considered an error
+  // since this is a normal operation within STL containers
+  if(p == 0) {
+    this->setPitch(0);
+    return;
+  }
+
   CUDA_CHECK(cudaMalloc((void **)&this->buffer, p * sizeof(Type)));
   this->setPitch(0);
 
