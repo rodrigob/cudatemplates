@@ -70,7 +70,7 @@ public:
   */
   inline IplImage* getIplImage()
     {
-      return(image_ptr);
+      return(image_ptr_);
     }
 
   /**
@@ -81,12 +81,13 @@ public:
   */
   void setImage(IplImage *image)
   {
-    image_ptr = image;
-
+    image_ptr_ = image;
+    
     this->size = Size<2>(image->width, image->height);
     this->region_ofs = Size<2>(0,0);
     this->region_size = this->size;
     this->setPitch(image->widthStep);
+    n_channels_ = image_ptr_->nChannels;
 
     // buffer is always interpreted as given template type -> TODO convert function?
     this->buffer = (Type*)image->imageData;
@@ -99,7 +100,9 @@ protected:
      pointers at some time. In future the IplReference should handle
      the memory of the referenced IplImage.
   */
-  IplImage *image_ptr;
+  IplImage *image_ptr_;
+
+  int num_channels_; /**< Number of channels that are used to save image data. */
 };
 
 }  // namespace Cuda
