@@ -989,7 +989,7 @@ copy(HostMemory<Type, Dim> &dst, const Type &val)
   copy(dst, val, Size<Dim>(), dst.size);
 }
 
-#ifdef __CUDACC__
+#if defined(__CUDACC__) || defined(__DOXYGEN__)
 
 /**
    Dummy class for kernel instantiation.
@@ -1054,7 +1054,7 @@ copy(DeviceMemory<Type, Dim> &dst, Type val)
   copy(dst, val, Size<Dim>(), dst.size);
 }
 
-#endif  // __CUDACC__
+#endif  // defined(__CUDACC__) || defined(__DOXYGEN__)
 
 }  // namespace Cuda
 

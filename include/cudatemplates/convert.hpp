@@ -103,7 +103,7 @@ copy(HostMemory<Type1, Dim> &dst, const HostMemory<Type2, Dim> &src)
     dst[i] = src[i];
 }
 
-#ifdef __CUDACC__
+#if defined(__CUDACC__) || defined(__DOXYGEN__)
 
 /**
    Convert data in device memory.
@@ -131,7 +131,7 @@ copy(DeviceMemory<Type1, Dim> &dst, const DeviceMemory<Type2, Dim> &src)
   CUDA_CHECK(cudaGetLastError());
 }
 
-#endif  // __CUDACC__
+#endif  // defined(__CUDACC__) || defined(__DOXYGEN__)
 
 /**
    Convert data in host memory.
