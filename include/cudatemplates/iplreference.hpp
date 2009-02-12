@@ -87,7 +87,7 @@ public:
     this->region_ofs = Size<2>(0,0);
     this->region_size = this->size;
     this->setPitch(image->widthStep);
-    n_channels_ = image_ptr_->nChannels;
+    num_channels_ = image_ptr_->nChannels;
 
     // buffer is always interpreted as given template type -> TODO convert function?
     this->buffer = (Type*)image->imageData;
