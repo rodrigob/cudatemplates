@@ -23,22 +23,11 @@
 
 
 #include <cudatemplates/copy.hpp>
+#include <cudatemplates/dimension.hpp>
 #include <cudatemplates/hostmemory.hpp>
 
 
 #ifdef __CUDACC__
-
-/*
-  We need some template kernels for handling different type conversion cases.
-  Since nvcc can't process template kernels with typename arguments (e.g.,
-  ...::KernelData), and partial function template specializations are not yet
-  supported (see http://www.gotw.ca/publications/mill17.htm for more
-  information), we use a dummy template class Cuda::Dimension to pass the
-  dimension information (BTW, removing the "dummy" arguments from the kernel
-  signatures results in a segfault in cudafe).
-*/
-
-namespace Cuda { template <unsigned N> struct Dimension {}; }
 
 template <class Type1, class Type2>
 __global__ void convert_type_nocheck_kernel(Type1 dst, Type2 src, Cuda::Dimension<1> dummy)
@@ -94,7 +83,7 @@ __global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<
     dst.data[x + y * dst.stride[0] + z * dst.stride[1]] = src.data[x + y * src.stride[0] + z * src.stride[1]];
 }
 
-#endif
+#endif  // __CUDACC__
 
 namespace Cuda {
 
@@ -129,25 +118,20 @@ copy(DeviceMemory<Type1, Dim> &dst, const DeviceMemory<Type2, Dim> &src)
 {
   CUDA_CHECK_SIZE;
   dim3 gridDim, blockDim;
-  dst.getExecutionConfiguration(gridDim, blockDim);
+  bool aligned;
+  dst.getExecutionConfiguration(gridDim, blockDim, aligned);
   typename DeviceMemory<Type1, Dim>::KernelData kdst(dst);
   typename DeviceMemory<Type2, Dim>::KernelData ksrc(src);
-
-  bool aligned = true;
-
-  for(unsigned i = Dim; i--;)
-    if((dst.size[i] % (&blockDim.x)[i]) != 0) {
-      aligned = false;
-      break;
-    }
 
   if(aligned)
     convert_type_nocheck_kernel<<<gridDim, blockDim>>>(kdst, ksrc, Dimension<Dim>());
   else
     convert_type_check_kernel<<<gridDim, blockDim>>>(kdst, ksrc, Dimension<Dim>());
+
+  CUDA_CHECK(cudaGetLastError());
 }
 
-#endif
+#endif  // __CUDACC__
 
 /**
    Convert data in host memory.

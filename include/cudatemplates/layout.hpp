@@ -53,6 +53,14 @@ inline int divup(int a, int b)
 }
 
 /**
+   Integer division with result rounded down.
+*/
+inline int divdown(int a, int b)
+{
+  return a / b;
+}
+
+/**
    Description of memory layout of multidimensional data.
    To achieve optimal memory bandwidth in CUDA, it is crucial to follow some
    memory layout rules. The purpose of this class is to hold the layout
@@ -155,10 +163,15 @@ public:
      given region within this layout.
      @param gridDim dimension of grid
      @param blockDim dimension of block
+     @param aligned whether region is aligned to block boundaries
+     @param dofs data offset according to first block of region
+     @param rmin rmax region to be processed in kernel coordinates
      @param rofs offset of region to be processed
      @param rsize size of region to be processed
   */
-  void getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, const Size<Dim> &rofs, const Size<Dim> &rsize) const;
+  void getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, bool &aligned,
+				 size_t &dofs, Size<Dim> &rmin, Size<Dim> &rmax,
+				 const Size<Dim> &rofs, const Size<Dim> &rsize) const;
 
   /**
      Get execution configuration for Cuda.
@@ -166,10 +179,15 @@ public:
      every element within this layout.
      @param gridDim dimension of grid
      @param blockDim dimension of block
+     @param aligned whether region is aligned to block boundaries
   */
-  inline void getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim) const
+  inline void getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, bool &aligned) const
   {
-    getExecutionConfiguration(gridDim, blockDim, Cuda::Size<Dim>(), size);
+    // these are irrelevant here, so don't return them to the caller:
+    size_t dofs;
+    Size<Dim> rmin, rmax;
+
+    getExecutionConfiguration(gridDim, blockDim, aligned, dofs, rmin, rmax, Cuda::Size<Dim>(), size);
   }
 
   /**
@@ -254,28 +272,61 @@ public:
   float spacing[Dim];
 };
 
+inline int
+numblocks(int ofs, int size, int blocksize)
+{
+  return divup(ofs + size, blocksize) - divdown(ofs, blocksize);
+}
+
 template <class _Type, unsigned _Dim>
 void Layout<_Type, _Dim>::
-getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim,
+getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, bool &aligned,
+			  size_t &dofs, Size<Dim> &rmin, Size<Dim> &rmax,
 			  const Size<Dim> &rofs, const Size<Dim> &rsize) const
 {
   CUDA_STATIC_ASSERT(Dim > 0);
-  CUDA_STATIC_ASSERT(Dim <= 3);
+
+  // Since Cuda only supports one- and two-dimensioanl grids,
+  // any higher-dimensional case must be mapped onto a 2D grid,
+  // which is not yet implemented:
+  CUDA_STATIC_ASSERT(Dim <= 2);
 
   switch(Dim) {
   case 1:
-    blockDim = dim3(64, 1, 1);
-    gridDim = dim3(divup(rsize[0], blockDim.x), 1, 1);
+    blockDim = dim3(64);
+    gridDim = dim3(numblocks(rofs[0], rsize[0], blockDim.x));
     break;
 
   case 2:
-    blockDim = dim3(8, 8, 1);
-    gridDim = dim3(divup(rsize[0], blockDim.x), divup(rsize[1], blockDim.y), 1);
-    break;
+    blockDim = dim3(8, 8);
+    gridDim = dim3(numblocks(rofs[0], rsize[0], blockDim.x),
+		   numblocks(rofs[1], rsize[1], blockDim.y));
+  }
 
-  case 3:
-    blockDim = dim3(4, 4, 4);
-    gridDim = dim3(divup(rsize[0], blockDim.x), divup(rsize[1], blockDim.y), divup(rsize[2], blockDim.z));
+  // x, y, and z are stored in consecutive memory locations,
+  // so an indexable pointer can be obtained:
+  const unsigned int *bdim = &blockDim.x;
+
+  // check whether region is aligned to block boundaries:
+  aligned = true;
+
+  for(unsigned i = Dim; i--;) {
+    if(((rofs[i] % bdim[i]) != 0) || ((rsize[i] % bdim[i]) != 0)) {
+      aligned = false;
+      break;
+    }
+  }
+
+  // compute data offset and kernel region:
+  dofs = 0;
+  rmin = rofs;
+  rmax = rofs + rsize;
+
+  for(unsigned i = Dim; i--;) {
+    size_t bofs = (rofs[i] / bdim[i]) * bdim[i];  // offset of first block
+    dofs += bofs * ((i > 0) ? stride[i - 1] : 1);
+    rmin[i] -= bofs;
+    rmax[i] -= bofs;
   }
 }
 

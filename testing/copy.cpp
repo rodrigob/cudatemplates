@@ -42,6 +42,9 @@
 using namespace std;
 
 
+extern void test_array_init();
+
+
 int err = 0;
 
 
@@ -307,62 +310,6 @@ test_array_copy()
     DeviceMemoryLinear<float, 2> gpu(size);
     copy(gpu, cpu);
   }
-}
-
-template <class T>
-int
-test_array_init1(size_t size_max)
-{
-  // random object size:
-  Cuda::Size<T::Dim> size0, ofs, size;
-
-  for(size_t i = T::Dim; i--;) {
-    size0[i] = (rand() % (size_max - 1)) + 1;
-    ofs[i] = rand() % (size0[i] - 1);
-    size_t r = size0[i] - ofs[i];
-    size[i] = (r > 1) ? (rand() % (r - 1)) + 1 : 1;
-  }
-
-  // random values:
-  typename T::Type val1, val2;
-  val1 = rand();
-  val2 = rand();
-
-  // create object and set values:
-  T data(size0);
-  copy(data, val1);
-  copy(data, val2, ofs, size);
-
-  // verify data:
-  Cuda::HostMemoryHeap<typename T::Type, T::Dim> hdata(data);
-  
-  for(Cuda::Iterator<T::Dim> index = hdata.begin(); index != hdata.end(); ++index) {
-    bool inside = true;
-
-    for(size_t i = T::Dim; i--;)
-      if((index[i] < ofs[i]) || (index[i] >= ofs[i] + size[i])) {
-	inside = false;
-	break;
-      }
-
-    if(hdata[index] != (inside ? val2 : val1)) {
-      cerr << "array init test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-void
-test_array_init()
-{
-  err |= test_array_init1<Cuda::HostMemoryHeap<float, 1> >(1 << 15);
-  err |= test_array_init1<Cuda::HostMemoryHeap<int  , 1> >(1 << 15);
-  err |= test_array_init1<Cuda::HostMemoryHeap<float, 2> >(1 << 10);
-  err |= test_array_init1<Cuda::HostMemoryHeap<int  , 2> >(1 << 10);
-  err |= test_array_init1<Cuda::HostMemoryHeap<float, 3> >(1 <<  5);
-  err |= test_array_init1<Cuda::HostMemoryHeap<int  , 3> >(1 <<  5);
 }
 
 int
