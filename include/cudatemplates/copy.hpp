@@ -70,6 +70,16 @@ check_bounds(const Layout<Type1, Dim> &dst, const Layout<Type2, Dim> &src,
   }
 }
 
+template<class Type, unsigned Dim>
+static void
+check_bounds(const Layout<Type, Dim> &dst, const Size<Dim> &dst_ofs, const Size<Dim> &size)
+{
+  for(size_t i = Dim; i--;) {
+    if(dst_ofs[i] + size[i] > dst.size[i])
+      CUDA_ERROR("out of bounds");
+  }
+}
+
 /**
    Generic copy method for host and/or device memory.
    It is not recommended to call this function directly since its correct
@@ -891,6 +901,38 @@ copy(TypeDst &dst, const TypeSrc &src,
     src_ofs3[i] = dst_ofs3[i] = dst_ofs[i];
     size3[i] = size[i];
   }
+}
+
+/**
+   Copy constant value to region in host memory.
+   @param dst destination pointer (host memory)
+   @param val value to copy
+   @param dst_ofs destination offset
+   @param size size of region
+*/
+template<class Type, unsigned Dim>
+void
+copy(HostMemory<Type, Dim> &dst, const Type &val,
+     const Size<Dim> &dst_ofs, const Size<Dim> &size)
+{
+  check_bounds(dst, dst_ofs, size);
+  typename HostMemory<Type, Dim>::iterator i(dst_ofs, Size<Dim>(dst_ofs + size)), iend(i);
+  iend.setEnd();
+
+  for(; i != iend; ++i)
+    dst[i] = val;
+}
+
+/**
+   Copy constant value to host memory.
+   @param dst destination pointer (host memory)
+   @param val value to copy
+*/
+template<class Type, unsigned Dim>
+void
+copy(HostMemory<Type, Dim> &dst, const Type &val)
+{
+  copy(dst, val, Size<Dim>(), dst.size);
 }
 
 }  // namespace Cuda

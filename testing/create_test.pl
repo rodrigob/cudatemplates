@@ -34,14 +34,14 @@ sub create_code
 	    
 	    if(($i == 0) && ($j == 0)) {
 		print cpp
-		    "err |= test2<Cuda::@templates[$i]<float, $dim>, Cuda::@templates[$j]<double, $dim> >".
+		    "err |= test_array_copy2<Cuda::@templates[$i]<float, $dim>, Cuda::@templates[$j]<double, $dim> >".
 		    "(size${dim}a, size${dim}b, pos${dim}a, pos${dim}b, size${dim}, $smax);\n".
-		    "err |= test2<Cuda::@templates[$i]<double, $dim>, Cuda::@templates[$j]<float, $dim> >".
+		    "err |= test_array_copy2<Cuda::@templates[$i]<double, $dim>, Cuda::@templates[$j]<float, $dim> >".
 		    "(size${dim}a, size${dim}b, pos${dim}a, pos${dim}b, size${dim}, $smax);\n";
 	    }
 		
 	    print cpp
-		"err |= test2<Cuda::@templates[$i]<float, $dim>, Cuda::@templates[$j]<float, $dim> >".
+		"err |= test_array_copy2<Cuda::@templates[$i]<float, $dim>, Cuda::@templates[$j]<float, $dim> >".
 		"(size${dim}a, size${dim}b, pos${dim}a, pos${dim}b, size${dim}, $smax);\n";
 	}
     }

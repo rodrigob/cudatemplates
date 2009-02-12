@@ -92,6 +92,8 @@ public:
 protected:
   /**
      The iterator range.
+     imin is inclusive, imax is exclusive.
+     Setting the index to imax indicates the "end" condition.
   */
   SizeBase<Dim> imin, imax;
 };

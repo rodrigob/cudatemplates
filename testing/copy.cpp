@@ -42,6 +42,9 @@
 using namespace std;
 
 
+int err = 0;
+
+
 static float
 my_random()
 {
@@ -63,9 +66,9 @@ ostream &operator<<(ostream &s, const Cuda::SizeBase<Dim> &sz)
 
 template <class T1, class T2>
 int
-test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
-      const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
-      const Cuda::Size<T1::Dim> &size, bool use_region)
+test_array_copy1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
+		 const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
+		 const Cuda::Size<T1::Dim> &size, bool use_region)
 {
   BOOST_STATIC_ASSERT((int)T1::Dim == (int)T2::Dim);
   
@@ -228,16 +231,16 @@ test1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
 
 template <class T1, class T2>
 int
-test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
-      const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
-      const Cuda::Size<T1::Dim> &size, size_t size_max)
+test_array_copy2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
+		 const Cuda::Size<T1::Dim> &pos1, const Cuda::Size<T1::Dim> &pos2,
+		 const Cuda::Size<T1::Dim> &size, size_t size_max)
 {
   BOOST_STATIC_ASSERT((int)T1::Dim == (int)T2::Dim);
 
   int err = 0;
 
   // test with fixed size:
-  err |= test1<T1, T2>(size1, size2, pos1, pos2, size, false);
+  err |= test_array_copy1<T1, T2>(size1, size2, pos1, pos2, size, false);
   
   if(size_max > 0) {
     // test with random size:
@@ -258,12 +261,109 @@ test2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &size2,
     cout << rsize1 << rsize2 << rpos1 << rpos2 << rsize << endl;
 #endif
 
-    err |= test1<T1, T2>(rsize1, rsize2, rpos1, rpos2, rsize, true);
+    err |= test_array_copy1<T1, T2>(rsize1, rsize2, rpos1, rpos2, rsize, true);
   }
 
   return err;
 }
 
+void
+test_array_copy()
+{
+  // one-dimensional data:
+  size_t smax1 = 512;
+  Cuda::Size<1>
+    size1a(smax1), size1b(smax1),
+    pos1a(smax1 / 16), pos1b(smax1 / 16),
+    size1(smax1 / 2);
+
+  err |= test_array_copy2<Cuda::HostMemoryHeap<float, 1>, Cuda::HostMemoryHeap<double, 1> >(size1a, size1b, pos1a, pos1b, size1, smax1);
+
+#include "test1d.cpp"
+
+  // two-dimensional data:
+  size_t smax2 = 512;
+  Cuda::Size<2>
+    size2a(smax2, smax2), size2b(smax2, smax2),
+    pos2a(smax2 / 16, smax2 / 16), pos2b(smax2 / 8, smax2 / 8),
+    size2(smax2 / 2, smax2 / 2);
+
+#include "test2d.cpp"
+
+  // three-dimensional data:
+  size_t smax3 = 64;
+  Cuda::Size<3>
+    size3a(smax3, smax3, smax3), size3b(smax3, smax3, smax3),
+    pos3a(smax3 / 4, smax3 / 4, smax3 / 4), pos3b(smax3 / 8, smax3 / 8, smax3 / 8),
+    size3(smax3 / 2, smax3 / 2, smax3 / 2);
+
+#include "test3d.cpp"
+
+  // simple usage example:
+  {
+    using namespace Cuda;
+    Size<2> size(256, 256);
+    HostMemoryHeap<float, 2> cpu(size);
+    DeviceMemoryLinear<float, 2> gpu(size);
+    copy(gpu, cpu);
+  }
+}
+
+template <class T>
+int
+test_array_init1(size_t size_max)
+{
+  // random object size:
+  Cuda::Size<T::Dim> size0, ofs, size;
+
+  for(size_t i = T::Dim; i--;) {
+    size0[i] = (rand() % (size_max - 1)) + 1;
+    ofs[i] = rand() % (size0[i] - 1);
+    size_t r = size0[i] - ofs[i];
+    size[i] = (r > 1) ? (rand() % (r - 1)) + 1 : 1;
+  }
+
+  // random values:
+  typename T::Type val1, val2;
+  val1 = rand();
+  val2 = rand();
+
+  // create object and set values:
+  T data(size0);
+  copy(data, val1);
+  copy(data, val2, ofs, size);
+
+  // verify data:
+  Cuda::HostMemoryHeap<typename T::Type, T::Dim> hdata(data);
+  
+  for(Cuda::Iterator<T::Dim> index = hdata.begin(); index != hdata.end(); ++index) {
+    bool inside = true;
+
+    for(size_t i = T::Dim; i--;)
+      if((index[i] < ofs[i]) || (index[i] >= ofs[i] + size[i])) {
+	inside = false;
+	break;
+      }
+
+    if(hdata[index] != (inside ? val2 : val1)) {
+      cerr << "array init test failed at index " << index << " in \"" << __PRETTY_FUNCTION__ << "\"\n";
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+void
+test_array_init()
+{
+  err |= test_array_init1<Cuda::HostMemoryHeap<float, 1> >(1 << 15);
+  err |= test_array_init1<Cuda::HostMemoryHeap<int  , 1> >(1 << 15);
+  err |= test_array_init1<Cuda::HostMemoryHeap<float, 2> >(1 << 10);
+  err |= test_array_init1<Cuda::HostMemoryHeap<int  , 2> >(1 << 10);
+  err |= test_array_init1<Cuda::HostMemoryHeap<float, 3> >(1 <<  5);
+  err |= test_array_init1<Cuda::HostMemoryHeap<int  , 3> >(1 <<  5);
+}
 
 int
 main(int argc, char *argv[])
@@ -286,46 +386,10 @@ main(int argc, char *argv[])
   }
 
   srand(seed);
-  int err = 0;
 
   try {
-    // one-dimensional data:
-    size_t smax1 = 512;
-    Cuda::Size<1>
-      size1a(smax1), size1b(smax1),
-      pos1a(smax1 / 16), pos1b(smax1 / 16),
-      size1(smax1 / 2);
-
-    err |= test2<Cuda::HostMemoryHeap<float, 1>, Cuda::HostMemoryHeap<double, 1> >(size1a, size1b, pos1a, pos1b, size1, smax1);
-
-#include "test1d.cpp"
-
-    // two-dimensional data:
-    size_t smax2 = 512;
-    Cuda::Size<2>
-      size2a(smax2, smax2), size2b(smax2, smax2),
-      pos2a(smax2 / 16, smax2 / 16), pos2b(smax2 / 8, smax2 / 8),
-      size2(smax2 / 2, smax2 / 2);
-
-#include "test2d.cpp"
-
-    // three-dimensional data:
-    size_t smax3 = 64;
-    Cuda::Size<3>
-      size3a(smax3, smax3, smax3), size3b(smax3, smax3, smax3),
-      pos3a(smax3 / 4, smax3 / 4, smax3 / 4), pos3b(smax3 / 8, smax3 / 8, smax3 / 8),
-      size3(smax3 / 2, smax3 / 2, smax3 / 2);
-
-#include "test3d.cpp"
-
-    // simple usage example:
-    {
-      using namespace Cuda;
-      Size<2> size(256, 256);
-      HostMemoryHeap<float, 2> cpu(size);
-      DeviceMemoryLinear<float, 2> gpu(size);
-      copy(gpu, cpu);
-    }
+    test_array_copy();
+    test_array_init();
   }
   catch(const exception &e) {
     cerr << e.what();
