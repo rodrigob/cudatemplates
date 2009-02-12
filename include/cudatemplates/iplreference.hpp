@@ -73,9 +73,10 @@ public:
       return(image_ptr);
     }
 
-protected:
   /**
-     Extract image information from IplImage.
+     Extract image information from IplImage. Also resets size, region_size and
+     region_ofs to offer the possibility to update the buffer of an existing
+     IplReference.
      @param image IplImage to be referenced.
   */
   void setImage(IplImage *image)
@@ -83,6 +84,7 @@ protected:
     image_ptr = image;
 
     this->size = Size<2>(image->width, image->height);
+    this->region_ofs = Size<2>(0,0);
     this->region_size = this->size;
     this->setPitch(image->widthStep);
 
@@ -90,6 +92,7 @@ protected:
     this->buffer = (Type*)image->imageData;
   }
 
+protected:
   /**
      Pointer to IplImage.  This pointer is not used in the
      IplReference class, but it offers the possibility to handle smart
