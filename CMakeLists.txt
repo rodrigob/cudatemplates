@@ -21,11 +21,10 @@ configure_file(${CMAKE_SOURCE_DIR}/${CPACK_PACKAGE_NAME}.spec.in ${CMAKE_SOURCE_
 configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_SOURCE_DIR}/Doxyfile)
 configure_file(${CMAKE_SOURCE_DIR}/CudaTemplatesConfigVersion.cmake.in ${CMAKE_SOURCE_DIR}/CudaTemplatesConfigVersion.cmake @ONLY)
 
-#install(FILES FindCudaTemplates.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/Modules)
 if(WIN32)
-  install(FILES CudaTemplatesConfig.cmake DESTINATION .)
+  install(FILES CudaTemplatesConfig.cmake CudaTemplatesConfigVersion.cmake DESTINATION .)
 else(WIN32)
-  install(FILES CudaTemplatesConfig.cmake DESTINATION share/CudaTemplates)
+  install(FILES CudaTemplatesConfig.cmake CudaTemplatesConfigVersion.cmake DESTINATION share/CudaTemplates)
 endif(WIN32)
 
 set(CPACK_IGNORE_FILES

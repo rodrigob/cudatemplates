@@ -70,16 +70,6 @@ check_bounds(const Layout<Type1, Dim> &dst, const Layout<Type2, Dim> &src,
   }
 }
 
-template<class Type, unsigned Dim>
-static void
-check_bounds(const Layout<Type, Dim> &dst, const Size<Dim> &dst_ofs, const Size<Dim> &size)
-{
-  for(size_t i = Dim; i--;) {
-    if(dst_ofs[i] + size[i] > dst.size[i])
-      CUDA_ERROR("out of bounds");
-  }
-}
-
 /**
    Generic copy method for host and/or device memory.
    It is not recommended to call this function directly since its correct
@@ -915,7 +905,7 @@ void
 copy(HostMemory<Type, Dim> &dst, const Type &val,
      const Size<Dim> &dst_ofs, const Size<Dim> &size)
 {
-  check_bounds(dst, dst_ofs, size);
+  dst.checkBounds(dst_ofs, size);
   typename HostMemory<Type, Dim>::iterator i(dst_ofs, Size<Dim>(dst_ofs + size)), iend(i);
   iend.setEnd();
 

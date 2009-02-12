@@ -45,6 +45,14 @@
 namespace Cuda {
 
 /**
+   Integer division with result rounded up.
+*/
+inline int divup(int a, int b)
+{
+  return (a + b - 1) / b;
+}
+
+/**
    Description of memory layout of multidimensional data.
    To achieve optimal memory bandwidth in CUDA, it is crucial to follow some
    memory layout rules. The purpose of this class is to hold the layout
@@ -97,6 +105,20 @@ public:
   }
 
   /**
+     Check bounds for given region.
+     If the given region exceeds the size of this layout, an error is reported.
+     @param rofs offset of region to be checked
+     @param rsize size of region to be checked
+   */
+  inline void
+  checkBounds(const Size<Dim> &rofs, const Size<Dim> &rsize)
+  {
+    for(size_t i = Dim; i--;)
+      if(rofs[i] + rsize[i] > size[i])
+	CUDA_ERROR("out of bounds");
+  }
+
+  /**
      Get total size in bytes.
      @return number of totally allocated bytes (including any padding)
   */
@@ -125,6 +147,29 @@ public:
     Layout<Type, Dim> x(*this);
     x.setPitch(0);
     return x.stride == stride;
+  }
+
+  /**
+     Get execution configuration for Cuda.
+     This method suggests an execution configuration suitable for accessing the
+     given region within this layout.
+     @param gridDim dimension of grid
+     @param blockDim dimension of block
+     @param rofs offset of region to be processed
+     @param rsize size of region to be processed
+  */
+  void getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, const Size<Dim> &rofs, const Size<Dim> &rsize) const;
+
+  /**
+     Get execution configuration for Cuda.
+     This method suggests an execution configuration suitable for accessing
+     every element within this layout.
+     @param gridDim dimension of grid
+     @param blockDim dimension of block
+  */
+  inline void getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim) const
+  {
+    getExecutionConfiguration(gridDim, blockDim, Cuda::Size<Dim>(), size);
   }
 
   /**
@@ -208,6 +253,31 @@ public:
   */
   float spacing[Dim];
 };
+
+template <class _Type, unsigned _Dim>
+void Layout<_Type, _Dim>::
+getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim,
+			  const Size<Dim> &rofs, const Size<Dim> &rsize) const
+{
+  CUDA_STATIC_ASSERT(Dim > 0);
+  CUDA_STATIC_ASSERT(Dim <= 3);
+
+  switch(Dim) {
+  case 1:
+    blockDim = dim3(64, 1, 1);
+    gridDim = dim3(divup(rsize[0], blockDim.x), 1, 1);
+    break;
+
+  case 2:
+    blockDim = dim3(8, 8, 1);
+    gridDim = dim3(divup(rsize[0], blockDim.x), divup(rsize[1], blockDim.y), 1);
+    break;
+
+  case 3:
+    blockDim = dim3(4, 4, 4);
+    gridDim = dim3(divup(rsize[0], blockDim.x), divup(rsize[1], blockDim.y), divup(rsize[2], blockDim.z));
+  }
+}
 
 }  // namespace Cuda
 
