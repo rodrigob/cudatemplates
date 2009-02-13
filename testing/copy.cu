@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include <cudatemplates/copy.hpp>
+#include <cudatemplates/copy_constant.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
