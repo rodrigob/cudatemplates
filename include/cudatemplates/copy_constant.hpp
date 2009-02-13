@@ -21,15 +21,8 @@
 #ifndef CUDA_COPY_CONSTANT_H
 #define CUDA_COPY_CONSTANT_H
 
-
-#ifndef __CUDACC__
-#error This file must be processed by nvcc (i.e., must be included in a .cu file)
-#endif
-
-
 #include <cudatemplates/devicememory.hpp>
 #include <cudatemplates/hostmemory.hpp>
-
 
 
 template <class Type1, class Type2>
