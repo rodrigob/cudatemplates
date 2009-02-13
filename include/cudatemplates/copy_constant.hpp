@@ -22,11 +22,15 @@
 #define CUDA_COPY_CONSTANT_H
 
 
+#ifndef __CUDACC__
+#error This file must be processed by nvcc (i.e., must be included in a .cu file)
+#endif
+
+
 #include <cudatemplates/devicememory.hpp>
 #include <cudatemplates/hostmemory.hpp>
 
 
-#ifdef __CUDACC__
 
 template <class Type1, class Type2>
 __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimension<1> dummy)
@@ -82,45 +86,7 @@ __global__ void copy_constant_check_kernel(Type1 dst, Type2 val, Cuda::Size<3> r
     dst.data[x + y * dst.stride[0] + z * dst.stride[1]] = val;
 }
 
-#endif  // __CUDACC__
-
-
 namespace Cuda {
-
-//------------------------------------------------------------------------------
-/**
-   Copy constant value to region in host memory.
-   @param dst destination pointer (host memory)
-   @param val value to copy
-   @param dst_ofs destination offset
-   @param size size of region
-*/
-template<class Type, unsigned Dim>
-void
-copy(HostMemory<Type, Dim> &dst, const Type &val,
-     const Size<Dim> &dst_ofs, const Size<Dim> &size)
-{
-  dst.checkBounds(dst_ofs, size);
-  typename HostMemory<Type, Dim>::iterator i(dst_ofs, Size<Dim>(dst_ofs + size)), iend(i);
-  iend.setEnd();
-
-  for(; i != iend; ++i)
-    dst[i] = val;
-}
-
-/**
-   Copy constant value to host memory.
-   @param dst destination pointer (host memory)
-   @param val value to copy
-*/
-template<class Type, unsigned Dim>
-void
-copy(HostMemory<Type, Dim> &dst, const Type &val)
-{
-  copy(dst, val, Size<Dim>(), dst.size);
-}
-
-#if defined(__CUDACC__) || defined(__DOXYGEN__)
 
 /**
    Dummy class for kernel instantiation.
@@ -184,8 +150,6 @@ copy(DeviceMemory<Type, Dim> &dst, Type val)
 {
   copy(dst, val, Size<Dim>(), dst.size);
 }
-
-#endif  // defined(__CUDACC__) || defined(__DOXYGEN__)
 
 }  // namespace Cuda
 

@@ -895,6 +895,69 @@ copy(TypeDst &dst, const TypeSrc &src,
   }
 }
 
+//------------------------------------------------------------------------------
+/**
+   Copy constant value to region in host memory.
+   @param dst destination pointer (host memory)
+   @param val value to copy
+   @param dst_ofs destination offset
+   @param size size of region
+*/
+template<class Type, unsigned Dim>
+void
+copy(HostMemory<Type, Dim> &dst, const Type &val,
+     const Size<Dim> &dst_ofs, const Size<Dim> &size)
+{
+  dst.checkBounds(dst_ofs, size);
+  typename HostMemory<Type, Dim>::iterator i(dst_ofs, Size<Dim>(dst_ofs + size)), iend(i);
+  iend.setEnd();
+
+  for(; i != iend; ++i)
+    dst[i] = val;
+}
+
+/**
+   Copy constant value to host memory.
+   @param dst destination pointer (host memory)
+   @param val value to copy
+*/
+template<class Type, unsigned Dim>
+void
+copy(HostMemory<Type, Dim> &dst, const Type &val)
+{
+  copy(dst, val, Size<Dim>(), dst.size);
+}
+
+/**
+   Copy constant value to region in device memory.
+   Since this function calls a CUDA kernel, its implementation is in a separate
+   file "copy_constants.hpp", which must be included in a .cu file. Note that
+   you will get "multiply defined symbols" errors in the linker if you access
+   the same template functions in "copy_constants.hpp" in more than one file
+   since the compiler creates separate template instantiations for each
+   occurence. In this case you should put explicit template instantiations into
+   a single file (see 
+   https://cudatemplates.svn.sourceforge.net/svnroot/cudatemplates/trunk/testing/copy_instantiate.cu
+   for an example).
+   @param dst destination pointer (device memory)
+   @param val value to copy
+   @param dst_ofs destination offset
+   @param size size of region
+*/
+template<class Type, unsigned Dim>
+void
+copy(DeviceMemory<Type, Dim> &dst, Type val,
+     const Size<Dim> &dst_ofs, const Size<Dim> &size);
+
+/**
+   Copy constant value to device memory.
+   @param dst destination pointer (device memory)
+   @param val value to copy
+*/
+template<class Type, unsigned Dim>
+void
+copy(DeviceMemory<Type, Dim> &dst, Type val);
+
 }  // namespace Cuda
 
 

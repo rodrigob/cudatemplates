@@ -68,7 +68,7 @@ endif(WINDOWS)
 add_executable(border border.cpp)
 target_link_libraries(border ${CUDA_TARGET_LINK})
 
-cuda_add_executable(copy copy.cpp copy.cu)
+cuda_add_executable(copy copy.cpp copy_instantiate.cu)
 
 cuda_add_executable(convert convert.cu)
 
