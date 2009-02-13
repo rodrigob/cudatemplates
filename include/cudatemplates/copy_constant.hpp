@@ -22,6 +22,7 @@
 #define CUDA_COPY_CONSTANT_H
 
 #include <cudatemplates/devicememory.hpp>
+#include <cudatemplates/dimension.hpp>
 #include <cudatemplates/hostmemory.hpp>
 
 
