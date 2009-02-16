@@ -126,6 +126,10 @@ private:
   {
     this->size[0] = image.width();
     this->size[1] = image.height();
+    this->region_ofs[0] = 0;
+    this->region_ofs[1] = 0;
+    this->region_size = this->size;
+
     this->spacing[0] = this->spacing[1] = 1;
     this->buffer = reinterpret_cast<Type *>(&boost::gil::view(image).pixels()[0]);
     this->setPitch(0);  // TODO: get this from gil::image!
