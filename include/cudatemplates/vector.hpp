@@ -35,6 +35,16 @@
 #endif
 
 
+/*
+  In device emulation mode, nvcc can't access vector elements in a template
+  kernel. We need some tricky (and ugly) workaround to achieve this.
+*/
+#if __DEVICE_EMULATION__
+#define CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND 1
+#else
+#define CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND 0
+#endif
+
 #include <cudatemplates/error.hpp>
 #include <cudatemplates/staticassert.hpp>
 
@@ -74,7 +84,11 @@ public:
   */
   inline Type &operator[](size_t i) { return data[i]; }
 
+#if CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND
+public:
+#else
 protected:
+#endif
   /**
      The size in each dimension.
   */

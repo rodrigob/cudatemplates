@@ -26,6 +26,13 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
+#if CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND
+#define CUDA_KERNEL_SIZE(n) Cuda::VectorBase<size_t, n>
+#else
+#define CUDA_KERNEL_SIZE(n) Cuda::Size<n>
+#endif
+
+
 template <class Type1, class Type2>
 __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimension<1> dummy)
 {
@@ -34,7 +41,7 @@ __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimensi
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, Cuda::Size<1> rmin, Cuda::Size<1> rmax)
+__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(1) rmin, CUDA_KERNEL_SIZE(1) rmax)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -51,7 +58,7 @@ __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimensi
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, Cuda::Size<2> rmin, Cuda::Size<2> rmax)
+__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(2) rmin, CUDA_KERNEL_SIZE(2) rmax)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -70,7 +77,7 @@ __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimensi
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, Cuda::Size<3> rmin, Cuda::Size<3> rmax)
+__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(3) rmin, CUDA_KERNEL_SIZE(3) rmax)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
