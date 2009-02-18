@@ -131,6 +131,91 @@ __global__ void transferInterleavedKernel( float4* input, float4* output,
   }
 }
 
+__global__ void transferInterleavedKernel( float3* input, float3* output,
+                                           int width, int height, int p)
+{
+  // calculate absolute coordinates
+  unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+  unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+  unsigned int c = y*p+x;
+
+  // Thread index
+  int tx = threadIdx.x+1;
+  int ty = threadIdx.y+1;
+
+  // Define arrays for shared memory
+  __shared__ float data_shared[16+2][16+2][3];
+
+  // load data into shared memory
+  float3 temp = input[c];
+  data_shared[ty][tx][0] = temp.x;
+  data_shared[ty][tx][1] = temp.y;
+  data_shared[ty][tx][2] = temp.z;
+
+  __syncthreads();
+
+  if (x == 0)
+  {
+    data_shared[ty][tx-1][0] = data_shared[ty][tx][0];
+    data_shared[ty][tx-1][1] = data_shared[ty][tx][1];
+    data_shared[ty][tx-1][2] = data_shared[ty][tx][2];
+  }
+  else if (tx == 1)
+  {
+    temp = input[c-1];
+    data_shared[ty][tx-1][0] = temp.x;
+    data_shared[ty][tx-1][1] = temp.y;
+    data_shared[ty][tx-1][2] = temp.z;
+  }
+
+  if (y == 0)
+  {
+    data_shared[ty-1][tx][0] = data_shared[ty][tx][0];
+    data_shared[ty-1][tx][1] = data_shared[ty][tx][1];
+    data_shared[ty-1][tx][2] = data_shared[ty][tx][2];
+  }
+  else if (ty == 1)
+  {
+    temp = input[c-p];
+    data_shared[ty-1][tx][0] = temp.x;
+    data_shared[ty-1][tx][1] = temp.y;
+    data_shared[ty-1][tx][2] = temp.z;
+  }
+
+  if (x >= width-1)
+  {
+    data_shared[ty][tx+1][0] = data_shared[ty][tx][0];
+    data_shared[ty][tx+1][1] = data_shared[ty][tx][1];
+    data_shared[ty][tx+1][2] = data_shared[ty][tx][2];
+  }
+  else if (tx == 16-1)
+  {
+    temp = input[c+1];
+    data_shared[ty][tx+1][0] = temp.x;
+    data_shared[ty][tx+1][1] = temp.y;
+    data_shared[ty][tx+1][2] = temp.z;
+  }
+
+  if (y >= height-1)
+  {
+    data_shared[ty+1][tx][0] = data_shared[ty][tx][0];
+    data_shared[ty+1][tx][1] = data_shared[ty][tx][1];
+    data_shared[ty+1][tx][2] = data_shared[ty][tx][2];
+  }
+  else if (ty == 16-1)
+  {
+    temp = input[c+p];
+    data_shared[ty+1][tx][0] = temp.x;
+    data_shared[ty+1][tx][1] = temp.y;
+    data_shared[ty+1][tx][2] = temp.z;
+  }
+
+  if ((x<width) && (y<height))
+  {
+    output[c] = make_float3(data_shared[ty][tx][0], data_shared[ty][tx][1], data_shared[ty][tx][2]);
+  }
+}
+
 __global__ void transferInterleavedKernel( char4* input, char4* output,
                                            int width, int height, int p)
 {

@@ -41,6 +41,8 @@ int CUDAtestMemLoad(int num, int width, int height)
   Cuda::Size<3> plane_size(divUp(width, block_size)*block_size, divUp(height, block_size)*block_size,3);
   Cuda::DeviceMemoryPitched<float4, 2> interleaved_image_in(interleaved_size);
   Cuda::DeviceMemoryPitched<float4, 2> interleaved_image_out(interleaved_size);
+  Cuda::DeviceMemoryPitched<float3, 2> interleaved3_image_in(interleaved_size);
+  Cuda::DeviceMemoryPitched<float3, 2> interleaved3_image_out(interleaved_size);
   Cuda::DeviceMemoryPitched<char4, 2> interleaved_image_char_in(interleaved_size);
   Cuda::DeviceMemoryPitched<char4, 2> interleaved_image_char_out(interleaved_size);
   Cuda::DeviceMemoryPitched<float, 3> plane_image_in(plane_size);
@@ -51,8 +53,14 @@ int CUDAtestMemLoad(int num, int width, int height)
 
   interleaved_image_in.initMem(0);
   interleaved_image_out.initMem(0);
+  interleaved3_image_in.initMem(0);
+  interleaved3_image_out.initMem(0);
+  interleaved_image_char_in.initMem(0);
+  interleaved_image_char_out.initMem(0);
   plane_image_in.initMem(0);
   plane_image_out.initMem(0);
+  plane_image_char_in.initMem(0);
+  plane_image_char_out.initMem(0);
   CUDA_CHECK(cudaGetLastError());
 
   // prepare fragmentation for processing
@@ -91,6 +99,38 @@ int CUDAtestMemLoad(int num, int width, int height)
   cout << getTime() - start_time << endl;
   CUDA_CHECK(cudaGetLastError());
 
+  cout << "float3 interleaved image          -  ";
+  cudaThreadSynchronize();
+  start_time = getTime();
+  for (int i=0; i<num; i++)
+  {
+    transferInterleavedKernel<<<dimGrid, dimBlock>>>( interleaved3_image_in.getBuffer(),
+                                                      interleaved3_image_out.getBuffer(),
+                                                      width, height,
+                                                      interleaved3_image_in.stride[0]);
+    CUDA_CHECK(cudaGetLastError());
+    cudaThreadSynchronize();
+  }
+  cudaThreadSynchronize();
+  cout << getTime() - start_time << endl;
+  CUDA_CHECK(cudaGetLastError());
+
+  cout << "float3 interleaved image (direct) -  ";
+  cudaThreadSynchronize();
+  start_time = getTime();
+  for (int i=0; i<num; i++)
+  {
+    transferInterleavedDirectKernel<<<dimGrid, dimBlock>>>( interleaved3_image_in.getBuffer(),
+                                                            interleaved3_image_out.getBuffer(),
+                                                            width, height,
+                                                            interleaved3_image_in.stride[0]);
+    CUDA_CHECK(cudaGetLastError());
+    cudaThreadSynchronize();
+  }
+  cudaThreadSynchronize();
+  cout << getTime() - start_time << endl;
+  CUDA_CHECK(cudaGetLastError());
+
   cout << "float 3-plane image               -  ";
   cudaThreadSynchronize();
   start_time = getTime();
@@ -108,9 +148,7 @@ int CUDAtestMemLoad(int num, int width, int height)
   cudaThreadSynchronize();
   cout << getTime() - start_time << endl;
 
-  cout << endl;
-
-  cout << "char4 interleaved image          -  ";
+  cout << "char4 interleaved image           -  ";
   cudaThreadSynchronize();
   start_time = getTime();
   for (int i=0; i<num; i++)
@@ -126,7 +164,7 @@ int CUDAtestMemLoad(int num, int width, int height)
   cout << getTime() - start_time << endl;
   CUDA_CHECK(cudaGetLastError());
 
-  cout << "char4 interleaved image (direct) -  ";
+  cout << "char4 interleaved image (direct)  -  ";
   cudaThreadSynchronize();
   start_time = getTime();
   for (int i=0; i<num; i++)
@@ -142,7 +180,7 @@ int CUDAtestMemLoad(int num, int width, int height)
   cout << getTime() - start_time << endl;
   CUDA_CHECK(cudaGetLastError());
 
-  cout << "char 3-plane image               -  ";
+  cout << "char 3-plane image                -  ";
   cudaThreadSynchronize();
   start_time = getTime();
   for (int i=0; i<num; i++)
