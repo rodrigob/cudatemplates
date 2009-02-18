@@ -21,7 +21,6 @@
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/copy_constant.hpp>
 #include <cudatemplates/devicememory.hpp>
-#include <cudatemplates/hostmemory.hpp>
 
 /*
   Explicit template instantiations.

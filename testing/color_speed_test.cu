@@ -1,3 +1,5 @@
+#include <cudatemplates/cuda_gcc43_compat.hpp>
+
 #include <iostream>
 
 #include <cudatemplates/devicememorypitched.hpp>
@@ -23,7 +25,7 @@ double getTime()
 }
 
   inline unsigned int divUp(unsigned int a, unsigned int b) {
-    return (a % b != 0) ? (a / b + 1) : (a / b);
+    return (a + b - 1) / b;
   }
 
 int CUDAtestMemLoad(int block_size, int num, int width, int height)
@@ -33,23 +35,23 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
   cout << "  Number of calls = " << num << endl;
   cout << "  Size            = " << width << "x" << height << endl;
 
-  Cuda::Size<2> interleaved_size(width,height);
-  Cuda::Size<3> plane_size(width,height,3);
+  Cuda::Size<2> interleaved_size(divUp(width, block_size)*block_size, divUp(height, block_size)*block_size);
+  Cuda::Size<3> plane_size(divUp(width, block_size)*block_size, divUp(height, block_size)*block_size,3);
   Cuda::DeviceMemoryPitched<float4, 2> interleaved_image_in(interleaved_size);
   Cuda::DeviceMemoryPitched<float4, 2> interleaved_image_out(interleaved_size);
   Cuda::DeviceMemoryPitched<float, 3> plane_image_in(plane_size);
   Cuda::DeviceMemoryPitched<float, 3> plane_image_out(plane_size);
 //   COMMONLIB_CHECK_CUDA_ERROR();
 
-//   interleaved_image_in.initMem(1);
-//   interleaved_image_out.initMem(1);
-//   plane_image_in.initMem(1);
-//   plane_image_out.initMem(1);
+  interleaved_image_in.initMem(1);
+  interleaved_image_out.initMem(1);
+  plane_image_in.initMem(1);
+  plane_image_out.initMem(1);
 //   COMMONLIB_CHECK_CUDA_ERROR();
 
   // prepare fragmentation for processing
   dim3 dimBlock(block_size, block_size, 1);
-  dim3 dimGrid(divUp(interleaved_size[0], block_size), divUp(interleaved_size[1], block_size), 1);
+  dim3 dimGrid(divUp(width, block_size), divUp(height, block_size), 1);
 
   cout << "float4 interleaved image          -  ";
   cudaThreadSynchronize();
@@ -61,7 +63,8 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
                                                       interleaved_image_in.region_size[0],
                                                       interleaved_image_in.region_size[1],
                                                       interleaved_image_in.stride[0]);
-                                                      cudaThreadSynchronize();
+    CUDA_CHECK(cudaGetLastError());
+    cudaThreadSynchronize();
   }
   cudaThreadSynchronize();
   cout << getTime() - start_time << endl;
@@ -77,7 +80,8 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
                                                             interleaved_image_in.region_size[0],
                                                             interleaved_image_in.region_size[1],
                                                             interleaved_image_in.stride[0]);
-                                                            cudaThreadSynchronize();
+    CUDA_CHECK(cudaGetLastError());
+    cudaThreadSynchronize();
   }
   cudaThreadSynchronize();
   cout << getTime() - start_time << endl;
@@ -93,7 +97,9 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
                                                 plane_image_in.region_size[1],
                                                 plane_image_in.stride[0],
                                                 plane_image_in.stride[1]);
-                                                cudaThreadSynchronize();
+
+    CUDA_CHECK(cudaGetLastError());
+    cudaThreadSynchronize();
   }
   cudaThreadSynchronize();
   cout << getTime() - start_time << endl;

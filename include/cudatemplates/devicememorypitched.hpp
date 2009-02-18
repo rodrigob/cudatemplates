@@ -153,8 +153,8 @@ initMem(int val, bool sync)
     cudaPitchedPtr pitchDevPtr;
     pitchDevPtr.ptr = (void *)this->buffer;
     pitchDevPtr.pitch = this->getPitch();
-    pitchDevPtr.xsize = this->stride[0] * sizeof(Type);
-    pitchDevPtr.ysize = (this->stride[1] / this->stride[0]) * sizeof(Type);
+    pitchDevPtr.xsize = this->size[0] * sizeof(Type);
+    pitchDevPtr.ysize = this->size[1];
 
     CUDA_CHECK(cudaMemset3D(pitchDevPtr, val, extent));
   }
