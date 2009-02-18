@@ -105,13 +105,13 @@ public:
   /**
      Bind the buffer object to the target specified in the constructor.
   */
-  inline void bind() { CUDA_OPENGL_CHECK(glBindBuffer(target, bufname)); }
+  inline void bind() { CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->bufname)); }
 
   /**
      Bind the buffer object to the given target.
      @param t target to which the buffer object should be bound
   */
-  inline void bind(GLenum t) { CUDA_OPENGL_CHECK(glBindBuffer(t, bufname)); }
+  inline void bind(GLenum t) { CUDA_OPENGL_CHECK(glBindBuffer(t, this->bufname)); }
 
   /**
      Register and map buffer object.
@@ -160,18 +160,21 @@ public:
   */
   void free();
 
-  inline GLuint getName() const { return bufname; }
+  inline GLuint getName() const { return this->bufname; }
 
   /**
      Unbind the buffer object from the target specified in the constructor.
   */
-  inline void unbind() { CUDA_OPENGL_CHECK(glBindBuffer(target, 0)); }
+  inline void unbind() { CUDA_OPENGL_CHECK(glBindBuffer(this->target, 0)); }
 
   /**
      Unbind the buffer object from the given target.
      @param t target from which the buffer object should be unbound
   */
-  inline void unbind(GLenum t) { CUDA_OPENGL_CHECK(glBindBuffer(t, 0)); }
+  inline void unbind(GLenum t) { 
+    temptarget = t; 
+    CUDA_OPENGL_CHECK(glBindBuffer(this->temptarget, 0)); 
+  }
 
 private:
   /**
@@ -188,6 +191,10 @@ private:
      Specifies the expected usage pattern of the data store.
   */
   GLenum usage;
+  /** 
+      member used for gcc template dependency problem workaround 
+   */
+  GLenum temptarget;
   /** 
       Specifies whether a buffer is registered in Cuda
   */
@@ -206,7 +213,7 @@ connect()
       CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
       registered = true;
     }
-  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, bufname));
+  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, this->bufname));
 
   if(this->buffer == 0)
     CUDA_ERROR("map buffer object failed");
@@ -219,10 +226,10 @@ disconnect()
   if(this->buffer == 0)
     return;
 
-  CUDA_CHECK(cudaGLUnmapBufferObject(bufname));
+  CUDA_CHECK(cudaGLUnmapBufferObject(this->bufname));
   if (registered) 
     {
-      CUDA_CHECK(cudaGLUnregisterBufferObject(bufname));
+      CUDA_CHECK(cudaGLUnregisterBufferObject(this->bufname));
       registered = false;
     }
   this->buffer = 0;
@@ -234,7 +241,7 @@ registerObject()
 {
   if (!registered)
     {
-      CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
+      CUDA_CHECK(cudaGLRegisterBufferObject(this->bufname));
       registered = true;
     }
 }
@@ -245,7 +252,7 @@ unregisterObject()
 {
   if (registered)
     {
-      CUDA_CHECK(cudaGLUnregisterBufferObject(bufname));
+      CUDA_CHECK(cudaGLUnregisterBufferObject(this->bufname));
       registered = false;
     }
 }
@@ -258,7 +265,7 @@ mapBuffer()
     return;
 
   if (!registered) CUDA_ERROR("map buffer object failed - register it first");
-  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, bufname));
+  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, this->bufname));
 
   if(this->buffer == 0)
     CUDA_ERROR("map buffer object failed");
@@ -271,7 +278,7 @@ unmapBuffer()
   if(this->buffer == 0)
     return;
   if (!registered) CUDA_ERROR("unmap of unregistered buffer object failed");
-  CUDA_CHECK(cudaGLUnmapBufferObject(bufname));
+  CUDA_CHECK(cudaGLUnmapBufferObject(this->bufname));
   this->buffer = 0;
 }
 
@@ -286,9 +293,9 @@ alloc()
   for(size_t i = Dim; i--;)
     p *= this->size[i];
 
-  CUDA_OPENGL_CHECK(glGenBuffers(1, &bufname));
+  CUDA_OPENGL_CHECK(glGenBuffers(1, &(this->bufname)));
   bind();
-  CUDA_OPENGL_CHECK(glBufferData(target, p * sizeof(Type), 0, usage));
+  CUDA_OPENGL_CHECK(glBufferData(this->target, p * sizeof(Type), 0, this->usage));
   unbind();
   connect();
 }
@@ -301,8 +308,8 @@ free()
     return;
 
   disconnect();
-  glBindBuffer(target, 0);
-  glDeleteBuffers(1, &bufname);
+  glBindBuffer(this->target, 0);
+  glDeleteBuffers(1, &(this->bufname));
   bufname = 0;
 }
 
