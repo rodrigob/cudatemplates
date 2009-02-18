@@ -117,7 +117,7 @@ cuda_add_executable(compat compat.cu)
 
 cuda_add_executable(symbol symbol.cu)
 
-cuda_add_executable(vector vector.cpp)
+# cuda_add_executable(vector vector.cpp)
 
 cuda_add_executable(precision_sm_10 precision.cu)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")

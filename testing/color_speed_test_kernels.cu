@@ -1,3 +1,51 @@
+
+__global__ void transferInterleavedDirectKernel( float4* input, float4* output,
+                                                 int width, int height, int p)
+{
+  // calculate absolute coordinates
+  unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+  unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+  unsigned int c = y*p+x;
+
+  // Thread index
+  int tx = threadIdx.x+1;
+  int ty = threadIdx.y+1;
+
+  // Define arrays for shared memory
+  __shared__ float4 data_shared[16+2][16+2];
+
+  // load data into shared memory
+  data_shared[ty][tx] = input[c];
+
+  __syncthreads();
+
+  if (x == 0)
+    data_shared[ty][tx-1] = make_float4(0.0f,0.0f,0.0f,0.0f);
+  else if (tx == 1)
+    data_shared[ty][tx-1] = input[c-1];
+
+  if (y == 0)
+    data_shared[ty-1][tx] = make_float4(0.0f,0.0f,0.0f,0.0f);
+  else if (ty == 1)
+    data_shared[ty-1][tx] = input[c-p];
+
+  if (x >= width-1)
+    data_shared[ty][tx+1] = data_shared[ty][tx];
+  else if (tx == 16-1)
+    data_shared[ty][tx+1] = input[c-p];
+
+  if (y >= height-1)
+    data_shared[ty+1][tx] = data_shared[ty][tx];
+  else if (ty == 16-1)
+    data_shared[ty+1][tx] = input[c+p];
+
+  if ((x<width) && (y<height))
+  {
+    output[c] = data_shared[ty][tx];
+  }
+}
+
+
 __global__ void transferInterleavedKernel( float4* input, float4* output,
                                            int width, int height, int p)
 {
@@ -165,3 +213,5 @@ __global__ void transferPlaneKernel( float* input, float* output,
     output[c+2*pitchY] = data_shared[ty][tx][0];
   }
 }
+
+

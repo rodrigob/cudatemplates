@@ -41,17 +41,17 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
   Cuda::DeviceMemoryPitched<float, 3> plane_image_out(plane_size);
 //   COMMONLIB_CHECK_CUDA_ERROR();
 
-  interleaved_image_in.initMem(1);
-  interleaved_image_out.initMem(1);
-  plane_image_in.initMem(1);
-  plane_image_out.initMem(1);
+//   interleaved_image_in.initMem(1);
+//   interleaved_image_out.initMem(1);
+//   plane_image_in.initMem(1);
+//   plane_image_out.initMem(1);
 //   COMMONLIB_CHECK_CUDA_ERROR();
 
   // prepare fragmentation for processing
   dim3 dimBlock(block_size, block_size, 1);
   dim3 dimGrid(divUp(interleaved_size[0], block_size), divUp(interleaved_size[1], block_size), 1);
 
-  cout << "First Test: float4 interleaved image  -  ";
+  cout << "float4 interleaved image          -  ";
   cudaThreadSynchronize();
   double start_time = getTime();
   for (int i=0; i<num; i++)
@@ -67,7 +67,22 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
   cout << getTime() - start_time << endl;
 //   COMMONLIB_CHECK_CUDA_ERROR();
 
-  cout << "Second Test: float 3 plane image  -  ";
+  cout << "float4 interleaved image (direct) -  ";
+  cudaThreadSynchronize();
+  start_time = getTime();
+  for (int i=0; i<num; i++)
+  {
+    transferInterleavedDirectKernel<<<dimGrid, dimBlock>>>( interleaved_image_in.getBuffer(),
+                                                            interleaved_image_out.getBuffer(),
+                                                            interleaved_image_in.region_size[0],
+                                                            interleaved_image_in.region_size[1],
+                                                            interleaved_image_in.stride[0]);
+                                                            cudaThreadSynchronize();
+  }
+  cudaThreadSynchronize();
+  cout << getTime() - start_time << endl;
+
+  cout << "float 3-plane image               -  ";
   cudaThreadSynchronize();
   start_time = getTime();
   for (int i=0; i<num; i++)
@@ -84,7 +99,6 @@ int CUDAtestMemLoad(int block_size, int num, int width, int height)
   cout << getTime() - start_time << endl;
 //   COMMONLIB_CHECK_CUDA_ERROR();
 
-
   cout << endl << endl;
   return 0;
 }
@@ -99,3 +113,4 @@ main()
 
   return 0;
 }
+
