@@ -117,6 +117,8 @@ cuda_add_executable(compat compat.cu)
 
 cuda_add_executable(symbol symbol.cu)
 
+cuda_add_executable(fillrate fillrate.cu)
+
 # cuda_add_executable(vector vector.cpp)
 
 cuda_add_executable(precision_sm_10 precision.cu)

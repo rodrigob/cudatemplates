@@ -88,12 +88,6 @@ public:
   {
     DeviceMemoryStorage<Type, Dim>::alloc(_size);
   }
-
-  /**
-     Initializes the GPU memory with the value \a val.
-     Unfortunately only integer values are supported by the cudaMemset functions.
-  */
-  void initMem(int val, bool sync = true);
 };
 
 template <class Type, unsigned Dim>
@@ -118,19 +112,6 @@ alloc()
 
   if(this->buffer == 0)
     CUDA_ERROR("cudaMalloc failed");
-}
-
-template <class Type, unsigned Dim>
-void DeviceMemoryLinear<Type, Dim>::
-initMem(int val, bool sync)
-{
-  if(this->buffer == 0)
-    return;
-
-  CUDA_CHECK(cudaMemset(this->buffer, val, this->getSize() * sizeof(Type)));
-
-  if(sync)
-    cudaThreadSynchronize();
 }
 
 }  // namespace Cuda
