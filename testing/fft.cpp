@@ -18,14 +18,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <sys/time.h>
-
 #include <cstdlib>
 #include <iostream>
 
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/cufft.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
+#include <cudatemplates/event.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
 
 using namespace std;
@@ -68,18 +67,17 @@ main()
     copy(data1_g, data1_h);
 
     // execute FFT and measure performance:
-    struct timeval t1, t2;
-    cudaThreadSynchronize();
-    gettimeofday(&t1, 0);
+    Cuda::Event t1, t2;
+    t1.record();
 
     for(int i = COUNT; i--;) {
       plan_r2c_1d.exec(data1_g, data_fft_g);
       plan_c2r_1d.exec(data_fft_g, data2_g);
     }
 
-    cudaThreadSynchronize();
-    gettimeofday(&t2, 0);
-    double t = t2 - t1;
+    t2.record();
+    t2.synchronize();
+    double t = (t2 - t1) / 1000;
     cout
       << "total time: " << t << " seconds\n"
       << "FFTs per second (size = " << SIZE << "x" << SIZE << ", forward and inverse): " << (COUNT / t) << endl;

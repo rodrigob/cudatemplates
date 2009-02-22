@@ -54,7 +54,7 @@ void fillrate()
 
     // measure initMem method:
     for(int j = count; j--;)
-      image.initMem(0);
+      image.initMem(0, false);
 
     event1.record();
 
