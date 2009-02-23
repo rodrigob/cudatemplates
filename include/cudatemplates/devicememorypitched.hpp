@@ -145,20 +145,15 @@ initMem(int val, bool sync)
     CUDA_CHECK(cudaMemset2D(this->buffer, this->getPitch(), val, this->size[0] * sizeof(Type), this->size[1]));
   }
   else if(Dim >= 3) {
-
-    printf("[INITMEM] stride = %d, pitch = %d\n", this->stride[0], this->getPitch());
-    printf("[INITMEM] size = %dx%dx%d\n", this->size[0], this->size[1], this->size[2]);
-    printf("[INITMEM] region_size = %dx%dx%d\n", this->region_size[0], this->region_size[1], this->region_size[2]);
-
     cudaExtent extent;
-    extent.width = this->getPitch();//this->size[0] * sizeof(Type);
+    extent.width = this->getPitch();
     extent.height = this->size[1];
     extent.depth = this->size[2];
 
     cudaPitchedPtr pitchDevPtr;
     pitchDevPtr.ptr = (void *)this->buffer;
     pitchDevPtr.pitch = this->getPitch();
-    pitchDevPtr.xsize = this->getPitch();//this->size[0] * sizeof(Type);
+    pitchDevPtr.xsize = this->getPitch();
     pitchDevPtr.ysize = this->size[1];
 
     CUDA_CHECK(cudaMemset3D(pitchDevPtr, val, extent));
@@ -175,4 +170,3 @@ initMem(int val, bool sync)
 
 
 #endif
-
