@@ -293,12 +293,12 @@ getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, bool &aligned,
 
   switch(Dim) {
   case 1:
-    blockDim = dim3(64);
+    blockDim = dim3(256);
     gridDim = dim3(numblocks(rofs[0], rsize[0], blockDim.x));
     break;
 
   case 2:
-    blockDim = dim3(8, 8);
+    blockDim = dim3(16, 16);
     gridDim = dim3(numblocks(rofs[0], rsize[0], blockDim.x),
 		   numblocks(rofs[1], rsize[1], blockDim.y));
   }
