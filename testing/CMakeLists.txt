@@ -102,12 +102,8 @@ target_link_libraries(array ${CUDA_TARGET_LINK})
 cuda_add_executable(kernel kernel.cu)
 target_link_libraries(kernel ${CUDA_TARGET_LINK})
 
-add_executable(texture texture.cu)
-target_link_libraries(texture ${CUDA_TARGET_LINK})
 cuda_add_executable(texture texture.cu)
 
-add_executable(color_speed_test color_speed_test.cu)
-target_link_libraries(color_speed_test ${CUDA_TARGET_LINK})
 cuda_add_executable(color_speed_test color_speed_test.cu)
 
 cuda_add_executable(buffer_object buffer_object.cpp buffer_object_init.cu)
@@ -118,6 +114,8 @@ cuda_add_executable(compat compat.cu)
 cuda_add_executable(symbol symbol.cu)
 
 cuda_add_executable(fillrate fillrate.cu)
+
+cuda_add_executable(throughput throughput.cu)
 
 # cuda_add_executable(vector vector.cpp)
 
