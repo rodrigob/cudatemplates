@@ -13,12 +13,20 @@ __device__ float ddata1[SIZE], ddata2[SIZE];
 Cuda::Symbol<float, 1> symbol(Cuda::Size<1>(1024), cdata1);
 
 
+__global__ void
+kernel(float *data1, float *data2)
+{
+  int i = threadIdx.x + blockIdx.x * blockDim.x;
+  data1[i] = cdata2[i];
+  data2[i] = ddata2[i];
+}
+
 int
 main()
 {
   Cuda::Size<1> size(SIZE);
-  Cuda::HostMemoryHeap<float, 1> host1(size), host2(size), host3(size);
-  Cuda::DeviceMemoryLinear<float, 1> device1(size), device2(size);
+  Cuda::HostMemoryHeap<float, 1> host1(size), host2(size), host3(size), host4(size), host5(size);
+  Cuda::DeviceMemoryLinear<float, 1> device1(size), device2(size), device4(size), device5(size);
   Cuda::Symbol<float, 1> csym1(size, cdata1), csym2(size, cdata2);
   Cuda::Symbol<float, 1> dsym1(size, ddata1), dsym2(size, ddata2);
 
@@ -49,9 +57,19 @@ main()
   float *dbuf1 = dsym1.getBuffer();
   float *dbuf2 = dsym2.getBuffer();
 
+  dim3 blockDim(32);
+  dim3 gridDim(SIZE / blockDim.x);
+  kernel<<<gridDim, blockDim>>>(device4.getBuffer(), device5.getBuffer());
+  copy(host4, device4);
+  copy(host5, device5);
+
   // verify data:
   srand(seed);
 
-  for(int i = SIZE; i--;)
-    assert(host3[i] == rand());
+  for(int i = SIZE; i--;) {
+    int r = rand();
+    assert(host3[i] == r);
+    assert(host4[i] == r);
+    assert(host5[i] == r);
+  }
 }
