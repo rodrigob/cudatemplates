@@ -18,15 +18,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <typeinfo>
 
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/copy_constant.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
 #include <cudatemplates/event.hpp>
+#include <cudatemplates/hostmemoryheap.hpp>
 
 
 const int BLOCK_SIZE = 16;
@@ -72,15 +74,27 @@ gbps(float ms)
 }
 
 void
+compare(const Cuda::HostMemoryHeap2D<PixelType> &data1,
+	const Cuda::HostMemoryHeap2D<PixelType> &data2)
+{
+  for(Cuda::Iterator<2> i = data1.begin(); i != data1.end(); ++i)
+    assert(data1[i] == data2[i]);
+}
+
+void
 throughput()
 {
   Cuda::Event event0, event1, event2;
+  Cuda::HostMemoryHeap2D<PixelType> h_src(SIZE, SIZE), h_dst(SIZE, SIZE);
   Cuda::DeviceMemoryPitched2D<PixelType> src_linear(SIZE, SIZE);
   Cuda::Array2D<PixelType> src_array(SIZE, SIZE);
-  Cuda::DeviceMemoryPitched2D<PixelType> dst(SIZE, SIZE);
-  
-  Cuda::copy(src_linear, (PixelType)0);
-  Cuda::copy(src_array, src_linear);
+  Cuda::DeviceMemoryPitched2D<PixelType> dst1(SIZE, SIZE), dst2(SIZE, SIZE);
+
+  for(Cuda::Iterator<2> i = h_src.begin(); i != h_src.end(); ++i)
+    h_src[i] = rand();
+
+  Cuda::copy(src_linear, h_src);
+  Cuda::copy(src_array, h_src);
   src_array.bindTexture(tex);
 
   dim3 gridDim(SIZE / BLOCK_SIZE, SIZE / BLOCK_SIZE);
@@ -89,17 +103,22 @@ throughput()
   t0.record();
 
   for(int i = COUNT; i--;)
-    throughput_linear_kernel<<<gridDim, blockDim>>>(src_linear, dst);
+    throughput_linear_kernel<<<gridDim, blockDim>>>(src_linear, dst1);
 
   t1.record();
 
   for(int i = COUNT; i--;)
-    throughput_array_kernel<<<gridDim, blockDim>>>(dst);
+    throughput_array_kernel<<<gridDim, blockDim>>>(dst2);
 
   t2.record();
   t2.synchronize();
   printf("throughput  linear->linear: %f GB/sec\n", gbps((t1 - t0) / COUNT));
   printf("throughput texture->linear: %f GB/sec\n", gbps((t2 - t1) / COUNT));
+
+  Cuda::copy(h_dst, dst1);
+  compare(h_src, h_dst);
+  Cuda::copy(h_dst, dst2);
+  compare(h_src, h_dst);
 }
 
 int
