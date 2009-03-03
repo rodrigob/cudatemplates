@@ -105,10 +105,10 @@ public:
 
 
   /**
-    Retruns a single slice from a higher dimensional dataset.
+    Returns a single slice from a higher dimensional dataset.
     @param slice slice to which reference will be created
   */
-  DeviceMemoryReference<Type, Dim-1>* getSlice(int slice)
+  DeviceMemoryReference<Type, Dim-1> getSlice(int slice)
   {
     CUDA_STATIC_ASSERT(Dim >= 2);
 
@@ -121,16 +121,14 @@ public:
       slice_size[i] = this->size[i];
 
     int offset = this->stride[Dim-2]*slice;
-    DeviceMemoryReference<Type, Dim-1>* slice_ref =
-      new DeviceMemoryReference<Type, Dim-1>(slice_size, &this->buffer[offset]);
+    DeviceMemoryReference<Type, Dim-1> slice_ref(slice_size, this->buffer + offset);
 
     for(int i = Dim-1; i--;)
     {
-      slice_ref->region_ofs[i] = this->region_ofs[i];
-      slice_ref->region_size[i] = this->region_size[i];
-      slice_ref->stride[i] = this->stride[i];
-      slice_ref->spacing[i] = this->spacing[i];
-      slice_ref->setPitch(this->getPitch());
+      slice_ref.region_ofs[i] = this->region_ofs[i];
+      slice_ref.region_size[i] = this->region_size[i];
+      slice_ref.stride[i] = this->stride[i];
+      slice_ref.spacing[i] = this->spacing[i];
     }
 
     return slice_ref;
