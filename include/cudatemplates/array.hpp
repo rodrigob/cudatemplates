@@ -111,15 +111,15 @@ public:
 #ifdef __CUDACC__
 
   template<enum cudaTextureReadMode readMode>
-  void bindTexture(texture<Type, Dim, readMode> &tex)
+  void bindTexture(texture<Type, Dim, readMode> &tex) const
   {
-    cudaBindTextureToArray(tex, array);
+    CUDA_CHECK(cudaBindTextureToArray(tex, array));
   }
 
   template<enum cudaTextureReadMode readMode>
-  void unbindTexture(texture<Type, Dim, readMode> &tex)
+  void unbindTexture(texture<Type, Dim, readMode> &tex) const
   {
-    cudaUnbindTexture(tex);
+    CUDA_CHECK(cudaUnbindTexture(tex));
   }
 
 #endif

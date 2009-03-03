@@ -22,6 +22,11 @@
 #define CUDA_DEVICEMEMORY_H
 
 
+#ifdef __CUDACC__
+#include <driver_types.h>
+#include <texture_types.h>
+#endif
+
 #include <cudatemplates/error.hpp>
 #include <cudatemplates/pointerstorage.hpp>
 
@@ -42,6 +47,11 @@ class DeviceMemory:
 {
 public:
   typedef DeviceMemoryReference<Type, Dim> Reference;
+
+#ifdef __CUDACC__
+  typedef texture<Type, Dim, cudaReadModeElementType> Texture;
+  typedef texture<Type, Dim, cudaReadModeNormalizedFloat> TextureNormalizedFloat;
+#endif
 
   /**
      A stripped-down version of the layout data structure suitable for passing
@@ -92,6 +102,23 @@ public:
      Unfortunately only integer values are supported by the cudaMemset functions.
   */
   void initMem(int val, bool sync = true);
+
+#ifdef __CUDACC__
+
+  template<enum cudaTextureReadMode readMode>
+  void bindTexture(texture<Type, Dim, readMode> &tex) const
+  {
+    CUDA_STATIC_ASSERT(Dim == 1);
+    CUDA_CHECK(cudaBindTexture(0, tex, this->buffer, this->size[0] * sizeof(Type)));
+  }
+
+  template<enum cudaTextureReadMode readMode>
+  void unbindTexture(texture<Type, Dim, readMode> &tex) const
+  {
+    CUDA_CHECK(cudaUnbindTexture(tex));
+  }
+
+#endif
 
 protected:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
