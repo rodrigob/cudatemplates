@@ -1,19 +1,19 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -91,8 +91,8 @@ public:
       data(const_cast<Type *>(mem.getBuffer()))
     {
       for(int i = Dim; i--;) {
-	size[i] = mem.size[i];
-	stride[i] = mem.stride[i];
+        size[i] = mem.size[i];
+        stride[i] = mem.stride[i];
       }
     }
   };
@@ -102,6 +102,39 @@ public:
      Unfortunately only integer values are supported by the cudaMemset functions.
   */
   void initMem(int val, bool sync = true);
+
+
+  /**
+    Retruns a single slice from a higher dimensional dataset.
+    @param slice slice to which reference will be created
+  */
+  DeviceMemoryReference<Type, Dim-1>* getSlice(int slice)
+  {
+    CUDA_STATIC_ASSERT(Dim >= 2);
+
+    if (slice < 0 || slice>=this->size[Dim-1])
+      CUDA_ERROR("out of bounds");
+
+    // Calculate new size
+    Cuda::Size<Dim-1> slice_size;
+    for(int i = Dim-1; i--;)
+      slice_size[i] = this->size[i];
+
+    int offset = this->stride[Dim-2]*slice;
+    DeviceMemoryReference<Type, Dim-1>* slice_ref =
+      new DeviceMemoryReference<Type, Dim-1>(slice_size, &this->buffer[offset]);
+
+    for(int i = Dim-1; i--;)
+    {
+      slice_ref->region_ofs[i] = this->region_ofs[i];
+      slice_ref->region_size[i] = this->region_size[i];
+      slice_ref->stride[i] = this->stride[i];
+      slice_ref->spacing[i] = this->spacing[i];
+      slice_ref->setPitch(this->getPitch());
+    }
+
+    return slice_ref;
+  }
 
 #ifdef __CUDACC__
 
