@@ -11,7 +11,7 @@
 # no DeviceMemoryPitched and Array in 1d:
 sub no_support_1d
 {
-    return (@_[0] == 3) || (@_[0] == 4);
+    return (@_[0] == 3);
 }
 
 # only power-of-two size allowed in 3D:

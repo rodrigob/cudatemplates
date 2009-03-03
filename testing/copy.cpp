@@ -277,8 +277,6 @@ test_array_copy()
     pos1a(smax1 / 16), pos1b(smax1 / 16),
     size1(smax1 / 2);
 
-  err |= test_array_copy2<Cuda::HostMemoryHeap<float, 1>, Cuda::HostMemoryHeap<double, 1> >(size1a, size1b, pos1a, pos1b, size1, smax1);
-
 #include "test1d.cpp"
 
   // two-dimensional data:

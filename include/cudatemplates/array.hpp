@@ -154,32 +154,29 @@ template <class Type, unsigned Dim>
 void Array<Type, Dim>::
 alloc()
 {
+  CUDA_STATIC_ASSERT(Dim >= 1);
   this->free();
 
   cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<Type>();
-  cudaExtent extent;
-  extent.width = this->size[0];
 
-  if(Dim >= 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMallocArray(&array, &channelDesc, this->size[0], 1));
+  }
+  else if(Dim == 2) {
+    CUDA_CHECK(cudaMallocArray(&array, &channelDesc, this->size[0], this->size[1]));
+  }
+  else {
+    cudaExtent extent;
+    extent.width = this->size[0];
     extent.height = this->size[1];
+    extent.depth = this->size[2];
 
-    if(Dim >= 3) {
-      extent.depth = this->size[2];
+    // map 4- and more-dimensional data sets to 3D data:
+    for(unsigned i = 3; i < Dim; ++i)
+      extent.depth *= this->size[i];
 
-      // map 4- and more-dimensional data sets to 3D data:
-      for(unsigned i = 3; i < Dim; ++i)
-	extent.depth *= this->size[i];
-    }
+    CUDA_CHECK(cudaMalloc3DArray(&array, &channelDesc, extent));
   }
-
-  if(Dim < 3) {
-    extent.depth = 0;
-
-    if(Dim < 2)
-      extent.height = 0;
-  }
-
-  CUDA_CHECK(cudaMalloc3DArray(&array, &channelDesc, extent));
 }
 
 template <class Type, unsigned Dim>

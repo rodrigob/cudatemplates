@@ -305,11 +305,15 @@ template<class Type, unsigned Dim>
 void
 copyFromArray(Pointer<Type, Dim> &dst, const Array<Type, Dim> &src, cudaMemcpyKind kind)
 {
-  CUDA_STATIC_ASSERT(Dim >= 2);
+  CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
   CUDA_CHECK_SIZE;
 
-  if(Dim == 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMemcpyFromArray(dst.getBuffer(), src.getArray(), 0, 0,
+				   src.size[0] * sizeof(Type), kind));
+  }
+  else if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DFromArray(dst.getBuffer(), dst.getPitch(),
 				     src.getArray(), 0, 0,
 				     src.size[0] * sizeof(Type), src.size[1], kind));
@@ -354,12 +358,16 @@ copyFromArray(Pointer<Type, Dim> &dst, const Array<Type, Dim> &src,
 	      const Size<Dim> &dst_ofs, const Size<Dim> &src_ofs, const Size<Dim> &size,
 	      cudaMemcpyKind kind)
 {
-  CUDA_STATIC_ASSERT(Dim >= 2);
+  CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
 
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
-  if(Dim == 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMemcpyFromArray(dst.getBuffer() + dst_ofs[0], src.getArray(), src_ofs[0] * sizeof(Type), 0,
+				   size[0] * sizeof(Type), kind));
+  }
+  else if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DFromArray(dst.getBuffer() + dst_ofs[0] + dst_ofs[1] * dst.stride[0], dst.getPitch(),
 				     src.getArray(), src_ofs[0] * sizeof(Type), src_ofs[1],
 				     size[0] * sizeof(Type), size[1], kind));
@@ -463,11 +471,15 @@ template<class Type, unsigned Dim>
 void
 copyToArray(Array<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind)
 {
-  CUDA_STATIC_ASSERT(Dim >= 2);
+  CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
   CUDA_CHECK_SIZE;
 
-  if(Dim == 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMemcpyToArray(dst.getArray(), 0, 0, src.getBuffer(),
+				 src.size[0] * sizeof(Type), kind));
+  }
+  else if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DToArray(dst.getArray(), 0, 0,
 				   src.getBuffer(), src.getPitch(),
 				   src.size[0] * sizeof(Type), src.size[1], kind));
@@ -513,12 +525,16 @@ copyToArray(Array<Type, Dim> &dst, const Pointer<Type, Dim> &src,
 	    cudaMemcpyKind kind)
 
 {
-  CUDA_STATIC_ASSERT(Dim >= 2);
+  CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
 
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
-  if(Dim == 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMemcpyToArray(dst.getArray(), dst_ofs[0] * sizeof(Type), 0, src.getBuffer() + src_ofs[0],
+				 size[0] * sizeof(Type), kind));
+  }
+  else if(Dim == 2) {
     /*
       Notes:
       -) the dstX parameter of cudaMemcpy2DToArray is measured in bytes
@@ -625,11 +641,16 @@ template<class Type, unsigned Dim>
 void
 copy(Array<Type, Dim> &dst, const Array<Type, Dim> &src)
 {
-  CUDA_STATIC_ASSERT(Dim >= 2);
+  CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
   CUDA_CHECK_SIZE;
 
-  if(Dim == 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMemcpyArrayToArray(dst.getArray(), 0, 0,
+				      src.getArray(), 0, 0,
+				      src.size[0] * sizeof(Type), cudaMemcpyDeviceToDevice));
+  }
+  else if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DArrayToArray(dst.getArray(), 0, 0,
 					src.getArray(), 0, 0,
 					src.size[0] * sizeof(Type), src.size[1], cudaMemcpyDeviceToDevice));
@@ -669,12 +690,17 @@ void
 copy(Array<Type, Dim> &dst, const Array<Type, Dim> &src,
      const Size<Dim> &dst_ofs, const Size<Dim> &src_ofs, const Size<Dim> &size)
 {
-  CUDA_STATIC_ASSERT(Dim >= 2);
+  CUDA_STATIC_ASSERT(Dim >= 1);
   CUDA_STATIC_ASSERT(Dim <= 3);
 
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
-  if(Dim == 2) {
+  if(Dim == 1) {
+    CUDA_CHECK(cudaMemcpyArrayToArray(dst.getArray(), dst_ofs[0] * sizeof(Type), 0,
+				      src.getArray(), src_ofs[0] * sizeof(Type), 0,
+				      size[0] * sizeof(Type), cudaMemcpyDeviceToDevice));
+  }
+  else if(Dim == 2) {
     CUDA_CHECK(cudaMemcpy2DArrayToArray(dst.getArray(), dst_ofs[0] * sizeof(Type), dst_ofs[1],
 					src.getArray(), src_ofs[0] * sizeof(Type), src_ofs[1],
 					size[0] * sizeof(Type), size[1], cudaMemcpyDeviceToDevice));
