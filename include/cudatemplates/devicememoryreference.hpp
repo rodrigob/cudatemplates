@@ -1,19 +1,19 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -66,18 +66,26 @@ public:
   }
 
   /**
-     Constructor.
-     The current implementation only works if the resulting object refers to a
-     contiguous block of memory.
+     Constructor based on existing device memory. Will keep any region of interest
+     valid, by determining 'intersection' of regions.
+     @param data existing device memroy
+     @param ofs offset to new region
+     @param _size size of new region
   */
-  inline DeviceMemoryReference(DeviceMemory<Type, Dim> &data, const Size<Dim> &ofs, const Size<Dim> &_size):
+  inline DeviceMemoryReference( DeviceMemory<Type, Dim> &data, const Size<Dim> &ofs,
+                                const Size<Dim> &_size):
     Layout<Type, Dim>(data),
     Pointer<Type, Dim>(data),
     DeviceMemory<Type, Dim>(data)
   {
     this->buffer = data.getBuffer() + data.getOffset(ofs);
     this->size = _size;
-    this->setPitch(0);
+
+    for(int i = Dim; i--;)
+    {
+      this->region_ofs[i] = min(max((int)this->region_ofs[i]-(int)ofs[i], 0), (int)this->size[i]);
+      this->region_size[i] = min(this->region_size[i], this->size[i] - this->region_ofs[i]);
+    }
   }
 
 protected:

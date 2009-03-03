@@ -106,13 +106,14 @@ public:
 
   /**
     Returns a single slice from a higher dimensional dataset.
+    Keeps region of interest and other information.
     @param slice slice to which reference will be created
   */
-  DeviceMemoryReference<Type, Dim-1> getSlice(int slice)
+  DeviceMemoryReference<Type, Dim-1> getSlice(unsigned int slice)
   {
     CUDA_STATIC_ASSERT(Dim >= 2);
 
-    if (slice < 0 || slice>=this->size[Dim-1])
+    if (slice>=this->size[Dim-1])
       CUDA_ERROR("out of bounds");
 
     // Calculate new size
