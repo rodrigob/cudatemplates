@@ -102,7 +102,7 @@ public:
   const Type *getBuffer() const
   {
     const Type *buffer;
-    CUDA_CHECK(cudaGetSymbolAddress((void **)&buffer, *symbol));
+    CUDA_CHECK(cudaGetSymbolAddress((void **)&buffer, (const char *)symbol));
     return buffer;
   }
 
@@ -121,7 +121,7 @@ private:
   checkSize()
   {
     size_t symsize = 0;
-    CUDA_CHECK(cudaGetSymbolSize(&symsize, *symbol));
+    CUDA_CHECK(cudaGetSymbolSize(&symsize, (const char *)symbol));
 
     if(symsize != this->getBytes())
       CUDA_ERROR("symbol size mismatch");
