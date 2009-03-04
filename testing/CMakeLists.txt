@@ -113,6 +113,8 @@ cuda_add_executable(compat compat.cu)
 
 cuda_add_executable(symbol symbol.cu)
 
+cuda_add_executable(symbol_plain symbol_plain.cu)
+
 cuda_add_executable(fillrate fillrate.cu)
 
 cuda_add_executable(throughput throughput.cu)
