@@ -83,8 +83,8 @@ public:
 
     for(int i = Dim; i--;)
     {
-      this->region_ofs[i] = min(max((int)this->region_ofs[i]-(int)ofs[i], 0), (int)this->size[i]);
-      this->region_size[i] = min(this->region_size[i], this->size[i] - this->region_ofs[i]);
+      this->region_ofs[i] = std::min(std::max((int)this->region_ofs[i]-(int)ofs[i], 0), (int)this->size[i]);
+      this->region_size[i] = std::min(this->region_size[i], this->size[i] - this->region_ofs[i]);
     }
   }
 
