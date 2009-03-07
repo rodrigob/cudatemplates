@@ -85,6 +85,14 @@ public:
   }
 
   /**
+    Access to the ITK image pointer, useful for writing an image.
+  */
+  typename ImageType::Pointer getITKImagePointer()
+  {
+     return image_ptr;
+  }
+
+  /**
     Minimum gray value in original ITK data.
     Used for convenience to store original grayvalue range to be used during denormalization.
   */
