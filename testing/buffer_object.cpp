@@ -44,6 +44,7 @@
 #include <boost/gil/image.hpp>
 #include <boost/gil/typedefs.hpp>
 
+#include <GL/glew.h>
 #include <GL/glut.h>
 
 #include <cudatemplates/copy.hpp>

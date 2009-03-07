@@ -21,7 +21,7 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <assert.h>
-
+#include <GL/glew.h>
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
 #include <cudatemplates/opengl/bufferobject.hpp>

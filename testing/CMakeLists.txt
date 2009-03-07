@@ -9,6 +9,11 @@ include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
 
+# Glew:
+find_package(GLEW REQUIRED)
+include_directories(${GLEW_INCLUDE_DIR})
+cuda_include_directories(${GLEW_INCLUDE_DIR})
+
 # Boost:
 find_package(Boost)
 if(Boost_FOUND)
@@ -107,7 +112,7 @@ cuda_add_executable(texture texture.cu)
 cuda_add_executable(color_speed_test color_speed_test.cu)
 
 cuda_add_executable(buffer_object buffer_object.cpp buffer_object_init.cu)
-target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${PNG_LIBRARIES})
+target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
 
 cuda_add_executable(compat compat.cu)
 
