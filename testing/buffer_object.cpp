@@ -40,7 +40,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/gil/extension/io/png_dynamic_io.hpp>
+#include <boost/gil/extension/io/png_io.hpp>
 #include <boost/gil/image.hpp>
 #include <boost/gil/typedefs.hpp>
 
@@ -52,9 +52,15 @@
 #include <cudatemplates/opengl/bufferobject.hpp>
 #include <cudatemplates/opengl/copy.hpp>
 #include <cudatemplates/opengl/texture.hpp>
+#include <cudatemplates/hostmemoryheap.hpp>
 
 using namespace std;
-
+#define CHECK_GL_ERRORS  \
+{ \
+	GLenum err = glGetError(); \
+	if (err) \
+	printf( "Error %x at line %d, %s\n", err, __LINE__, gluErrorString(err)); \
+}
 
 #define SUBDIV_X  127
 #define SUBDIV_Y  127
@@ -106,19 +112,33 @@ main(int argc, char *argv[])
   try {
     typedef struct uchar3 PixelType;
 
+#ifndef _WIN32
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
     boost::gil::png_read_image("ladybug.png", gil_image);  // must match PixelType!
     Cuda::GilReference2D<PixelType> image(gil_image);
+#endif
 
     // init GLUT:
     glutInit(&argc, argv);
+#ifndef _WIN32
     glutInitWindowSize(image.size[0] * 2, image.size[1] * 2);
+#else
+    glutInitWindowSize(512, 512);
+#endif
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow("OpenGL buffer object demo");
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+#ifdef _WIN32
+	if (glewInit() != GLEW_OK)
+	{
+		printf("glewInit failed. Exiting...\n");
+		exit(1);
+	}
+	CHECK_GL_ERRORS;
+#endif
 
     GLuint obj1 = 0, obj2 = 0;
     glGenFramebuffersEXT(1, &obj1);
@@ -126,14 +146,31 @@ main(int argc, char *argv[])
     cout << obj1 << ' ' << obj2 << endl;
 
     // create OpenGL buffer object for image and copy data:
+#ifndef _WIN32
     Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(image.size);
     copy(bufobj_image, image);
+	// create OpenGL texture and copy data
+	// (note that the image data could also be copied directly to the texture,
+	// this is just to demonstrate the use of a buffer object for pixel data):
+	Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
+	copy(texture, bufobj_image);
+#else
+	Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(Cuda::Size<2>(256,256));
+	Cuda::HostMemoryHeap2D<PixelType> h_img(Cuda::Size<2>(256,256));
+	for(int i = 0; i < 256*256; i++)
+	{
+		h_img[i].x = i;
+		h_img[i].y = 0;
+		h_img[i].z = 0;
+	}
+	copy(bufobj_image, h_img);
+	// create OpenGL texture and copy data
+	// (note that the image data could also be copied directly to the texture,
+	// this is just to demonstrate the use of a buffer object for pixel data):
+	Cuda::OpenGL::Texture<PixelType, 2> texture(Cuda::Size<2>(256,256));
+	copy(texture, bufobj_image);
+#endif
 
-    // create OpenGL texture and copy data
-    // (note that the image data could also be copied directly to the texture,
-    // this is just to demonstrate the use of a buffer object for pixel data):
-    Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
-    copy(texture, bufobj_image);
     bufobj_image.disconnect();
     texture.bind();
 
