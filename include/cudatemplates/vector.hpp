@@ -41,9 +41,12 @@
 */
 #if __DEVICE_EMULATION__
 #define CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND 1
+#define CUDA_KERNEL_SIZE(n) Cuda::VectorBase<size_t, n>
 #else
 #define CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND 0
+#define CUDA_KERNEL_SIZE(n) Cuda::Size<n>
 #endif
+
 
 #include <cudatemplates/error.hpp>
 #include <cudatemplates/staticassert.hpp>

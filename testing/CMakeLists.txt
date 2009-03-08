@@ -77,6 +77,9 @@ cuda_add_executable(copy copy.cpp copy_instantiate.cu)
 
 cuda_add_executable(convert convert.cu)
 
+cuda_add_executable(pack pack.cu)
+add_dependencies(pack create_pack)
+
 add_executable(demo demo.cpp)
 target_link_libraries(demo ${CUDA_TARGET_LINK})
 

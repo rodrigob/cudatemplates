@@ -26,13 +26,6 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
-#if CUDA_EMULATION_VECTOR_ACCESS_WORKAROUND
-#define CUDA_KERNEL_SIZE(n) Cuda::VectorBase<size_t, n>
-#else
-#define CUDA_KERNEL_SIZE(n) Cuda::Size<n>
-#endif
-
-
 template <class Type1, class Type2>
 __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimension<1> dummy)
 {

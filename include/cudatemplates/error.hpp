@@ -85,4 +85,7 @@ private:
 #endif  // defined(__CUDACC__) || defined(NVCC)
 
 
+#define CUDA_CHECK_LAST CUDA_CHECK(cudaGetLastError())
+
+
 #endif
