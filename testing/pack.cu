@@ -54,6 +54,78 @@ gbps(float ms)
   return gb / sec;
 }
 
+/**
+   Class for pack/unpack functions.
+   Must be partially specialized for desired dimensions (see below).
+*/
+template <class ScalarType, unsigned VectorDim, class VectorType, unsigned DataDim>
+struct Test
+{
+};
+
+/**
+   Pack/unpack functions for 2D vectors.
+*/
+template <class ScalarType, class VectorType, unsigned DataDim>
+struct Test<ScalarType, 2, VectorType, DataDim>
+{
+  static inline void pack(Cuda::DeviceMemoryLinear<VectorType, DataDim> &d_data_vector,
+			  const Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar[2])
+  {
+    Cuda::pack(d_data_vector, d_data_scalar[0], d_data_scalar[1]);
+  }
+
+  static inline void unpack(Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar[2],
+			    const Cuda::DeviceMemoryLinear<VectorType, DataDim> &d_data_vector)
+			    
+  {
+    Cuda::unpack(d_data_scalar[0], d_data_scalar[1], d_data_vector);
+  }
+};
+
+/**
+   Pack/unpack functions for 3D vectors.
+*/
+template <class ScalarType, class VectorType, unsigned DataDim>
+struct Test<ScalarType, 3, VectorType, DataDim>
+{
+  static inline void pack(Cuda::DeviceMemoryLinear<VectorType, DataDim> &d_data_vector,
+			  const Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar[3])
+  {
+    Cuda::pack(d_data_vector, d_data_scalar[0], d_data_scalar[1], d_data_scalar[2]);
+  }
+
+  static inline void unpack(Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar[3],
+			    const Cuda::DeviceMemoryLinear<VectorType, DataDim> &d_data_vector)
+			    
+  {
+    Cuda::unpack(d_data_scalar[0], d_data_scalar[1], d_data_scalar[2], d_data_vector);
+  }
+};
+
+/**
+   Pack/unpack functions for 4D vectors.
+*/
+template <class ScalarType, class VectorType, unsigned DataDim>
+struct Test<ScalarType, 4, VectorType, DataDim>
+{
+  static inline void pack(Cuda::DeviceMemoryLinear<VectorType, DataDim> &d_data_vector,
+			  const Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar[4])
+  {
+    Cuda::pack(d_data_vector, d_data_scalar[0], d_data_scalar[1], d_data_scalar[2], d_data_scalar[3]);
+  }
+
+  static inline void unpack(Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar[4],
+			    const Cuda::DeviceMemoryLinear<VectorType, DataDim> &d_data_vector)
+			    
+  {
+    Cuda::unpack(d_data_scalar[0], d_data_scalar[1], d_data_scalar[2], d_data_scalar[3], d_data_vector);
+  }
+};
+
+/**
+   Performance and integrity test.
+*/
 template <class ScalarType, unsigned VectorDim, class VectorType, unsigned DataDim>
 void
 test()
@@ -91,19 +163,19 @@ test()
   t0.record();
   
   for(int i = COUNT; i--;)
-    Cuda::pack(d_data_vector, d_data_scalar1[0], d_data_scalar1[1], d_data_scalar1[2], d_data_scalar1[3]);
+    Test<ScalarType, VectorDim, VectorType, DataDim>::pack(d_data_vector, d_data_scalar1);
 
   // unpack vector into scalars:
   t1.record();
-  
+
   for(int i = COUNT; i--;)
-    Cuda::unpack(d_data_scalar2[0], d_data_scalar2[1], d_data_scalar2[2], d_data_scalar2[3], d_data_vector);
+    Test<ScalarType, VectorDim, VectorType, DataDim>::unpack(d_data_scalar2, d_data_vector);
 
   // report performance:
   t2.record();
   t2.synchronize();
-  printf("pack   %dD %s: %f GB / sec\n", VectorDim, typeid(ScalarType).name(), gbps<VectorType, DataDim>(t1 - t0));
-  printf("unpack %dD %s: %f GB / sec\n", VectorDim, typeid(ScalarType).name(), gbps<VectorType, DataDim>(t2 - t1));
+  printf("pack / unpack %d%s: %f / %f GB/sec\n", VectorDim, typeid(ScalarType).name(),
+	 gbps<VectorType, DataDim>(t1 - t0), gbps<VectorType, DataDim>(t2 - t1));
 
   // copy data from device to host memory:
   Cuda::copy(h_data_vector, d_data_vector);
@@ -125,10 +197,20 @@ test()
 int
 main()
 {
+  test<unsigned char, 2, uchar2, 2>();
+  test<short        , 2, short2, 2>();
+  test<int          , 2, int2  , 2>();
+  test<float        , 2, float2, 2>();
+
+  test<unsigned char, 3, uchar3, 2>();
+  test<short        , 3, short3, 2>();
+  test<int          , 3, int3  , 2>();
+  test<float        , 3, float3, 2>();
+
   test<unsigned char, 4, uchar4, 2>();
-  test<short, 4, short4, 2>();
-  test<int, 4, int4, 2>();
-  test<float, 4, float4, 2>();
+  test<short        , 4, short4, 2>();
+  test<int          , 4, int4  , 2>();
+  test<float        , 4, float4, 2>();
 
   return 0;
 }
