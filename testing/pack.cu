@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <typeinfo>
+
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/devicememorylinear.hpp>
 #include <cudatemplates/event.hpp>
@@ -38,92 +40,95 @@ frand()
   return rand() / (float)RAND_MAX;
 }
 
+template <class VectorType, unsigned DataDim>
 float
-gbps(float ms, int dim)
+gbps(float ms)
 {
-  int bytes = SIZE * SIZE * sizeof(float) * dim * 2;
+  int bytes = sizeof(VectorType) * 2;  // one read plus one write transfer of vector size
+
+  for(int i = DataDim; i--;)
+    bytes *= SIZE;
+
   float gb = bytes / (float)(1 << 30);
   float sec = ms / (1000 * COUNT);
   return gb / sec;
 }
 
+template <class ScalarType, unsigned VectorDim, class VectorType, unsigned DataDim>
+void
+test()
+{
+  Cuda::Size<DataDim> size;
+
+  for(int i = DataDim; i--;)
+    size[i] = SIZE;
+
+  Cuda::HostMemoryHeap<ScalarType, DataDim> h_data_scalar1[VectorDim], h_data_scalar2[VectorDim];
+  Cuda::HostMemoryHeap<VectorType, DataDim> h_data_vector(size);
+  Cuda::DeviceMemoryLinear<ScalarType, DataDim> d_data_scalar1[VectorDim], d_data_scalar2[VectorDim];
+  Cuda::DeviceMemoryLinear<VectorType, DataDim> d_data_vector(size);
+
+  for(int i = VectorDim; i--;) {
+    // allocate host memory:
+    h_data_scalar1[i].alloc(size);
+    h_data_scalar2[i].alloc(size);
+
+    // allocate device memory:
+    d_data_scalar1[i].alloc(size);
+    d_data_scalar2[i].alloc(size);
+
+    // initialize data:
+    for(Cuda::Iterator<DataDim> j = h_data_scalar1[i].begin(); j != h_data_scalar1[i].end(); ++j)
+      h_data_scalar1[i][j] = frand();
+
+    // copy data from host to device memory:
+    Cuda::copy(d_data_scalar1[i], h_data_scalar1[i]);
+  }
+
+  Cuda::Event t0, t1, t2;
+
+  // pack scalars into vector:
+  t0.record();
+  
+  for(int i = COUNT; i--;)
+    Cuda::pack(d_data_vector, d_data_scalar1[0], d_data_scalar1[1], d_data_scalar1[2], d_data_scalar1[3]);
+
+  // unpack vector into scalars:
+  t1.record();
+  
+  for(int i = COUNT; i--;)
+    Cuda::unpack(d_data_scalar2[0], d_data_scalar2[1], d_data_scalar2[2], d_data_scalar2[3], d_data_vector);
+
+  // report performance:
+  t2.record();
+  t2.synchronize();
+  printf("pack   %dD %s: %f GB / sec\n", VectorDim, typeid(ScalarType).name(), gbps<VectorType, DataDim>(t1 - t0));
+  printf("unpack %dD %s: %f GB / sec\n", VectorDim, typeid(ScalarType).name(), gbps<VectorType, DataDim>(t2 - t1));
+
+  // copy data from device to host memory:
+  Cuda::copy(h_data_vector, d_data_vector);
+
+  for(int i = VectorDim; i--;)
+    Cuda::copy(h_data_scalar2[i], d_data_scalar2[i]);
+
+  // verify packed data:
+  for(Cuda::Iterator<DataDim> i = h_data_vector.begin(); i != h_data_vector.end(); ++i) {
+    const ScalarType *vec = &h_data_vector[i].x;
+
+    for(int j = VectorDim; j--;) {
+      assert(h_data_scalar2[j][i] == h_data_scalar1[j][i]);
+      assert(vec[j] == h_data_scalar2[j][i]);
+    }
+  }
+}
+
 int
 main()
 {
-  const Cuda::Size<2> size(SIZE, SIZE);
-
-  // allocate memory in host memory:
-  Cuda::HostMemoryHeap<float , 2> h_data1x(size), h_data1y(size), h_data1z(size), h_data1w(size);
-  Cuda::HostMemoryHeap<float2, 2> h_data2(size);
-  Cuda::HostMemoryHeap<float3, 2> h_data3(size);
-  Cuda::HostMemoryHeap<float4, 2> h_data4(size);
-
-  // allocate memory in device memory:
-  Cuda::DeviceMemoryLinear<float , 2> d_data1x(size), d_data1y(size), d_data1z(size), d_data1w(size);
-  Cuda::DeviceMemoryLinear<float2, 2> d_data2(size);
-  Cuda::DeviceMemoryLinear<float3, 2> d_data3(size);
-  Cuda::DeviceMemoryLinear<float4, 2> d_data4(size);
-
-  // initialize data:
-  for(Cuda::Iterator<2> i = h_data1x.begin(); i != h_data1x.end(); ++i) {
-    h_data1x[i] = frand();
-    h_data1y[i] = frand();
-    h_data1z[i] = frand();
-    h_data1w[i] = frand();
-  }
-
-  // copy data from host to device:
-  Cuda::copy(d_data1x, h_data1x);
-  Cuda::copy(d_data1y, h_data1y);
-  Cuda::copy(d_data1z, h_data1z);
-  Cuda::copy(d_data1w, h_data1w);
-
-  Cuda::Event t0, t1, t2, t3;
-
-  // pack scalars into 2D-vector:
-  t0.record();
-
-  for(int i = COUNT; i--;)
-    Cuda::pack(d_data2, d_data1x, d_data1y);
-
-  // pack scalars into 3D-vector:
-  t1.record();
-
-  for(int i = COUNT; i--;)
-    Cuda::pack(d_data3, d_data1x, d_data1y, d_data1z);
-
-  // pack scalars into 4D-vector:
-  t2.record();
-
-  for(int i = COUNT; i--;)
-    Cuda::pack(d_data4, d_data1x, d_data1y, d_data1z, d_data1w);
-
-  t3.record();
-  t3.synchronize();
-
-  printf("pack 2D: %f GB / sec\n", gbps(t1 - t0, 2));
-  printf("pack 3D: %f GB / sec\n", gbps(t2 - t1, 3));
-  printf("pack 4D: %f GB / sec\n", gbps(t3 - t2, 4));
-
-  // copy data from device to host:
-  Cuda::copy(h_data2, d_data2);
-  Cuda::copy(h_data3, d_data3);
-  Cuda::copy(h_data4, d_data4);
-
-  // verify packed data:
-  for(Cuda::Iterator<2> i = h_data1x.begin(); i != h_data1x.end(); ++i) {
-    assert(h_data2[i].x == h_data1x[i]);
-    assert(h_data2[i].y == h_data1y[i]);
-
-    assert(h_data3[i].x == h_data1x[i]);
-    assert(h_data3[i].y == h_data1y[i]);
-    assert(h_data3[i].z == h_data1z[i]);
-
-    assert(h_data4[i].x == h_data1x[i]);
-    assert(h_data4[i].y == h_data1y[i]);
-    assert(h_data4[i].z == h_data1z[i]);
-    assert(h_data4[i].w == h_data1w[i]);
-  }      
+  test<unsigned char, 4, uchar4, 2>();
+  test<short, 4, short4, 2>();
+  test<int, 4, int4, 2>();
+  test<float, 4, float4, 2>();
 
   return 0;
 }

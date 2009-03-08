@@ -102,6 +102,15 @@ public:
   void alloc();
 
   /**
+     Allocate CPU memory.
+     @param _size requested size
+  */
+  inline void alloc(const Size<Dim> &_size)
+  {
+    HostMemoryStorage<Type, Dim>::alloc(_size);
+  }
+
+  /**
      Free CPU memory.
   */
   void free();

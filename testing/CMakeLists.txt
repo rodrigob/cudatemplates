@@ -5,6 +5,8 @@ set(CUDA_BUILD_TYPE Device)
 find_package(Cuda REQUIRED)
 include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--keep")
+
 # CUDA templates:
 include_directories(${CMAKE_SOURCE_DIR}/include)
 cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
