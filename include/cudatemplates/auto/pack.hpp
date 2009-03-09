@@ -30,7 +30,7 @@
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2,
-                    Cuda::Size<1> dst_size, Cuda::Size<1> dst_stride, Cuda::Size<1> src_size, Cuda::Size<1> src_stride)
+                    CUDA_KERNEL_SIZE(1) dst_size, CUDA_KERNEL_SIZE(1) dst_stride, CUDA_KERNEL_SIZE(1) src_size, CUDA_KERNEL_SIZE(1) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int dst_ofs = x;
@@ -44,7 +44,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, const VectorType *src,
-                      Cuda::Size<1> dst_size, Cuda::Size<1> dst_stride, Cuda::Size<1> src_size, Cuda::Size<1> src_stride)
+                      CUDA_KERNEL_SIZE(1) dst_size, CUDA_KERNEL_SIZE(1) dst_stride, CUDA_KERNEL_SIZE(1) src_size, CUDA_KERNEL_SIZE(1) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int dst_ofs = x;
@@ -57,7 +57,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, const VectorType *src,
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2, const ScalarType *src3,
-                    Cuda::Size<1> dst_size, Cuda::Size<1> dst_stride, Cuda::Size<1> src_size, Cuda::Size<1> src_stride)
+                    CUDA_KERNEL_SIZE(1) dst_size, CUDA_KERNEL_SIZE(1) dst_stride, CUDA_KERNEL_SIZE(1) src_size, CUDA_KERNEL_SIZE(1) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int dst_ofs = x;
@@ -72,7 +72,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, const VectorType *src,
-                      Cuda::Size<1> dst_size, Cuda::Size<1> dst_stride, Cuda::Size<1> src_size, Cuda::Size<1> src_stride)
+                      CUDA_KERNEL_SIZE(1) dst_size, CUDA_KERNEL_SIZE(1) dst_stride, CUDA_KERNEL_SIZE(1) src_size, CUDA_KERNEL_SIZE(1) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int dst_ofs = x;
@@ -86,7 +86,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, cons
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2, const ScalarType *src3, const ScalarType *src4,
-                    Cuda::Size<1> dst_size, Cuda::Size<1> dst_stride, Cuda::Size<1> src_size, Cuda::Size<1> src_stride)
+                    CUDA_KERNEL_SIZE(1) dst_size, CUDA_KERNEL_SIZE(1) dst_stride, CUDA_KERNEL_SIZE(1) src_size, CUDA_KERNEL_SIZE(1) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int dst_ofs = x;
@@ -102,7 +102,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, ScalarType *dst4, const VectorType *src,
-                      Cuda::Size<1> dst_size, Cuda::Size<1> dst_stride, Cuda::Size<1> src_size, Cuda::Size<1> src_stride)
+                      CUDA_KERNEL_SIZE(1) dst_size, CUDA_KERNEL_SIZE(1) dst_stride, CUDA_KERNEL_SIZE(1) src_size, CUDA_KERNEL_SIZE(1) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int dst_ofs = x;
@@ -117,7 +117,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, Scal
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2,
-                    Cuda::Size<2> dst_size, Cuda::Size<2> dst_stride, Cuda::Size<2> src_size, Cuda::Size<2> src_stride)
+                    CUDA_KERNEL_SIZE(2) dst_size, CUDA_KERNEL_SIZE(2) dst_stride, CUDA_KERNEL_SIZE(2) src_size, CUDA_KERNEL_SIZE(2) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -132,7 +132,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, const VectorType *src,
-                      Cuda::Size<2> dst_size, Cuda::Size<2> dst_stride, Cuda::Size<2> src_size, Cuda::Size<2> src_stride)
+                      CUDA_KERNEL_SIZE(2) dst_size, CUDA_KERNEL_SIZE(2) dst_stride, CUDA_KERNEL_SIZE(2) src_size, CUDA_KERNEL_SIZE(2) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -146,7 +146,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, const VectorType *src,
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2, const ScalarType *src3,
-                    Cuda::Size<2> dst_size, Cuda::Size<2> dst_stride, Cuda::Size<2> src_size, Cuda::Size<2> src_stride)
+                    CUDA_KERNEL_SIZE(2) dst_size, CUDA_KERNEL_SIZE(2) dst_stride, CUDA_KERNEL_SIZE(2) src_size, CUDA_KERNEL_SIZE(2) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -162,7 +162,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, const VectorType *src,
-                      Cuda::Size<2> dst_size, Cuda::Size<2> dst_stride, Cuda::Size<2> src_size, Cuda::Size<2> src_stride)
+                      CUDA_KERNEL_SIZE(2) dst_size, CUDA_KERNEL_SIZE(2) dst_stride, CUDA_KERNEL_SIZE(2) src_size, CUDA_KERNEL_SIZE(2) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -177,7 +177,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, cons
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2, const ScalarType *src3, const ScalarType *src4,
-                    Cuda::Size<2> dst_size, Cuda::Size<2> dst_stride, Cuda::Size<2> src_size, Cuda::Size<2> src_stride)
+                    CUDA_KERNEL_SIZE(2) dst_size, CUDA_KERNEL_SIZE(2) dst_stride, CUDA_KERNEL_SIZE(2) src_size, CUDA_KERNEL_SIZE(2) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -194,7 +194,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, ScalarType *dst4, const VectorType *src,
-                      Cuda::Size<2> dst_size, Cuda::Size<2> dst_stride, Cuda::Size<2> src_size, Cuda::Size<2> src_stride)
+                      CUDA_KERNEL_SIZE(2) dst_size, CUDA_KERNEL_SIZE(2) dst_stride, CUDA_KERNEL_SIZE(2) src_size, CUDA_KERNEL_SIZE(2) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -210,7 +210,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, Scal
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2,
-                    Cuda::Size<3> dst_size, Cuda::Size<3> dst_stride, Cuda::Size<3> src_size, Cuda::Size<3> src_stride)
+                    CUDA_KERNEL_SIZE(3) dst_size, CUDA_KERNEL_SIZE(3) dst_stride, CUDA_KERNEL_SIZE(3) src_size, CUDA_KERNEL_SIZE(3) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -226,7 +226,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, const VectorType *src,
-                      Cuda::Size<3> dst_size, Cuda::Size<3> dst_stride, Cuda::Size<3> src_size, Cuda::Size<3> src_stride)
+                      CUDA_KERNEL_SIZE(3) dst_size, CUDA_KERNEL_SIZE(3) dst_stride, CUDA_KERNEL_SIZE(3) src_size, CUDA_KERNEL_SIZE(3) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -241,7 +241,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, const VectorType *src,
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2, const ScalarType *src3,
-                    Cuda::Size<3> dst_size, Cuda::Size<3> dst_stride, Cuda::Size<3> src_size, Cuda::Size<3> src_stride)
+                    CUDA_KERNEL_SIZE(3) dst_size, CUDA_KERNEL_SIZE(3) dst_stride, CUDA_KERNEL_SIZE(3) src_size, CUDA_KERNEL_SIZE(3) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -258,7 +258,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, const VectorType *src,
-                      Cuda::Size<3> dst_size, Cuda::Size<3> dst_stride, Cuda::Size<3> src_size, Cuda::Size<3> src_stride)
+                      CUDA_KERNEL_SIZE(3) dst_size, CUDA_KERNEL_SIZE(3) dst_stride, CUDA_KERNEL_SIZE(3) src_size, CUDA_KERNEL_SIZE(3) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -274,7 +274,7 @@ unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, cons
 template <class VectorType, class ScalarType>
 __global__ void
 pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *src2, const ScalarType *src3, const ScalarType *src4,
-                    Cuda::Size<3> dst_size, Cuda::Size<3> dst_stride, Cuda::Size<3> src_size, Cuda::Size<3> src_stride)
+                    CUDA_KERNEL_SIZE(3) dst_size, CUDA_KERNEL_SIZE(3) dst_stride, CUDA_KERNEL_SIZE(3) src_size, CUDA_KERNEL_SIZE(3) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -292,7 +292,7 @@ pack_nocheck_kernel(VectorType *dst, const ScalarType *src1, const ScalarType *s
 template <class VectorType, class ScalarType>
 __global__ void
 unpack_nocheck_kernel(ScalarType *dst1, ScalarType *dst2, ScalarType *dst3, ScalarType *dst4, const VectorType *src,
-                      Cuda::Size<3> dst_size, Cuda::Size<3> dst_stride, Cuda::Size<3> src_size, Cuda::Size<3> src_stride)
+                      CUDA_KERNEL_SIZE(3) dst_size, CUDA_KERNEL_SIZE(3) dst_stride, CUDA_KERNEL_SIZE(3) src_size, CUDA_KERNEL_SIZE(3) src_stride)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;

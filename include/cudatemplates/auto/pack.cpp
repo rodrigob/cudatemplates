@@ -72,10 +72,10 @@ main()
 
       cout <<
 	",\n                    "
-	"Cuda::Size<" << dim_data << "> dst_size, "
-	"Cuda::Size<" << dim_data << "> dst_stride, "
-	"Cuda::Size<" << dim_data << "> src_size, "
-	"Cuda::Size<" << dim_data << "> src_stride)\n{\n";
+	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_size, "
+	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_stride, "
+	"CUDA_KERNEL_SIZE(" << dim_data << ") src_size, "
+	"CUDA_KERNEL_SIZE(" << dim_data << ") src_stride)\n{\n";
 
       // compute coordinates:
       for(int i = 1; i <= dim_data; ++i) {
@@ -119,10 +119,10 @@ main()
       cout <<
 	"const VectorType *src,\n"
 	"                      "
-	"Cuda::Size<" << dim_data << "> dst_size, "
-	"Cuda::Size<" << dim_data << "> dst_stride, "
-	"Cuda::Size<" << dim_data << "> src_size, "
-	"Cuda::Size<" << dim_data << "> src_stride)\n{\n";
+	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_size, "
+	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_stride, "
+	"CUDA_KERNEL_SIZE(" << dim_data << ") src_size, "
+	"CUDA_KERNEL_SIZE(" << dim_data << ") src_stride)\n{\n";
 
       // compute coordinates:
       for(int i = 1; i <= dim_data; ++i) {
