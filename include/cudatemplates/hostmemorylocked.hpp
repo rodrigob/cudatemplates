@@ -101,6 +101,11 @@ alloc()
 {
   this->setPitch(0);
   CUDA_CHECK(cudaMallocHost((void **)&this->buffer, this->getSize() * sizeof(Type)));
+  assert(this->buffer != 0);
+
+#ifdef CUDA_DEBUG_INIT_MEMORY
+  memset(this->buffer, 0, this->getBytes());
+#endif
 }
 
 template <class Type, unsigned Dim>

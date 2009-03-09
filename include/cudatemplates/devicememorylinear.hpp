@@ -112,6 +112,10 @@ alloc()
 
   if(this->buffer == 0)
     CUDA_ERROR("cudaMalloc failed");
+
+#ifdef CUDA_DEBUG_INIT_MEMORY
+  CUDA_CHECK(cudaMemset(this->buffer, 0, this->getBytes()));
+#endif
 }
 
 }  // namespace Cuda

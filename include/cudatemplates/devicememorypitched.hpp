@@ -141,6 +141,10 @@ alloc()
   }
 
   assert(this->buffer != 0);
+
+#ifdef CUDA_DEBUG_INIT_MEMORY
+  CUDA_CHECK(cudaMemset(this->buffer, 0, this->getBytes()));
+#endif
 }
 
 template <class Type, unsigned Dim>

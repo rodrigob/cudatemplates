@@ -94,6 +94,8 @@ __global__ void copy_constant_check_kernel_3D( T* dst, T val, int width, int hei
 
 namespace Cuda {
 
+static inline int div_up(int a, int b) { return (a + b - 1) / b; }
+
 /**
    Dummy class for kernel instantiation.
    nvcc gets confused if it doesn't see at least one instatiation of template
@@ -158,7 +160,7 @@ copy(DeviceMemory<Type, Dim> &dst, Type val,
 
     // prepare fragmentation for processing
     dim3 dimBlock(block_size, block_size, block_size_z);
-    dim3 dimGrid(CommonLib::divUp(rmax[0], block_size), CommonLib::divUp(rmax[1], block_size), 1);
+    dim3 dimGrid(div_up(rmax[0], block_size), div_up(rmax[1], block_size), 1);
 
     for (unsigned int offset_z=0; offset_z<rmax[1]; offset_z+=block_size_z)
     {

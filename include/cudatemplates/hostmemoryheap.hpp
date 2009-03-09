@@ -125,6 +125,10 @@ alloc()
 
   if(this->buffer == 0)
     CUDA_ERROR("out of memory");
+
+#ifdef CUDA_DEBUG_INIT_MEMORY
+  memset(this->buffer, 0, this->getBytes());
+#endif
 }
 
 template <class Type, unsigned Dim>
