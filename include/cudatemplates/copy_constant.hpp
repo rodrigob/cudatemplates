@@ -94,7 +94,7 @@ __global__ void copy_constant_check_kernel_3D( Type1 dst, Type2 val, int width, 
 
 namespace Cuda {
 
-static inline int div_up(int a, int b) { return (a + b - 1) / b; }
+static inline size_t div_up(size_t a, size_t b) { return (a + b - 1) / b; }
 
 /**
    Dummy class for kernel instantiation.
@@ -155,12 +155,13 @@ copy(DeviceMemory<Type, Dim> &dst, Type val,
                                    dofs, rmin, rmax, dst_ofs, size);
 
     // Compute optimal blocksize
-    unsigned int block_size = 16;
-    unsigned int block_size_z = 2;
+    size_t block_size = 16;
+    size_t block_size_z = 2;
 
     // prepare fragmentation for processing
     dim3 dimBlock(block_size, block_size, block_size_z);
-    dim3 dimGrid(div_up(rmax[0], block_size), div_up(rmax[1], block_size), 1);
+    dim3 dimGrid(div_up(static_cast<size_t>(rmax[0]), block_size), 
+       div_up(static_cast<size_t>(rmax[1]), block_size), 1);
 
     for (unsigned int offset_z=0; offset_z<rmax[1]; offset_z+=block_size_z)
     {
