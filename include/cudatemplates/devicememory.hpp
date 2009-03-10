@@ -271,7 +271,6 @@ free()
   if(this->buffer == 0)
     return;
 
-  printf("cudaFree(%p)\n", this->buffer);
   CUDA_CHECK(cudaFree(this->buffer));
   this->buffer = 0;
 }
