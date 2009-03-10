@@ -80,8 +80,8 @@ __global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZ
     dst.data[x + y * dst.stride[0] + z * dst.stride[1]] = val;
 }
 
-template <class T>
-__global__ void copy_constant_check_kernel_3D( T* dst, T val, int width, int height, int depth,
+template <class Type1, class Type2>
+__global__ void copy_constant_check_kernel_3D( Type1 dst, Type2 val, int width, int height, int depth,
                                                int pitch, int pitchPlane, size_t offset_z)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;

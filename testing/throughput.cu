@@ -25,7 +25,7 @@
 
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/copy.hpp>
-#include <cudatemplates/copy_constant.hpp>
+//#include <cudatemplates/copy_constant.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
 #include <cudatemplates/event.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
