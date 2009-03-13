@@ -1,19 +1,19 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -71,7 +71,7 @@ test_array_copy1(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &si
 		 const Cuda::Size<T1::Dim> &size, bool use_region)
 {
   BOOST_STATIC_ASSERT((int)T1::Dim == (int)T2::Dim);
-  
+
   // extract some types and constants:
   typedef typename T1::Type Type;
   const unsigned Dim = T1::Dim;
@@ -241,7 +241,7 @@ test_array_copy2(const Cuda::Size<T1::Dim> &size1, const Cuda::Size<T1::Dim> &si
 
   // test with fixed size:
   err |= test_array_copy1<T1, T2>(size1, size2, pos1, pos2, size, false);
-  
+
   if(size_max > 0) {
     // test with random size:
     Cuda::Size<T1::Dim> rsize1, rsize2, rpos1, rpos2, rsize;
@@ -290,10 +290,15 @@ test_array_copy()
 
   // three-dimensional data:
   size_t smax3 = 64;
+//   Cuda::Size<3>
+//     size3a(smax3, smax3, smax3), size3b(smax3, smax3, smax3),
+//     pos3a(smax3 / 4, smax3 / 4, smax3 / 4), pos3b(smax3 / 8, smax3 / 8, smax3 / 8),
+//     size3(smax3 / 2, smax3 / 2, smax3 / 2);
+
   Cuda::Size<3>
-    size3a(smax3, smax3, smax3), size3b(smax3, smax3, smax3),
-    pos3a(smax3 / 4, smax3 / 4, smax3 / 4), pos3b(smax3 / 8, smax3 / 8, smax3 / 8),
-    size3(smax3 / 2, smax3 / 2, smax3 / 2);
+    size3a(720, 576, 8), size3b(720, 576, 8),
+    pos3a(0, 0, 0), pos3b(0, 0, 0),
+    size3(720, 576, 8);
 
 #include "test3d.cpp"
 
@@ -334,7 +339,7 @@ test_array_init1(size_t size_max)
 
   // verify data:
   Cuda::HostMemoryHeap<typename T::Type, T::Dim> hdata(data);
-  
+
   for(Cuda::Iterator<T::Dim> index = hdata.begin(); index != hdata.end(); ++index) {
     bool inside = true;
 
