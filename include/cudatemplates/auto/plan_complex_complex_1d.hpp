@@ -41,6 +41,8 @@ template <>
 class Plan<complex, complex, 1>
 {
 public:
+  enum { Dim = 1 };
+
   /**
      Constructor.
      The constructor creates a CUFFT plan with the given size.
@@ -84,7 +86,7 @@ public:
   */
   inline void exec(const DeviceMemory<complex, 1> &idata, DeviceMemory<complex, 1> &odata, int dir)
   {
-    if((idata.stride[0] != idata.size[0]) || (odata.stride[0] != odata.size[0]))
+    if((Dim > 1) && !(idata.contiguous() && odata.contiguous()))
       CUDA_ERROR("CUFFT can only be used for contiguous memory (i.e., no padding between rows)");
 
     CUFFT_CHECK(cufftExecC2C(plan, const_cast<complex *>(idata.getBuffer()), odata.getBuffer(), dir));
