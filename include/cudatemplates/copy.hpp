@@ -40,6 +40,12 @@
 */
 #define CUDA_USE_OFFSET 0
 
+/**
+cudaMemcpy3D is still very buggy. Use set this to 1 to use cudaMemcpy2D
+instead.
+*/
+#define USE_2D_COPY 1
+
 /*
   There is a possible range checking bug in cudaMemcpy3D,
   see http://forums.nvidia.com/index.php?showtopic=73497.
@@ -95,6 +101,14 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind
 			    src.size[0] * sizeof(Type), src.size[1], kind));
   }
   else if(Dim >= 3) {
+#if USE_2D_COPY
+    for (unsigned int slice=0; slice<src.size[2]; slice++)
+    {
+      CUDA_CHECK(cudaMemcpy2D( &dst.getBuffer()[slice * dst.stride[1]], dst.getPitch(),
+                               &src.getBuffer()[slice * src.stride[1]], src.getPitch(),
+                               src.size[0] * sizeof(Type), src.size[1], kind));
+    }
+#else
     cudaMemcpy3DParms p = { 0 };
     p.srcPtr.ptr = (void *)src.getBuffer();
     p.srcPtr.pitch = src.getPitch();
@@ -113,6 +127,7 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src, cudaMemcpyKind kind
 
     p.kind = kind;
     CUDA_CHECK(cudaMemcpy3D(&p));
+#endif
   }
 }
 
@@ -140,14 +155,26 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src,
   check_bounds(dst, src, dst_ofs, src_ofs, size);
 
   if(Dim == 1) {
-    CUDA_CHECK(cudaMemcpy(dst.getBuffer() + dst_ofs[0], src.getBuffer() + src_ofs[0], size[0] * sizeof(Type), kind));
+    CUDA_CHECK(cudaMemcpy( dst.getBuffer() + dst_ofs[0], src.getBuffer() + src_ofs[0],
+                           size[0] * sizeof(Type), kind));
   }
   else if(Dim == 2) {
-    CUDA_CHECK(cudaMemcpy2D(dst.getBuffer() + dst_ofs[0] + dst_ofs[1] * dst.stride[0], dst.getPitch(),
-			    src.getBuffer() + src_ofs[0] + src_ofs[1] * src.stride[0], src.getPitch(),
-			    size[0] * sizeof(Type), size[1], kind));
+    CUDA_CHECK(cudaMemcpy2D( dst.getBuffer() + dst_ofs[0] + dst_ofs[1] * dst.stride[0],
+                             dst.getPitch(), src.getBuffer() + src_ofs[0] + src_ofs[1] * src.stride[0],
+                             src.getPitch(), size[0] * sizeof(Type), size[1], kind));
   }
   else if(Dim == 3) {
+
+#if USE_2D_COPY
+  for (unsigned int slice=0; slice<size[2]; slice++)
+  {
+    size_t dst_offset = dst_ofs[0] + dst_ofs[1] * dst.stride[0] + (dst_ofs[2]+slice) * dst.stride[1];
+    size_t src_offset = src_ofs[0] + src_ofs[1] * src.stride[0] + (src_ofs[2]+slice) * src.stride[1];
+    CUDA_CHECK(cudaMemcpy2D( &dst.getBuffer()[dst_offset], dst.getPitch(),
+                             &src.getBuffer()[src_offset], src.getPitch(),
+                             size[0] * sizeof(Type), size[1], kind));
+  }
+#else
     cudaMemcpy3DParms p = { 0 };
 #if CUDA_USE_OFFSET
     p.srcPos.x = src_ofs[0] * sizeof(Type);
@@ -176,6 +203,7 @@ copy(Pointer<Type, Dim> &dst, const Pointer<Type, Dim> &src,
     p.extent.depth = size[2];
     p.kind = kind;
     CUDA_CHECK(cudaMemcpy3D(&p));
+#endif
   }
 }
 
@@ -962,7 +990,7 @@ copy(HostMemory<Type, Dim> &dst, const Type &val)
    the same template functions in "copy_constants.hpp" in more than one file
    since the compiler creates separate template instantiations for each
    occurence. In this case you should put explicit template instantiations into
-   a single file (see 
+   a single file (see
    https://cudatemplates.svn.sourceforge.net/svnroot/cudatemplates/trunk/testing/copy_instantiate.cu
    for an example).
    @param dst destination pointer (device memory)
