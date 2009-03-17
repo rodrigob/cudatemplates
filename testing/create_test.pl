@@ -29,6 +29,7 @@ sub create_code
 	foreach $j (0 .. $#templates) {
 	    # handle a few exceptions for cases which are not yet implemented:
 	    next if ($dim == 1) && (no_support_1d($i) || no_support_1d($j));
+	    next if ($i == 1) || ($j == 1);  # not yet implemented in Cuda-2.2beta
 	    $smax = "smax${dim}";
 	    $smax = 0 if ($dim == 3) && (only_pot_3d($i) || only_pot_3d($j));
 	    
