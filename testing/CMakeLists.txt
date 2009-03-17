@@ -136,9 +136,9 @@ target_link_libraries(memset ${CUDA_TARGET_LINK})
 
 # cuda_add_executable(vector vector.cpp)
 
-cuda_add_executable(precision_sm_10 precision.cu)
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")
-cuda_add_executable(precision_sm_13 precision.cu)
+#cuda_add_executable(precision_sm_10 precision.cu)
+#set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")
+#cuda_add_executable(precision_sm_13 precision.cu)
 
 # run tests:
 

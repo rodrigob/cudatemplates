@@ -27,6 +27,58 @@ using namespace std;
 const char coord[] = { 0, 'x', 'y', 'z', 'w' };
 
 
+void
+args_pack_nocheck(int dim_data, int dim_vec, bool types)
+{
+  if(types)
+    cout << "VectorType *";
+
+  cout << "dst";
+
+  for(int i = 1; i <= dim_vec; ++i) {
+    cout << ", ";
+    
+    if(types)
+      cout << "const ScalarType *";
+
+    cout << "src" << i;
+  }
+
+  if(types) {
+    cout <<
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") dst_size"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") dst_stride"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") src_size"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") src_stride";
+  }
+  else {
+    cout << ", dst_size, dst_stride, src_size, src_stride";
+  }
+}
+
+void
+args_unpack_nocheck(int dim_data, int dim_vec, bool types)
+{
+  for(int i = 1; i <= dim_vec; ++i) {
+    if(types)
+      cout << "ScalarType *";
+    
+    cout << "dst" << i << ", ";
+  }
+
+  if(types) {
+    cout <<
+      "const VectorType *src"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") dst_size"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") dst_stride"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") src_size"
+      ", CUDA_KERNEL_SIZE(" << dim_data << ") src_stride";
+  }
+  else {
+    cout << "src, dst_size, dst_stride, src_size, src_stride";
+  }
+}
+
 int
 main()
 {
@@ -59,23 +111,17 @@ main()
     "#ifndef CUDA_PACK_AUTO_H\n"
     "#define CUDA_PACK_AUTO_H\n"
     "\n"
-    "\n";
+    "\n"
+    "namespace Cuda {\n"
+    "\n\n";
 
   // template kernels:
   for(int dim_data = 1; dim_data <= 3; ++dim_data) {
     for(int dim_vec = 2; dim_vec <= 4; ++dim_vec) {
       // pack kernel header:
-      cout << "template <class VectorType, class ScalarType>\n__global__ void\npack_nocheck_kernel(VectorType *dst";
-
-      for(int i = 1; i <= dim_vec; ++i)
-	cout << ", const ScalarType *src" << i;
-
-      cout <<
-	",\n                    "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_size, "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_stride, "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") src_size, "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") src_stride)\n{\n";
+      cout << "template <class VectorType, class ScalarType>\n__global__ void\npack_nocheck_kernel_" << dim_data << dim_vec << "(";
+      args_pack_nocheck(dim_data, dim_vec, true);
+      cout << ")\n{\n";
 
       // compute coordinates:
       for(int i = 1; i <= dim_data; ++i) {
@@ -111,18 +157,9 @@ main()
       cout << "}\n\n";
 
       // unpack kernel header:
-      cout << "template <class VectorType, class ScalarType>\n__global__ void\nunpack_nocheck_kernel(";
-
-      for(int i = 1; i <= dim_vec; ++i)
-	cout << "ScalarType *dst" << i << ", ";
-
-      cout <<
-	"const VectorType *src,\n"
-	"                      "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_size, "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") dst_stride, "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") src_size, "
-	"CUDA_KERNEL_SIZE(" << dim_data << ") src_stride)\n{\n";
+      cout << "template <class VectorType, class ScalarType>\n__global__ void\nunpack_nocheck_kernel_" << dim_data << dim_vec << "(";
+      args_unpack_nocheck(dim_data, dim_vec, true);
+      cout << ")\n{\n";
 
       // compute coordinates:
       for(int i = 1; i <= dim_data; ++i) {
@@ -157,11 +194,42 @@ main()
     }
   }
 
-  // template functions:
+  // template structs:
   cout <<
-    "namespace Cuda {\n"
-    "\n";
+    "template <class VectorType, class ScalarType, unsigned Dim>\n"
+    "struct PackKernel\n"
+    "{\n"
+    "};\n\n";
 
+  for(int dim_data = 1; dim_data <= 3; ++dim_data) {
+    cout <<
+      "template <class VectorType, class ScalarType>\n"
+      "struct PackKernel<VectorType, ScalarType, " << dim_data << ">\n"
+      "{\n";
+
+    for(int dim_vec = 2; dim_vec <= 4; ++dim_vec) {
+      // pack function:
+      cout << "  static inline void pack_nocheck(dim3 gridDim, dim3 blockDim, ";
+      args_pack_nocheck(dim_data, dim_vec, true);
+      cout << ")\n  {\n    pack_nocheck_kernel_" << dim_data << dim_vec << "<<<gridDim, blockDim>>>(";
+      args_pack_nocheck(dim_data, dim_vec, false);
+      cout << ");\n  }\n\n";
+
+      // unpack function:
+      cout << "  static inline void unpack_nocheck(dim3 gridDim, dim3 blockDim, ";
+      args_unpack_nocheck(dim_data, dim_vec, true);
+      cout << ")\n  {\n    unpack_nocheck_kernel_" << dim_data << dim_vec << "<<<gridDim, blockDim>>>(";
+      args_unpack_nocheck(dim_data, dim_vec, false);
+      cout << ");\n  }\n";
+
+      if(dim_vec < 4)
+	cout << endl;
+    }
+
+    cout << "};\n\n";
+  }
+
+  // template functions:
   for(int dim_vec = 2; dim_vec <= 4; ++dim_vec) {
     // pack function:
     cout <<
@@ -187,7 +255,7 @@ main()
       "  // kdst.data += dofs;\n"
       "\n"
       "  if(aligned)\n"
-      "    pack_nocheck_kernel<<<gridDim, blockDim>>>(dst.getBuffer(), ";
+      "    PackKernel<VectorType, ScalarType, Dim>::pack_nocheck(gridDim, blockDim, dst.getBuffer(), ";
 
     for(int i = 1; i <= dim_vec; ++i)
       cout << "src" << i << ".getBuffer(), ";
@@ -229,7 +297,7 @@ main()
       "  // kdst.data += dofs;\n"
       "\n"
       "  if(aligned)\n"
-      "    unpack_nocheck_kernel<<<gridDim, blockDim>>>(";
+      "    PackKernel<VectorType, ScalarType, Dim>::unpack_nocheck(gridDim, blockDim, ";
 
     for(int i = 1; i <= dim_vec; ++i)
       cout << "dst" << i << ".getBuffer(), ";

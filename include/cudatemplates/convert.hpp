@@ -27,17 +27,19 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
+namespace Cuda {
+
 #ifdef __CUDACC__
 
 template <class Type1, class Type2>
-__global__ void convert_type_nocheck_kernel(Type1 dst, Type2 src, Cuda::Dimension<1> dummy)
+__global__ void convert_type_nocheck_kernel_1d(Type1 dst, Type2 src)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   dst.data[x] = src.data[x];
 }
 
 template <class Type1, class Type2>
-__global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<1> dummy)
+__global__ void convert_type_check_kernel_1d(Type1 dst, Type2 src)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -46,7 +48,7 @@ __global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<
 }
 
 template <class Type1, class Type2>
-__global__ void convert_type_nocheck_kernel(Type1 dst, Type2 src, Cuda::Dimension<2> dummy)
+__global__ void convert_type_nocheck_kernel_2d(Type1 dst, Type2 src)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -54,7 +56,7 @@ __global__ void convert_type_nocheck_kernel(Type1 dst, Type2 src, Cuda::Dimensio
 }
 
 template <class Type1, class Type2>
-__global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<2> dummy)
+__global__ void convert_type_check_kernel_2d(Type1 dst, Type2 src)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -64,7 +66,7 @@ __global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<
 }
 
 template <class Type1, class Type2>
-__global__ void convert_type_nocheck_kernel(Type1 dst, Type2 src, Cuda::Dimension<3> dummy)
+__global__ void convert_type_nocheck_kernel_3d(Type1 dst, Type2 src)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -73,7 +75,7 @@ __global__ void convert_type_nocheck_kernel(Type1 dst, Type2 src, Cuda::Dimensio
 }
 
 template <class Type1, class Type2>
-__global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<3> dummy)
+__global__ void convert_type_check_kernel_3d(Type1 dst, Type2 src)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -83,9 +85,41 @@ __global__ void convert_type_check_kernel(Type1 dst, Type2 src, Cuda::Dimension<
     dst.data[x + y * dst.stride[0] + z * dst.stride[1]] = src.data[x + y * src.stride[0] + z * src.stride[1]];
 }
 
-#endif  // __CUDACC__
+/**
+   Generic template class for call to "copy constant" kernel.
+*/
+  template <class Type1, class Type2, unsigned Dim>
+struct ConvertTypeKernel
+{
+};
 
-namespace Cuda {
+#define CUDA_CONVERT_TYPE_KERNEL_STRUCT(Dim)				\
+template <class Type1, class Type2>					\
+struct ConvertTypeKernel<Type1, Type2, Dim>				\
+{									\
+  static inline void nocheck(dim3 gridDim, dim3 blockDim,		\
+			     typename DeviceMemory<Type1, Dim>::KernelData dst,	\
+			     typename DeviceMemory<Type2, Dim>::KernelData src) \
+  {									\
+    convert_type_nocheck_kernel_ ## Dim ## d<<<gridDim, blockDim>>>(dst, src); \
+  }									\
+									\
+  static inline void check(dim3 gridDim, dim3 blockDim,			\
+			   typename DeviceMemory<Type1, Dim>::KernelData dst, \
+			   typename DeviceMemory<Type2, Dim>::KernelData src) \
+  {									\
+    convert_type_check_kernel_ ## Dim ## d<<<gridDim, blockDim>>>(dst, src); \
+  }									\
+}
+
+CUDA_CONVERT_TYPE_KERNEL_STRUCT(1);
+CUDA_CONVERT_TYPE_KERNEL_STRUCT(2);
+CUDA_CONVERT_TYPE_KERNEL_STRUCT(3);
+
+#undef CUDA_CONVERT_TYPE_KERNEL_STRUCT
+
+
+#endif  // __CUDACC__
 
 /**
    Convert data in host memory.
@@ -124,9 +158,9 @@ copy(DeviceMemory<Type1, Dim> &dst, const DeviceMemory<Type2, Dim> &src)
   typename DeviceMemory<Type2, Dim>::KernelData ksrc(src);
 
   if(aligned)
-    convert_type_nocheck_kernel<<<gridDim, blockDim>>>(kdst, ksrc, Dimension<Dim>());
+    ConvertTypeKernel<Type1, Type2, Dim>::nocheck(gridDim, blockDim, kdst, ksrc);
   else
-    convert_type_check_kernel<<<gridDim, blockDim>>>(kdst, ksrc, Dimension<Dim>());
+    ConvertTypeKernel<Type1, Type2, Dim>::check(gridDim, blockDim, kdst, ksrc);
 
   CUDA_CHECK(cudaGetLastError());
 }
