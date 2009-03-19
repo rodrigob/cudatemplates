@@ -23,3 +23,4 @@ include_directories(
 cuda_add_executable(bug2 bug2.cpp)
 cuda_add_executable(float3 float3.cpp)
 cuda_add_executable(bug3 bug3.cu)
+cuda_add_executable(bug4 bug4.cu)
