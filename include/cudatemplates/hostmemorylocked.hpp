@@ -54,24 +54,24 @@ public:
      Constructor.
      @param _size requested size of memory block
   */
-  inline HostMemoryLocked(const Size<Dim> &_size):
+  inline HostMemoryLocked(const Size<Dim> &_size, unsigned flags = cudaHostAllocDefault):
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
     HostMemoryStorage<Type, Dim>(_size)
   {
-    alloc();
+    alloc(flags);
   }
 
   /**
      Constructor.
      @param layout requested layout of memory block
   */
-  inline HostMemoryLocked(const Layout<Type, Dim> &layout):
+  inline HostMemoryLocked(const Layout<Type, Dim> &layout, unsigned flags = cudaHostAllocDefault):
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
     HostMemoryStorage<Type, Dim>(layout)
   {
-    alloc();
+    alloc(flags);
   }
 
 #include "auto/copy_hostmemorylocked.hpp"
@@ -90,6 +90,12 @@ public:
   void alloc();
 
   /**
+     Allocate page-locked CPU memory.
+     @param flags see CUDA Programming Guide section 3.2.5
+  */
+  void alloc(unsigned flags);
+
+  /**
      Free page-locked CPU memory.
   */
   void free();
@@ -99,8 +105,16 @@ template <class Type, unsigned Dim>
 void HostMemoryLocked<Type, Dim>::
 alloc()
 {
+  alloc(cudaHostAllocDefault);
+}
+
+template <class Type, unsigned Dim>
+void HostMemoryLocked<Type, Dim>::
+alloc(unsigned flags)
+{
   this->setPitch(0);
-  CUDA_CHECK(cudaMallocHost((void **)&this->buffer, this->getSize() * sizeof(Type)));
+  // CUDA_CHECK(cudaMallocHost((void **)&this->buffer, this->getSize() * sizeof(Type)));
+  CUDA_CHECK(cudaHostAlloc((void **)&this->buffer, this->getSize() * sizeof(Type), flags));
   assert(this->buffer != 0);
 
 #ifdef CUDA_DEBUG_INIT_MEMORY

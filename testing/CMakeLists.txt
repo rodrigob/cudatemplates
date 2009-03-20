@@ -134,6 +134,8 @@ cuda_add_executable(throughput throughput.cu)
 add_executable(memset memset.cpp)
 target_link_libraries(memset ${CUDA_TARGET_LINK})
 
+cuda_add_executable(mapped mapped.cu)
+
 # cuda_add_executable(vector vector.cpp)
 
 #cuda_add_executable(precision_sm_10 precision.cu)
