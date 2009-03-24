@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <cutil.h>
+
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
@@ -78,7 +80,7 @@ demo_plain()
   extent.height = SIZE[1];
   extent.depth = SIZE[2];
   cudaPitchedPtr mem_device;
-  CUDA_CHECK(cudaMalloc3D(&mem_device, extent));
+  CUDA_SAFE_CALL(cudaMalloc3D(&mem_device, extent));
 
   // copy from host memory to device memory:
   cudaMemcpy3DParms p = { 0 };
@@ -94,7 +96,7 @@ demo_plain()
   p.extent.height = SIZE[1];
   p.extent.depth = SIZE[2];
   p.kind = cudaMemcpyHostToDevice;
-  CUDA_CHECK(cudaMemcpy3D(&p));
+  CUDA_SAFE_CALL(cudaMemcpy3D(&p));
 
   // copy from device memory to host memory:
   p.srcPtr.ptr = mem_device.ptr;
@@ -102,13 +104,13 @@ demo_plain()
   p.dstPtr.ptr = mem_host2;
   p.dstPtr.pitch = SIZE[0] * sizeof(float);
   p.kind = cudaMemcpyDeviceToHost;
-  CUDA_CHECK(cudaMemcpy3D(&p));
+  CUDA_SAFE_CALL(cudaMemcpy3D(&p));
 
   // verify host memory:
   verify(mem_host2);
 
   // free memory:
-  CUDA_CHECK(cudaFree(mem_device.ptr));
+  CUDA_SAFE_CALL(cudaFree(mem_device.ptr));
   free(mem_host2);
   free(mem_host1);
 }
