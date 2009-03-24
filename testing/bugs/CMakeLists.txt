@@ -11,6 +11,11 @@ add_definitions(-DUSE_CUDA)
 include_directories(
   ${CUDATEMPLATES_INCLUDE_DIR}
   ${FOUND_CUDA_NVCC_INCLUDE}
+  ${CUDA_CUT_INCLUDE}
+)
+
+cuda_include_directories(
+  ${CUDA_CUT_INCLUDE}
 )
 
 find_package(Boost 1.35 REQUIRED)
@@ -24,3 +29,4 @@ cuda_add_executable(bug2 bug2.cpp)
 cuda_add_executable(float3 float3.cpp)
 cuda_add_executable(bug3 bug3.cu)
 cuda_add_executable(bug4 bug4.cu)
+cuda_add_executable(bug5 bug5.cu)
