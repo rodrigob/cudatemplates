@@ -1,3 +1,4 @@
+//#include "../../include/cudatemplates/cuda_gcc43_compat.hpp"
 #include <iostream>
 #include <cutil.h>
 
