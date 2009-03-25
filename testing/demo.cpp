@@ -130,10 +130,10 @@ demo_cudatemplates()
     Cuda::DeviceMemoryPitched3D<float> mem_device(SIZE[0], SIZE[1], SIZE[2]);
 
     // copy from host memory to device memory:
-    copy(mem_device, mem_host1);
+    Cuda::copy(mem_device, mem_host1);
 
     // copy from device memory to host memory:
-    copy(mem_host2, mem_device);
+    Cuda::copy(mem_host2, mem_device);
 
     // verify host memory:
     verify(mem_host2.getBuffer());
