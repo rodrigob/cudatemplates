@@ -8,7 +8,7 @@ bug4.cudafe1.stub.c: In function ‘void __sti____cudaRegisterAll_12_bug4_cpp1_i
 bug4.cudafe1.stub.c:23: error: insufficient contextual information to determine type
 --------------------------------------------------------------------------------
 
-The error dos not appear when "bool" is replaced by "int".
+The error does not appear when "bool" is replaced by "int".
 
 system information:
 Linux openSUSE-11.1 x86_64 kernel 2.6.27.19-3.2-default
