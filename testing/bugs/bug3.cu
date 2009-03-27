@@ -1,3 +1,51 @@
+/*
+
+Compiling this file with "nvcc bug3.cu" gives the following error message:
+
+--------------------------------------------------------------------------------
+Signal: Segmentation fault in Global Optimization -- Expression Reshaping phase.
+<input>(0): Error: Signal Segmentation fault in phase Global Optimization -- Expression Reshaping -- processing aborted
+*** Internal stack backtrace:
+    /usr/open64/lib//be [0x6a342f]
+    /usr/open64/lib//be [0x6a4079]
+    /usr/open64/lib//be [0x6a37cd]
+    /usr/open64/lib//be [0x6a4a16]
+    /lib64/libc.so.6 [0x2ac9462a76e0]
+    /usr/open64/lib//be [0x40f3f8]
+    /usr/open64/lib//be [0x411c25]
+    /usr/open64/lib//be [0x411f45]
+    /usr/open64/lib//be [0x411ffd]
+    /usr/open64/lib//be [0x4138ce]
+    /usr/open64/lib//be [0x4df593]
+    /usr/open64/lib//be [0x4df779]
+    /usr/open64/lib//be [0x42b936]
+    /usr/open64/lib//be [0x42bba0]
+    /usr/open64/lib//be [0x42bc9d]
+    /usr/open64/lib//be [0x42c056]
+    /usr/open64/lib//be [0x42c23d]
+    /usr/open64/lib//be [0x42165a]
+    /usr/open64/lib//be [0x4781fd]
+    /usr/open64/lib//be [0x4043a2]
+    /usr/open64/lib//be [0x40502e]
+    /usr/open64/lib//be [0x406081]
+    /usr/open64/lib//be [0x4073ad]
+    /lib64/libc.so.6(__libc_start_main+0xe6) [0x2ac946293586]
+    /usr/open64/lib//be [0x4037ea]
+nvopencc INTERNAL ERROR: /usr/open64/lib//be died due to signal 4
+--------------------------------------------------------------------------------
+
+system information:
+Linux openSUSE-11.1 x86_64 kernel 2.6.27.19-3.2-default
+
+nvcc version:
+Built on Thu_Mar__5_04:25:57_PST_2009
+Cuda compilation tools, release 2.2, V0.2.1221
+
+gcc version:
+gcc (SUSE Linux) 4.3.2 [gcc-4_3-branch revision 141291]
+
+*/
+
 #include <cutil_math.h>
 
 struct matrix4x4
@@ -39,7 +87,7 @@ __global__ void
 test(float4 *p)
 {
   matrix4x4 m;
-  float4 v;
+  float4 v = make_float4(1, 1, 1, 1);
   *p = m * m * v;
 }
 

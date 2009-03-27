@@ -2,9 +2,11 @@
 
 Compiling this file with "nvcc --keep bug4.cu" gives the following error message:
 
-In file included from bug4.cu:37:
+--------------------------------------------------------------------------------
+In file included from bug4.cu:39:
 bug4.cudafe1.stub.c: In function ‘void __sti____cudaRegisterAll_12_bug4_cpp1_ii_main()’:
 bug4.cudafe1.stub.c:23: error: insufficient contextual information to determine type
+--------------------------------------------------------------------------------
 
 The error dos not appear when "bool" is replaced by "int".
 
