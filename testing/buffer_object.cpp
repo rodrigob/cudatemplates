@@ -1,19 +1,19 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -44,7 +44,13 @@
 #include <boost/gil/image.hpp>
 #include <boost/gil/typedefs.hpp>
 
+#ifdef _WIN32
 #include <GL/glew.h>
+#else
+#include <GL/gl.h>
+#include <GL/glext.h>
+#endif
+
 #include <GL/glut.h>
 
 #include <cudatemplates/copy.hpp>
@@ -55,12 +61,13 @@
 #include <cudatemplates/hostmemoryheap.hpp>
 
 using namespace std;
-#define CHECK_GL_ERRORS  \
-{ \
-	GLenum err = glGetError(); \
-	if (err) \
-	printf( "Error %x at line %d, %s\n", err, __LINE__, gluErrorString(err)); \
-}
+
+#define CHECK_GL_ERRORS							\
+  {									\
+    GLenum err = glGetError();						\
+    if (err)								\
+      printf( "Error %x at line %d, %s\n", err, __LINE__, gluErrorString(err)); \
+  }
 
 #define SUBDIV_X  127
 #define SUBDIV_Y  127
@@ -132,43 +139,36 @@ main(int argc, char *argv[])
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 #ifdef _WIN32
-	if (glewInit() != GLEW_OK)
-	{
-		printf("glewInit failed. Exiting...\n");
-		exit(1);
-	}
-	CHECK_GL_ERRORS;
+    if (glewInit() != GLEW_OK) {
+      printf("glewInit failed. Exiting...\n");
+      exit(1);
+    }
+    CHECK_GL_ERRORS;
 #endif
-
-    GLuint obj1 = 0, obj2 = 0;
-    glGenFramebuffersEXT(1, &obj1);
-    glGenBuffers(1, &obj2);
-    cout << obj1 << ' ' << obj2 << endl;
 
     // create OpenGL buffer object for image and copy data:
 #ifndef _WIN32
     Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(image.size);
     copy(bufobj_image, image);
-	// create OpenGL texture and copy data
-	// (note that the image data could also be copied directly to the texture,
-	// this is just to demonstrate the use of a buffer object for pixel data):
-	Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
-	copy(texture, bufobj_image);
+    // create OpenGL texture and copy data
+    // (note that the image data could also be copied directly to the texture,
+    // this is just to demonstrate the use of a buffer object for pixel data):
+    Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
+    copy(texture, bufobj_image);
 #else
-	Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(Cuda::Size<2>(256,256));
-	Cuda::HostMemoryHeap2D<PixelType> h_img(Cuda::Size<2>(256,256));
-	for(int i = 0; i < 256*256; i++)
-	{
-		h_img[i].x = i;
-		h_img[i].y = 0;
-		h_img[i].z = 0;
-	}
-	copy(bufobj_image, h_img);
-	// create OpenGL texture and copy data
-	// (note that the image data could also be copied directly to the texture,
-	// this is just to demonstrate the use of a buffer object for pixel data):
-	Cuda::OpenGL::Texture<PixelType, 2> texture(Cuda::Size<2>(256,256));
-	copy(texture, bufobj_image);
+    Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(Cuda::Size<2>(256,256));
+    Cuda::HostMemoryHeap2D<PixelType> h_img(Cuda::Size<2>(256,256));
+    for(int i = 0; i < 256*256; i++) {
+      h_img[i].x = i;
+      h_img[i].y = 0;
+      h_img[i].z = 0;
+    }
+    copy(bufobj_image, h_img);
+    // create OpenGL texture and copy data
+    // (note that the image data could also be copied directly to the texture,
+    // this is just to demonstrate the use of a buffer object for pixel data):
+    Cuda::OpenGL::Texture<PixelType, 2> texture(Cuda::Size<2>(256,256));
+    copy(texture, bufobj_image);
 #endif
 
     bufobj_image.disconnect();
