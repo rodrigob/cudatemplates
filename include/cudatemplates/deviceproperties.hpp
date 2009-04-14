@@ -42,8 +42,11 @@ public:
      Constructor.
      @param dev device number
   */
-  inline DeviceProperties(int dev = 0)
+  inline DeviceProperties(int dev = -1)
   {
+    if(dev < 0)
+      CUDA_CHECK(cudaGetDevice(&dev));
+
     cudaGetDeviceProperties(this, dev);
     CUDA_CHECK_LAST;
   }
