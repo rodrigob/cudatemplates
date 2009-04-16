@@ -4,6 +4,7 @@ set(CUDA_BUILD_TYPE Device)
 #set(CUDA_BUILD_TYPE Emulation)
 find_package(Cuda REQUIRED)
 include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
+cuda_include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 
 # if you get error messages in nvcc-generated files,
 # enable the following line for debugging:
