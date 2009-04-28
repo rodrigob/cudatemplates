@@ -67,7 +67,11 @@ public:
     DeviceMemoryStorage<Type, Dim>(_size),
     bufname(0), target(t), usage(u), registered(false)
   {
-    alloc();
+    if (_size[0] > 0 && _size[1] > 0)
+      {
+	printf(" %u %u\n", _size[0], _size[1]);
+	alloc();
+      }
   }
 
   /**
