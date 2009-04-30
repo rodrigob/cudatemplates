@@ -50,9 +50,11 @@ public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
   /**
      Default constructor.
+     @param t target to which the buffer object is bound
+     @param u usage pattern of the data store
   */
-  inline BufferObject():
-    bufname(0), target(GL_ARRAY_BUFFER), usage(GL_STATIC_DRAW), registered(false)
+  inline BufferObject(GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW):
+    bufname(0), target(t), usage(u), registered(false)
   {
   }
 #endif
@@ -60,6 +62,8 @@ public:
   /**
      Constructor.
      @param _size requested size of memory block.
+     @param t target to which the buffer object is bound
+     @param u usage pattern of the data store
   */
   inline BufferObject(const Size<Dim> &_size, GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW):
     Layout<Type, Dim>(_size),
@@ -67,16 +71,14 @@ public:
     DeviceMemoryStorage<Type, Dim>(_size),
     bufname(0), target(t), usage(u), registered(false)
   {
-    if (_size[0] > 0 && _size[1] > 0)
-      {
-	printf(" %u %u\n", _size[0], _size[1]);
-	alloc();
-      }
+    alloc();
   }
 
   /**
      Constructor.
      @param layout requested size of memory block.
+     @param t target to which the buffer object is bound
+     @param u usage pattern of the data store
   */
   inline BufferObject(const Layout<Type, Dim> &layout, GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW):
     Layout<Type, Dim>(layout),
@@ -133,8 +135,8 @@ public:
 
   /**
      Register abuffer object.
-     If you called disconnect() or unregister, this must be called before using t
-     he buffer memory in a CUDA kernel.
+     If you called disconnect() or unregister, this must be called before using
+     the buffer memory in a CUDA kernel.
   */
   void registerObject();
 
@@ -175,9 +177,8 @@ public:
      Unbind the buffer object from the given target.
      @param t target from which the buffer object should be unbound
   */
-  inline void unbind(GLenum t) { 
-    temptarget = t; 
-    CUDA_OPENGL_CHECK(glBindBuffer(this->temptarget, 0)); 
+  inline static void unbind(GLenum t) { 
+    CUDA_OPENGL_CHECK(glBindBuffer(t, 0)); 
   }
 
 private:
@@ -195,10 +196,7 @@ private:
      Specifies the expected usage pattern of the data store.
   */
   GLenum usage;
-  /** 
-      member used for gcc template dependency problem workaround 
-   */
-  GLenum temptarget;
+
   /** 
       Specifies whether a buffer is registered in Cuda
   */
@@ -298,6 +296,10 @@ alloc()
     p *= this->size[i];
 
   CUDA_OPENGL_CHECK(glGenBuffers(1, &(this->bufname)));
+
+  if(this->bufname == 0)
+    CUDA_OPENGL_ERROR("generate buffer object failed");
+
   bind();
   CUDA_OPENGL_CHECK(glBufferData(this->target, p * sizeof(Type), 0, this->usage));
   unbind();

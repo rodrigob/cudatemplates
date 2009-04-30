@@ -44,7 +44,10 @@
 #include <boost/gil/image.hpp>
 #include <boost/gil/typedefs.hpp>
 
+#ifdef _WIN32
 #include <GL/glew.h>
+#endif
+
 #include <GL/glut.h>
 
 #include <cudatemplates/copy.hpp>
