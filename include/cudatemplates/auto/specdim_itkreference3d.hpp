@@ -36,10 +36,7 @@ namespace Cuda {
    ItkReference template specialized for 3 dimension(s).
 */
 template <class Type>
-class ItkReference3D:
-    virtual public Layout<Type, 3>,
-    virtual public Pointer<Type, 3>,
-    public ItkReference<Type, 3>
+class ItkReference3D: public ItkReference<Type, 3>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

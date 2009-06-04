@@ -63,7 +63,6 @@ throughput_array_kernel(Cuda::DeviceMemoryPitched2D<PixelType>::KernelData dst)
 
 /**
    Compute gigabytes per second.
-   @param size edge length of square (i.e., size*size pixels in total)
    @param ms time in milliseconds
 */
 float

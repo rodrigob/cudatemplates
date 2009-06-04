@@ -1,28 +1,9 @@
 # Cuda:
-if(NOT CUDA_BUILD_EMULATION)
-  set(CUDA_BUILD_EMULATION FALSE)
-endif()
-find_file(CUDANEW FindCUDA_new.cmake /usr/share/cmake/Modules ${CMAKE_MODULE_PATH})
-
-if(CUDANEW)
-  find_package(CUDA_new REQUIRED)
-else()
-  # fallback to old version:
-  #message("Please upgrade your IcgCMakeModules, they contain an improved version of \"FindCUDA.cmake\".")
-  if(CUDA_BUILD_EMULATION)
-    set(CUDA_BUILD_TYPE Emulation)
-  else()
-    set(CUDA_BUILD_TYPE Device)
-  endif()
-  find_package(Cuda REQUIRED)
-  set(CUDA_INCLUDE_DIRS "${CUDA_INCLUDE} ${FOUND_CUT_INCLUDE}")
-  set(CUDA_LIBRARIES ${CUDA_TARGET_LINK})
-  set(CUFFT_LIBRARIES ${CUFFT_TARGET_LINK})
-  set(CUBLAS_LIBRARIES ${CUBLAS_TARGET_LINK})
-  cuda_include_directories(${CUDA_INCLUDE_DIRS})
-endif()
-
-include_directories(${CUDA_INCLUDE_DIRS})
+set(CUDA_BUILD_CUBIN OFF)
+set(CUDA_BUILD_TYPE Device)
+#set(CUDA_BUILD_TYPE Emulation)
+find_package(Cuda REQUIRED)
+include_directories(${CUDA_INCLUDE} ${CUDA_CUT_INCLUDE})
 
 # if you get error messages in nvcc-generated files,
 # enable the following line for debugging:
@@ -68,6 +49,9 @@ find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
 
+include_directories(${CMAKE_SOURCE_DIR}/include)
+cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
+
 #add_definitions(-Wall)
 
 # There seems to be a problem with gcc < 4.3 and c++0x. Therefore we define the -std only if gcc >= 4.3
@@ -91,7 +75,7 @@ endif(WINDOWS)
 # test programs:
 
 add_executable(border border.cpp)
-target_link_libraries(border ${CUDA_LIBRARIES})
+target_link_libraries(border ${CUDA_TARGET_LINK})
 
 cuda_add_executable(copy copy.cpp copy_instantiate.cu)
 
@@ -101,41 +85,41 @@ cuda_add_executable(pack pack.cu)
 add_dependencies(pack create_pack)
 
 add_executable(demo demo.cpp)
-target_link_libraries(demo ${CUDA_LIBRARIES})
+target_link_libraries(demo ${CUDA_TARGET_LINK})
 
 add_executable(fft fft.cpp)
-target_link_libraries(fft ${CUDA_LIBRARIES} ${CUFFT_LIBRARIES})
+target_link_libraries(fft ${CUDA_TARGET_LINK} ${CUFFT_TARGET_LINK})
 
 add_executable(blas blas.cpp)
-target_link_libraries(blas ${CUDA_LIBRARIES} ${CUBLAS_LIBRARIES})
+target_link_libraries(blas ${CUDA_TARGET_LINK} ${CUBLAS_TARGET_LINK})
 
 if(ITK_FOUND)
   add_executable(itk itk.cpp)
-  target_link_libraries(itk ${CUDA_LIBRARIES} ${ITK_LIBRARIES})
+  target_link_libraries(itk ${CUDA_TARGET_LINK} ${ITK_LIBRARIES})
 endif(ITK_FOUND)
 
 if(Boost_FOUND)
   add_executable(gil gil.cpp)
-  target_link_libraries(gil ${CUDA_LIBRARIES} ${PNG_LIBRARIES})
+  target_link_libraries(gil ${CUDA_TARGET_LINK} ${PNG_LIBRARIES})
 endif(Boost_FOUND)
 
 if(OpenCV_FOUND)
   add_executable(ipl ipl.cpp)
-  target_link_libraries(ipl ${CUDA_LIBRARIES} ${OPENCV_LIBRARIES})
+  target_link_libraries(ipl ${CUDA_TARGET_LINK} ${OPENCV_LIBRARIES})
 endif(OpenCV_FOUND)
 
 add_executable(array array.cpp)
-target_link_libraries(array ${CUDA_LIBRARIES})
+target_link_libraries(array ${CUDA_TARGET_LINK})
 
 cuda_add_executable(kernel kernel.cu)
-target_link_libraries(kernel ${CUDA_LIBRARIES})
+target_link_libraries(kernel ${CUDA_TARGET_LINK})
 
 cuda_add_executable(texture texture.cu)
 
 cuda_add_executable(color_speed_test color_speed_test.cu)
 
 cuda_add_executable(buffer_object buffer_object.cpp buffer_object_init.cu)
-target_link_libraries(buffer_object ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
+target_link_libraries(buffer_object ${CUDA_TARGET_LINK} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
 
 cuda_add_executable(compat compat.cu)
 
@@ -148,13 +132,17 @@ cuda_add_executable(fillrate fillrate.cu)
 cuda_add_executable(throughput throughput.cu)
 
 add_executable(memset memset.cpp)
-target_link_libraries(memset ${CUDA_LIBRARIES})
+target_link_libraries(memset ${CUDA_TARGET_LINK})
+
+cuda_add_executable(mapped mapped.cu)
+
+cuda_add_executable(array_by_value array_by_value.cu)
 
 # cuda_add_executable(vector vector.cpp)
 
-cuda_add_executable(precision_sm_10 precision.cu)
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")
-cuda_add_executable(precision_sm_13 precision.cu)
+#cuda_add_executable(precision_sm_10 precision.cu)
+#set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")
+#cuda_add_executable(precision_sm_13 precision.cu)
 
 # run tests:
 

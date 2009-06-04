@@ -36,10 +36,7 @@ namespace Cuda {
    HostMemoryReference template specialized for 3 dimension(s).
 */
 template <class Type>
-class HostMemoryReference3D:
-    virtual public Layout<Type, 3>,
-    virtual public Pointer<Type, 3>,
-    public HostMemoryReference<Type, 3>
+class HostMemoryReference3D: public HostMemoryReference<Type, 3>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

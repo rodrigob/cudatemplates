@@ -36,10 +36,7 @@ namespace Cuda {
    GilReference template specialized for 1 dimension(s).
 */
 template <class Type>
-class GilReference1D:
-    virtual public Layout<Type, 1>,
-    virtual public Pointer<Type, 1>,
-    public GilReference<Type, 1>
+class GilReference1D: public GilReference<Type, 1>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

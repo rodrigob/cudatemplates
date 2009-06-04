@@ -25,7 +25,6 @@
 #include <cuda_runtime.h>
 
 #include <cudatemplates/devicememory.hpp>
-#include <cudatemplates/deviceproperties.hpp>
 #include <cudatemplates/staticassert.hpp>
 
 
@@ -115,16 +114,8 @@ alloc()
       return;
     }
 
-    size_t pitch, bytes = this->size[0] * sizeof(Type);
-
-#ifndef NDEBUG
-    DeviceProperties prop;
-    
-    if(bytes > prop.memPitch)
-      CUDA_ERROR("maximum pitch exceeded");
-#endif
-
-    CUDA_CHECK(cudaMallocPitch((void **)&this->buffer, &pitch, bytes, this->size[1]));
+    size_t pitch;
+    CUDA_CHECK(cudaMallocPitch((void **)&this->buffer, &pitch, this->size[0] * sizeof(Type), this->size[1]));
     this->setPitch(pitch);
   }
   else if(Dim >= 3) {

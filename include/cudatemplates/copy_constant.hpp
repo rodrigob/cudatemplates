@@ -26,15 +26,19 @@
 #include <cudatemplates/hostmemory.hpp>
 
 
+namespace Cuda {
+
+static inline size_t div_up(size_t a, size_t b) { return (a + b - 1) / b; }
+
 template <class Type1, class Type2>
-__global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimension<1> dummy)
+__global__ void copy_constant_nocheck_kernel1(Type1 dst, Type2 val)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   dst.data[x] = val;
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(1) rmin, CUDA_KERNEL_SIZE(1) rmax)
+__global__ void copy_constant_check_kernel1(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(1) rmin, CUDA_KERNEL_SIZE(1) rmax)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -43,7 +47,7 @@ __global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZ
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimension<2> dummy)
+__global__ void copy_constant_nocheck_kernel2(Type1 dst, Type2 val)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -51,7 +55,7 @@ __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimensi
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(2) rmin, CUDA_KERNEL_SIZE(2) rmax)
+__global__ void copy_constant_check_kernel2(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(2) rmin, CUDA_KERNEL_SIZE(2) rmax)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -61,7 +65,7 @@ __global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZ
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimension<3> dummy)
+__global__ void copy_constant_nocheck_kernel3(Type1 dst, Type2 val)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -70,7 +74,7 @@ __global__ void copy_constant_nocheck_kernel(Type1 dst, Type2 val, Cuda::Dimensi
 }
 
 template <class Type1, class Type2>
-__global__ void copy_constant_check_kernel(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(3) rmin, CUDA_KERNEL_SIZE(3) rmax)
+__global__ void copy_constant_check_kernel3(Type1 dst, Type2 val, CUDA_KERNEL_SIZE(3) rmin, CUDA_KERNEL_SIZE(3) rmax)
 {
   int x = threadIdx.x + blockIdx.x * blockDim.x;
   int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -92,27 +96,37 @@ __global__ void copy_constant_check_kernel_3D( Type1 dst, Type2 val, int width, 
     dst[x + y*pitch + z*pitchPlane] = val;
 }
 
-namespace Cuda {
-
-static inline size_t div_up(size_t a, size_t b) { return (a + b - 1) / b; }
-
 /**
-   Dummy class for kernel instantiation.
-   nvcc gets confused if it doesn't see at least one instatiation of template
-   kernels. The constructor of this dummy class provides one.
+   Generic template class for call to "copy constant" kernel.
 */
-struct DummyInstantiateCopyConstantKernels
+template <class Type, unsigned Dim>
+struct CopyConstantKernel
 {
-  DummyInstantiateCopyConstantKernels()
-  {
-    dim3 gridDim(1, 1, 1), blockDim(1, 1, 1);
-    Size<1> r1;
-    int val = 0;
-    typename DeviceMemory<int, 1>::KernelData kdst;
-    copy_constant_nocheck_kernel<<<gridDim, blockDim>>>(kdst, val, Dimension<1>());
-    copy_constant_check_kernel<<<gridDim, blockDim>>>(kdst, val, r1, r1);
-  }
 };
+
+#define CUDA_COPY_CONSTANT_KERNEL_STRUCT(Dim)				\
+template <class Type>							\
+struct CopyConstantKernel<Type, Dim>					\
+{									\
+  static inline void nocheck(dim3 gridDim, dim3 blockDim,		\
+			     typename DeviceMemory<Type, Dim>::KernelData kdst, Type val) \
+  {									\
+    copy_constant_nocheck_kernel ## Dim<<<gridDim, blockDim>>>(kdst, val); \
+  }									\
+									\
+  static inline void check(dim3 gridDim, dim3 blockDim,			\
+			   typename DeviceMemory<Type, Dim>::KernelData kdst, Type val, \
+			   CUDA_KERNEL_SIZE(Dim) rmin, CUDA_KERNEL_SIZE(Dim) rmax) \
+  {									\
+    copy_constant_check_kernel ## Dim<<<gridDim, blockDim>>>(kdst, val, rmin, rmax); \
+  }									\
+}
+
+CUDA_COPY_CONSTANT_KERNEL_STRUCT(1);
+CUDA_COPY_CONSTANT_KERNEL_STRUCT(2);
+CUDA_COPY_CONSTANT_KERNEL_STRUCT(3);
+
+#undef CUDA_COPY_CONSTANT_KERNEL_STRUCT
 
 /**
    Copy constant value to region in device memory.
@@ -140,9 +154,9 @@ copy(DeviceMemory<Type, Dim> &dst, Type val,
     kdst.data += dofs;
 
     if(aligned)
-      copy_constant_nocheck_kernel<<<gridDim, blockDim>>>(kdst, val, Dimension<Dim>());
+      CopyConstantKernel<Type, Dim>::nocheck(gridDim, blockDim, kdst, val);
     else
-      copy_constant_check_kernel<<<gridDim, blockDim>>>(kdst, val, rmin, rmax);
+      CopyConstantKernel<Type, Dim>::check(gridDim, blockDim, kdst, val, rmin, rmax);
   }
   else if (Dim == 3)
   {
@@ -171,7 +185,8 @@ copy(DeviceMemory<Type, Dim> &dst, Type val,
                                                             offset_z);
     }
   }
-  CUDA_CHECK(cudaGetLastError());
+
+  CUDA_CHECK_LAST;
 }
 
 /**
