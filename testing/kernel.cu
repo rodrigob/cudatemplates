@@ -5,15 +5,18 @@
 #include <cudatemplates/hostmemoryheap.hpp>
 
 
-typedef Cuda::HostMemoryHeap1D<float> memhost_t;
-typedef Cuda::DeviceMemoryLinear1D<float> memdev_t;
+typedef Cuda::HostMemoryHeap1D<int> memhost_t;
+typedef Cuda::DeviceMemoryLinear1D<int> memdev_t;
 
 
 __global__ void kernel(memdev_t::KernelData arg1,
 		       memdev_t::KernelData arg2,
 		       memdev_t::KernelData sum)
 {
-  sum.data[threadIdx.x] = arg1.data[threadIdx.x] + arg2.data[threadIdx.x];
+  int a1 = arg1.data[threadIdx.x];
+  int a2 = arg2.data[threadIdx.x];
+  int s = a1 + a2;
+  sum.data[threadIdx.x] = s;
 }
 
 
