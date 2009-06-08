@@ -4,18 +4,18 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
 
 # Cuda:
-set(CUDA_BUILD_TYPE Device CACHE STRING "Choose 'Device' or 'Emulation'")
-find_package(Cuda REQUIRED)
+set(CUDA_BUILD_EMULATION OFF CACHE BOOL "enable emulation mode")
+find_package(CUDA REQUIRED)
 find_package(CudaTemplates REQUIRED)
 add_definitions(-DUSE_CUDA)
 include_directories(
   ${CUDATEMPLATES_INCLUDE_DIR}
   ${FOUND_CUDA_NVCC_INCLUDE}
-  ${CUDA_CUT_INCLUDE}
+  ${CUDA_CUT_INCLUDE_DIR}
 )
 
 cuda_include_directories(
-  ${CUDA_CUT_INCLUDE}
+  ${CUDA_CUT_INCLUDE_DIR}
 )
 
 find_package(Boost 1.35 REQUIRED)
