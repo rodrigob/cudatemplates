@@ -140,6 +140,14 @@ cuda_add_executable(array_by_value array_by_value.cu)
 
 # cuda_add_executable(vector vector.cpp)
 
+IF(WIN32)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
+/NODEFAULTLIB:LIBCMT.lib ")
+ENDIF(WIN32)
+cuda_add_executable(crazyFindOGLTextureAdress crazyFindOGLTextureAdress.cu crazyFindOGLTextureAdress.cpp)
+target_link_libraries(crazyFindOGLTextureAdress ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
+
+
 #cuda_add_executable(precision_sm_10 precision.cu)
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--gpu-name;sm_13;--gpu-code;sm_13")
 #cuda_add_executable(precision_sm_13 precision.cu)
