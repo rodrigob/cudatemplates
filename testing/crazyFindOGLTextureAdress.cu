@@ -53,7 +53,7 @@ findPatternStartAdress(Cuda::DeviceMemory<PixelType, 2>::KernelData pattern, int
   PixelType value = *adress;
 
   //write test
-  *adress = 0;
+  //*adress = 0;
 
   
 }
@@ -77,9 +77,10 @@ void find_crazyAdress(Cuda::HostMemoryHeap2D<PixelType> pattern, Cuda::Size<2> s
  printf("necessary iterations: %d \n", iterations);
  
  // TODO : do as 
- for(int i = 0; i < iterations; i++)
- {
+ //for(int i = 0; i < iterations; i++)
+ //{
+ int i = 0;
  findPatternStartAdress<<<gridDim,blockDim>>>(d_pattern, deviceProp.totalGlobalMem, i);
- }
+ //}
 
 }
