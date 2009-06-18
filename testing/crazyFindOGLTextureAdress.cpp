@@ -27,12 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/gil/image.hpp>
 #include <boost/gil/typedefs.hpp>
 
-#ifdef _WIN32
+
 #include <GL/glew.h>
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
 
 #include <GL/glut.h>
 
@@ -42,6 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <cudatemplates/opengl/copy.hpp>
 #include <cudatemplates/opengl/texture.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
+#include <cudatemplates/devicememorylinear.hpp>
 
 using namespace std;
 
@@ -58,11 +55,17 @@ using namespace std;
 #define WIREFRAME 0
 typedef float PixelType;
 
-extern void find_crazyAdress(Cuda::HostMemoryHeap2D<PixelType> pattern, Cuda::Size<2> size);
+extern void find_crazyAddress(Cuda::HostMemoryHeap2D<PixelType> pattern, 
+                             Cuda::Size<2> size, 
+                             Cuda::HostMemoryHeap1D<unsigned long long> mcth, 
+                             Cuda::DeviceMemoryLinear1D<unsigned long long> mct
+                             );
 
 Cuda::HostMemoryHeap2D<PixelType> h_img;
-Cuda::OpenGL::Texture<PixelType, 2> texture;
 Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image;
+Cuda::OpenGL::Texture<PixelType, 2> texture;
+Cuda::DeviceMemoryLinear1D<unsigned long long > mct(Cuda::Size<1>(2));
+Cuda::HostMemoryHeap1D<unsigned long long> mcth(Cuda::Size<1>(2));
 
 const int SIZE = 256;
 
@@ -95,9 +98,9 @@ display()
   glLoadIdentity();
 
   glBegin(GL_QUADS);
-  glTexCoord2f(0, 1); glVertex3f(-1, -1, 0);
-  glTexCoord2f(1, 1); glVertex3f( 1, -1, 0);
-  glTexCoord2f(1, 0); glVertex3f( 1,  1, 0);
+  glTexCoord2f(0, 1); glColor3d(1.0, 0.0, 0.0); glVertex3f(-1, -1, 0);
+  glTexCoord2f(1, 1); glColor3d(0.0, 1.0, 0.0); glVertex3f( 1, -1, 0);
+  glTexCoord2f(1, 0); glColor3d(0.0, 0.0, 1.0); glVertex3f( 1,  1, 0);
   glTexCoord2f(0, 0); glVertex3f(-1,  1, 0);
   glEnd();
 
@@ -108,6 +111,8 @@ display()
   glPopAttrib();
 
   texture.unbind();
+  CHECK_GL_ERRORS;
+
   // postprocess:
   glutSwapBuffers();
   glutPostRedisplay();
@@ -126,62 +131,48 @@ int
 main(int argc, char *argv[])
 {
   try {
-
-#ifndef _WIN32
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
-    boost::gil::png_read_image("ladybug.png", gil_image);  // must match PixelType!
+    boost::gil::png_read_and_convert_image("ladybug.png", gil_image);  // must match PixelType!
     Cuda::GilReference2D<PixelType> image(gil_image);
-#endif
 
+    printf("image size %lu x %lu\n", image.size[0], image.size[1]);
     // init GLUT:
     glutInit(&argc, argv);
-#ifndef _WIN32
-    glutInitWindowSize(image.size[0] * 2, image.size[1] * 2);
-#else
-    glutInitWindowSize(512, 512);
-#endif
+    glutInitWindowSize(image.size[0] * 1, image.size[1] * 1);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow("OpenGL buffer object demo");
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
-#ifdef _WIN32
+
     if (glewInit() != GLEW_OK) {
       printf("glewInit failed. Exiting...\n");
       exit(1);
     }
     CHECK_GL_ERRORS;
-#endif
+
 
     // create OpenGL buffer object for image and copy data:
-#ifndef _WIN32
-    Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(image.size);
-    copy(bufobj_image, image);
-    // create OpenGL texture and copy data
-    // (note that the image data could also be copied directly to the texture,
-    // this is just to demonstrate the use of a buffer object for pixel data):
-    Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
-    copy(texture, bufobj_image);
-#else
-
-    h_img.alloc(Cuda::Size<2>(SIZE,SIZE));
-    texture.alloc(Cuda::Size<2>(SIZE,SIZE));
-    bufobj_image.alloc(Cuda::Size<2>(SIZE,SIZE));
+    bufobj_image.alloc(Cuda::Size<2>(image.size[0], image.size[1]));
+    texture.alloc(Cuda::Size<2>(image.size[0], image.size[1]));
+    h_img.alloc(Cuda::Size<2>(image.size[0], image.size[1]));
     srand ( time(NULL) );
-    for(int i = 0; i < SIZE*SIZE; i++) {
+    for(int i = 0; i < image.size[0]*image.size[1]; i++) {
       h_img[i] = rand()/(float)RAND_MAX;
-     // printf("%f  ", h_img[i]);
     }
-    copy(bufobj_image, h_img);
+    copy(bufobj_image, image);
+    //copy(h_img, image);
+
     // create OpenGL texture and copy data
     // (note that the image data could also be copied directly to the texture,
     // this is just to demonstrate the use of a buffer object for pixel data):
-   
+    
     copy(texture, bufobj_image);
-#endif
+    printf("image size %lu x %lu\n", image.size[0], image.size[1]);    
+    find_crazyAddress(bufobj_image, Cuda::Size<2>(image.size[0], image.size[1]),mcth, mct);
 
-    find_crazyAdress(h_img, Cuda::Size<2>(SIZE, SIZE));
+
 
 #if WIREFRAME
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -196,3 +187,16 @@ main(int argc, char *argv[])
   }
   return 0;
 }
+
+//========================================================================
+// End of file
+//========================================================================
+// Local Variables:
+// mode: c++
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'case-label '+)
+// eval: (c-set-offset 'statement 'c-lineup-runin-statements)
+// eval: (setq indent-tabs-mode nil)
+// End:
+//========================================================================
