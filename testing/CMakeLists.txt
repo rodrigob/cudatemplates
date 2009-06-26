@@ -116,6 +116,8 @@ target_link_libraries(kernel ${CUDA_LIBRARIES})
 
 cuda_add_executable(texture texture.cu)
 
+cuda_add_executable(texture_precision texture_precision.cu)
+
 cuda_add_executable(color_speed_test color_speed_test.cu)
 
 cuda_add_executable(buffer_object buffer_object.cpp buffer_object_init.cu)
