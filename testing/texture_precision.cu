@@ -49,6 +49,8 @@ main()
   // copy data to CPU:
   Cuda::copy(h_data, d_data);
 
+  printf("index  GPU       CPU        diff\n");
+
   // report results:
   for(int i = 0; i < h_data.size[0]; ++i) {
     // read interpolated value computed on GPU:
