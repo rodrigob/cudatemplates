@@ -18,8 +18,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CUDA_EVENT_H
-#define CUDA_EVENT_H
+#ifndef CUDA_STREAM_H
+#define CUDA_STREAM_H
 
 
 #include <cudatemplates/error.hpp>
@@ -28,48 +28,32 @@
 namespace Cuda {
 
 /**
-   CUDA runtime event class.
+   CUDA stream class.
 */
-class Event
+class Stream
 {
 public:
   /**
      Default constructor.
   */
-  inline Event() { CUDA_CHECK(cudaEventCreate(&event)); }
+  inline Stream() { CUDA_CHECK(cudaStreamCreate(&stream)); }
 
   /**
      Destructor.
   */
-  inline ~Event() { CUDA_CHECK(cudaEventDestroy(event)); }
+  inline ~Stream() { CUDA_CHECK(cudaStreamDestroy(stream)); }
 
   /**
-     Get event identifier.
+     Get stream identifier.
   */
-  inline operator cudaEvent_t() const { return event; }
+  inline operator cudaStream_t() const { return stream; }
 
   /**
-     Computes the elapsed time between events.
-     @return elapsed time in milliseconds
-  */
-  inline float operator-(const Event &e) const
-  {
-    float time;
-    CUDA_CHECK(cudaEventElapsedTime(&time, e.event, event));
-    return time;
-  }
-
-  /**
-     Records an event.
-  */
-  inline void record(cudaStream_t stream = 0) { CUDA_CHECK(cudaEventRecord(event, stream)); }
-
-  /**
-     Query if an event has been recorded.
+     Query if a stream has finished.
   */
   inline bool query() const
   {
-    cudaError_t ret = cudaEventQuery(event);
+    cudaError_t ret = cudaStreamQuery(stream);
 
     if(ret == cudaSuccess)
       return true;
@@ -81,12 +65,12 @@ public:
   }
 
   /**
-     Wait for an event to be recorded.
+     Wait for an stream to finish.
   */
-  inline void synchronize() { CUDA_CHECK(cudaEventSynchronize(event)); }
+  inline void synchronize() { CUDA_CHECK(cudaStreamSynchronize(stream)); }
 
 private:
-  cudaEvent_t event;
+  cudaStream_t stream;
 };
 
 }  // namespace Cuda
