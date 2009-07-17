@@ -22,8 +22,10 @@
 #define CUDA_DEVICEMEMORYREFERENCE_H
 
 
+#include <algorithm>
+
 #include <cudatemplates/devicememory.hpp>
-#include "cutil_math.h"
+
 
 namespace Cuda {
 
