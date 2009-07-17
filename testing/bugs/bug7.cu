@@ -6,10 +6,9 @@
   ### unexpected mtype
   nvopencc INTERNAL ERROR: /usr/open64/lib//be returned non-zero status 1
 
-  Distribution: openSUSE-11.1
-  Architecture: x86_64
-  gcc-4.3.2
+  OS: Linux openSUSE-11.1 x86_64
   CUDA toolkit: 2.3beta
+  gcc-4.3.2
 */
 
 __device__ void function()
