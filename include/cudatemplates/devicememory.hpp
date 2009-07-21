@@ -140,13 +140,23 @@ public:
   template<enum cudaTextureReadMode readMode>
   void bindTexture(texture<Type, Dim, readMode> &tex) const
   {
-    CUDA_STATIC_ASSERT(Dim == 1);
-    CUDA_CHECK(cudaBindTexture(0, tex, this->buffer, this->size[0] * sizeof(Type)));
+    CUDA_STATIC_ASSERT(Dim > 2);
+    if (Dim == 1)
+      {
+	CUDA_CHECK(cudaBindTexture(0, tex, this->buffer, this->size[0] * sizeof(Type)));
+      }
+    else
+      {
+	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<Type>();
+	CUDA_CHECK(cudaBindTexture2D(0, tex, this->buffer, channelDesc,
+				     this->size[0], this->size[1], this->getPitch()));
+      }
   }
 
   template<enum cudaTextureReadMode readMode>
   void unbindTexture(texture<Type, Dim, readMode> &tex) const
   {
+    CUDA_STATIC_ASSERT(Dim > 2);
     CUDA_CHECK(cudaUnbindTexture(tex));
   }
 
