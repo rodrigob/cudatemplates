@@ -140,7 +140,7 @@ public:
   template<enum cudaTextureReadMode readMode>
   void bindTexture(texture<Type, Dim, readMode> &tex) const
   {
-    CUDA_STATIC_ASSERT(Dim > 2);
+    CUDA_STATIC_ASSERT(Dim <= 2);
     if (Dim == 1)
       {
 	CUDA_CHECK(cudaBindTexture(0, tex, this->buffer, this->size[0] * sizeof(Type)));
@@ -156,7 +156,7 @@ public:
   template<enum cudaTextureReadMode readMode>
   void unbindTexture(texture<Type, Dim, readMode> &tex) const
   {
-    CUDA_STATIC_ASSERT(Dim > 2);
+    CUDA_STATIC_ASSERT(Dim <= 2);
     CUDA_CHECK(cudaUnbindTexture(tex));
   }
 
