@@ -11,7 +11,7 @@
   gcc-4.3.2
 */
 
-__device__ void function()
+__global__ void kernel()
 {
   float3 x0;
   float3 array[8];
@@ -26,9 +26,4 @@ __device__ void function()
 
     array[i] = x0;
   }
-}
-
-__global__ void kernel()
-{
-  function();
 }
