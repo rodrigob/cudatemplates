@@ -239,6 +239,11 @@ public:
     setPitch(0);  // no padding by default
   }
 
+  /**
+     Sets region offset and its size at once
+     @param _ofs region offset
+     @param _size region size
+  */
   void setRegion(const Size<Dim> &_ofs, const Size<Dim> &_size)
   {
     region_ofs = _ofs;
