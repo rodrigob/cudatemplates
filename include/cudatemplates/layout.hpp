@@ -24,6 +24,8 @@
 
 #include <cassert>
 
+#include <cuda_runtime.h>
+
 #include <cudatemplates/size.hpp>
 
 

@@ -31,7 +31,7 @@
 #endif
 
 
-#if defined(__CUDACC__) || defined(NVCC)
+#if defined(__CUDACC__) || defined(NVCC) || defined(CUDA_SIMPLE_ERROR)
 
 #include <stdio.h>
 #include <stdlib.h>
