@@ -43,6 +43,7 @@ public:
 
   /**
      Constructor.
+     Creates an ItkReference by using an existing, already allocated ITK image!
      @param image ITK image to reference
   */
   inline ItkReference(typename ImageType::Pointer image):
@@ -57,11 +58,14 @@ public:
 
   /**
      Constructor.
-     This allocates memory for the ITK image of the given size.
+     Creates an ItkReference from an ITK image that has been constructed (Image::New() has been called)
+     but has not been allocated with memory! This constructor allocates memory for the ITK image of the
+     given size internally and also sets the spacing accordingly.
      @param _size size of image
+     @param _spacing spacing of image
      @param image ITK image to reference
   */
-  inline ItkReference(const Size<Dim> &_size, typename ImageType::Pointer image):
+  inline ItkReference(const Size<Dim> &_size, const Spacing<Dim> &_spacing, typename ImageType::Pointer image):
     Layout<Type, Dim>(),
     Pointer<Type, Dim>(),
     HostMemoryReference<Type, Dim>(),
@@ -70,16 +74,19 @@ public:
   {
     typename ImageType::IndexType istart;
     typename ImageType::SizeType isize;
+    typename ImageType::SpacingType ispacing;
 
     for(unsigned i = Dim; i--;) {
       istart[i] = 0;
       isize[i] = _size[i];
+      ispacing[i] = _spacing[i];
     }
 
     typename ImageType::RegionType region;
     region.SetSize(isize);
     region.SetIndex(istart);
     image->SetRegions(region);
+    image->SetSpacing(ispacing);
     image->Allocate();
     setImage(image);
   }

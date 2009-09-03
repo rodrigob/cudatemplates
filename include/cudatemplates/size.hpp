@@ -292,6 +292,14 @@ public:
 };
 
 /**
+   Generic spacing template
+*/
+template<unsigned Dim>
+class Spacing : public VectorBase<float, Dim>
+{
+};
+
+/**
    Generic size template.
 */
 template <unsigned Dim>
