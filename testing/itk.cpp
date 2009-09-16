@@ -66,7 +66,9 @@ main()
     ImageType::Pointer image_output = ImageType::New();
 
     // create reference to ITK output image and initialize with same size as input image:
-    Cuda::ItkReference<PixelType, 2> ref_image_output(ref_image_input.size, image_output);
+    Cuda::Spacing<2> spacing;
+    spacing[0] = spacing[1] = 1;
+    Cuda::ItkReference<PixelType, 2> ref_image_output(ref_image_input.size, spacing, image_output);
 
     // copy input image to GPU and back to output image (i.e., CPU/GPU roundtrip):
     Cuda::DeviceMemoryLinear<PixelType, 2> tmp(ref_image_input.size);
