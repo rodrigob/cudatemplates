@@ -1,5 +1,6 @@
 /*
   The kernel is in a separate file to test if dependencies are handled correctly.
+  It is meant to be included in "texture.cu" and not compiled as a standalone program.
 */
 
 __global__ void kernel(memdev_t::KernelData res)
