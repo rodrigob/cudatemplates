@@ -149,15 +149,15 @@ public:
 
   /**
      Map buffer object.
-     This must be called before accessing  buffer memory in Cuda. Note,
-     that the buffer object must be registered in Cuda
+     This must be called before accessing buffer memory in Cuda.
+     Note that the buffer object must be registered in Cuda
   */
   void mapBuffer();
 
   /**
      Unmap buffer object.
-     This must be called before read-accessing  buffer memory in OpenGL. Note,
-     that the buffer object must be registered in Cuda.
+     This must be called before read-accessing buffer memory in OpenGL.
+     Note that the buffer object must be registered in Cuda.
   */
   void unmapBuffer();
 
@@ -178,7 +178,7 @@ public:
      @param t target from which the buffer object should be unbound
   */
   inline static void unbind(GLenum t) { 
-    CUDA_OPENGL_CHECK(glBindBuffer(t, 0)); 
+    CUDA_OPENGL_CHECK(glBindBuffer(t, 0));
   }
 
 private:
