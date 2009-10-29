@@ -57,8 +57,8 @@ cuda_include_directories(${CMAKE_SOURCE_DIR}/include)
 # There seems to be a problem with gcc < 4.3 and c++0x. Therefore we define the -std only if gcc >= 4.3
 # TODO: workarounf for gcc < 4.3
 if(UNIX)
-  EXEC_PROGRAM(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
-  IF(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[3-9].*")
+  exec_program(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
+  if(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[3-9].*")
     message(STATUS "GCC >= 4.3")
     add_definitions(-std=c++0x)
   else()
@@ -144,10 +144,10 @@ cuda_add_executable(streams streams.cu)
 
 # cuda_add_executable(vector vector.cpp)
 
-IF(WIN32)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
+if(WIN32)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
 /NODEFAULTLIB:LIBCMT.lib ")
-ENDIF(WIN32)
+endif(WIN32)
 #cuda_add_executable(crazyFindOGLTextureAdress crazyFindOGLTextureAdress.cu crazyFindOGLTextureAdress.cpp)
 #target_link_libraries(crazyFindOGLTextureAdress ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
 
