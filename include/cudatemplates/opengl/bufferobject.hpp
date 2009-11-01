@@ -43,7 +43,7 @@ namespace OpenGL {
 /**
    Representation of OpenGL buffer object.
 */
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 class BufferObject: public DeviceMemoryStorage<Type, Dim>
 {
 public:
@@ -203,7 +203,7 @@ private:
   bool registered;
 };
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 connect()
 {
@@ -221,7 +221,7 @@ connect()
     CUDA_ERROR("map buffer object failed");
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 disconnect()
 {
@@ -237,7 +237,7 @@ disconnect()
   this->buffer = 0;
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 registerObject()
 {
@@ -248,7 +248,7 @@ registerObject()
     }
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 unregisterObject()
 {
@@ -259,7 +259,7 @@ unregisterObject()
     }
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 mapBuffer()
 {
@@ -273,7 +273,7 @@ mapBuffer()
     CUDA_ERROR("map buffer object failed");
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 unmapBuffer()
 {
@@ -284,7 +284,7 @@ unmapBuffer()
   this->buffer = 0;
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 alloc()
 {
@@ -306,7 +306,7 @@ alloc()
   connect();
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 free()
 {
@@ -319,7 +319,7 @@ free()
   bufname = 0;
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 BufferObject<Type, Dim>::
 ~BufferObject()
 {

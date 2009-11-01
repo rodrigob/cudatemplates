@@ -29,6 +29,15 @@ are transformed into C++ exceptions.
 are provided for convenience.
 </ul>
 
+\subsection requirements Requirements
+The following components must be installed on your machine before you can use the CUDA templates:
+<ul>
+<li>CUDA Driver, Toolkit, and SDK, version 2.3 or newer is recommended
+(<a href="http://www.nvidia.com/object/cuda_get.html">Download</a>)
+<li>FindCUDA cmake modules
+(<a href="https://gforge.sci.utah.edu/gf/project/findcuda">Download</a>)
+</ul>
+
 \section example Example
 
 Here is a small

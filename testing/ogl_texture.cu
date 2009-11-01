@@ -37,7 +37,7 @@
 
 
 const size_t TESTSIZE = 64;
-size_t testcalls = 0;
+int testcalls = 0;
 
 #define CHECK_GL_ERRORS							\
   {									\
@@ -116,14 +116,14 @@ template<class type>
 int testOglTexture(type (*randFunc)(), bool (*comp)(const type&, const type&))
 {
   ++testcalls;
-  Cuda::HostMemoryHeap2D<type> h_data(Cuda::Size<2>(TESTSIZE,TESTSIZE));
-  Cuda::HostMemoryHeap2D<type> h_data2(Cuda::Size<2>(TESTSIZE,TESTSIZE));
+  Cuda::HostMemoryHeap<type, 2> h_data(Cuda::Size<2>(TESTSIZE,TESTSIZE));
+  Cuda::HostMemoryHeap<type, 2> h_data2(Cuda::Size<2>(TESTSIZE,TESTSIZE));
   Cuda::OpenGL::Texture<type, 2> texture(Cuda::Size<2>(TESTSIZE,TESTSIZE));
 
-  for(int i = 0; i < TESTSIZE*TESTSIZE; i++)
+  for(unsigned i = 0; i < TESTSIZE*TESTSIZE; i++)
     h_data[i] = randFunc();
 
-  copy(texture, h_data);
+  Cuda::OpenGL::copy(texture, h_data);
 
   texture.bind();
   glGetTexImage(GL_TEXTURE_2D, 0, Cuda::OpenGL::getFormat<type>(), Cuda::OpenGL::getType<type>(), h_data2.getBuffer());

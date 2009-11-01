@@ -44,8 +44,10 @@ namespace OpenGL {
 /**
    Representation of OpenGL texture.
 */
-template <class Type, size_t Dim>
-class Texture: public Storage<Type, Dim>
+template <class Type, unsigned Dim>
+class Texture:
+    virtual public Layout<Type, Dim>,
+    public Storage<Type, Dim>
 {
   CUDA_STATIC_ASSERT(Dim <= 3);
 
@@ -158,7 +160,7 @@ private:
   GLuint texname;
 };
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 alloc()
 {
@@ -206,7 +208,7 @@ alloc()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 glTexSubImage(const GLvoid *pixels)
 {
@@ -237,7 +239,7 @@ glTexSubImage(const GLvoid *pixels)
   unbind();
 }
 
-template <class Type, size_t Dim>
+template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 free()
 {

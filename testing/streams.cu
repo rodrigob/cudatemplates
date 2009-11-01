@@ -50,7 +50,7 @@ int
 main()
 {
   try {
-    Cuda::Size<1> size(1 << 16);
+    Cuda::Size<1> size(1 << 20);
     Cuda::DeviceMemoryLinear1D<float> src[NUM_STREAMS], dst[NUM_STREAMS];
 
     for(int i = NUM_STREAMS; i--;) {
@@ -63,11 +63,12 @@ main()
     dim3 gridDim(1), blockDim(1);
 
     for(int i = 0; i < NUM_STREAMS; ++i) {
-      event[event_id(i, 0)].record();
+      Cuda::Stream &s = stream[i];
+      event[event_id(i, 0)].record(s);
 
       for(int j = 0; j < NUM_PASSES; ++j) {
-	kernel<<<gridDim, blockDim, 0, stream[i]>>>(dst[i], src[i]);
-	event[event_id(i, j + 1)].record();
+	kernel<<<gridDim, blockDim, 0, s>>>(dst[i], src[i]);
+	event[event_id(i, j + 1)].record(s);
       }
     }
 
@@ -75,7 +76,7 @@ main()
 
     for(int i = 0; i < NUM_STREAMS; ++i) {
       for(int j = 0; j < NUM_PASSES; ++j) {
-	float t = event[event_id(i, j + 1)] - event[event_id(i, 0)];
+	float t = event[event_id(i, j + 1)] - event[event_id(0, 0)];
 	cout << "stream " << i << " / event " << (j + 1) << " recorded at " << t << "ms\n";
       }
     }

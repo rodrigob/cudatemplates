@@ -18,8 +18,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define GL_GLEXT_PROTOTYPES
-
 #include <assert.h>
 #include <GL/glew.h>
 #include <cudatemplates/copy.hpp>
@@ -59,10 +57,10 @@ init_geometry_kernel(Cuda::OpenGL::BufferObject2D<float4>::KernelData coords,
   float fj = (float)j / coords.size[0];
 
   // coordinates:
-  float dx = fj - 0.5;
-  float dy = 0.5 - fi;
+  float dx = fj - 0.5f;
+  float dy = 0.5f - fi;
   float d = sqrtf(dx * dx + dy * dy);
-  float f = (d > 0) ? 2 * powf(d, 0.2) : 0;
+  float f = (d > 0) ? 2 * powf(d, 0.2f) : 0;
   coords.data[ofs] = make_float4(f * dx, f * dy, 0, 1);
 
   // texture coordinates:
