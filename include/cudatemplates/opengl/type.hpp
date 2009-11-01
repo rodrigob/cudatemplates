@@ -40,8 +40,6 @@ template <class T> GLint getInternalFormat();
    Provide "format" parameter for OpenGL texture calls.
    In some situations "GL_BGR" is more efficient than "GL_RGB".
    However, "GL_BGR" is not yet supported.
-   Moreover, in the current implementation, "format" and "internalFormat" are
-   identical (see getInternalFormat), but there is no internal format "GL_BGR".
    @return format parameter
 */
 template <class T> inline  GLenum getFormat() { CUDA_OPENGL_ERROR("unsupported texture format"); }
@@ -54,11 +52,11 @@ CUDA_OPENGL_FORMAT(struct uchar2 , GL_LUMINANCE_ALPHA)
 CUDA_OPENGL_FORMAT(struct uchar3 , GL_RGB)
 CUDA_OPENGL_FORMAT(struct uchar4 , GL_RGBA)
 
-CUDA_OPENGL_FORMAT(char          , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct char1  , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct char2  , GL_LUMINANCE_ALPHA)
-CUDA_OPENGL_FORMAT(struct char3  , GL_RGB)
-CUDA_OPENGL_FORMAT(struct char4  , GL_RGBA)
+CUDA_OPENGL_FORMAT(char          , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct char1  , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct char2  , GL_LUMINANCE_ALPHA_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct char3  , GL_RGB_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct char4  , GL_RGBA_INTEGER_EXT)
 
 CUDA_OPENGL_FORMAT(unsigned short, GL_LUMINANCE)
 CUDA_OPENGL_FORMAT(struct ushort1, GL_LUMINANCE)
@@ -66,23 +64,23 @@ CUDA_OPENGL_FORMAT(struct ushort2, GL_LUMINANCE_ALPHA)
 CUDA_OPENGL_FORMAT(struct ushort3, GL_RGB)
 CUDA_OPENGL_FORMAT(struct ushort4, GL_RGBA)
 
-CUDA_OPENGL_FORMAT(short         , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct short1 , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct short2 , GL_LUMINANCE_ALPHA)
-CUDA_OPENGL_FORMAT(struct short3 , GL_RGB)
-CUDA_OPENGL_FORMAT(struct short4 , GL_RGBA)
+CUDA_OPENGL_FORMAT(short         , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct short1 , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct short2 , GL_LUMINANCE_ALPHA_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct short3 , GL_RGB_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct short4 , GL_RGBA_INTEGER_EXT)
 
-CUDA_OPENGL_FORMAT(unsigned int  , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct uint1  , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct uint2  , GL_LUMINANCE_ALPHA)
-CUDA_OPENGL_FORMAT(struct uint3  , GL_RGB)
-CUDA_OPENGL_FORMAT(struct uint4  , GL_RGBA)
+CUDA_OPENGL_FORMAT(unsigned int  , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct uint1  , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct uint2  , GL_LUMINANCE_ALPHA_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct uint3  , GL_RGB_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct uint4  , GL_RGBA_INTEGER_EXT)
 
-CUDA_OPENGL_FORMAT(int           , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct int1   , GL_LUMINANCE)
-CUDA_OPENGL_FORMAT(struct int2   , GL_LUMINANCE_ALPHA)
-CUDA_OPENGL_FORMAT(struct int3   , GL_RGB)
-CUDA_OPENGL_FORMAT(struct int4   , GL_RGBA)
+CUDA_OPENGL_FORMAT(int           , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct int1   , GL_LUMINANCE_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct int2   , GL_LUMINANCE_ALPHA_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct int3   , GL_RGB_INTEGER_EXT)
+CUDA_OPENGL_FORMAT(struct int4   , GL_RGBA_INTEGER_EXT)
 
 CUDA_OPENGL_FORMAT(float         , GL_LUMINANCE)
 CUDA_OPENGL_FORMAT(struct float1 , GL_LUMINANCE)
@@ -96,10 +94,58 @@ CUDA_OPENGL_FORMAT(struct float4 , GL_RGBA)
 
 /**
    Provide "internalFormat" parameter for OpenGL texture calls.
-   In the current implementation, this is identical with the "format" parameter.
    @return internalFormat parameter
 */
-template <class T> inline GLint getInternalFormat() { return (GLint)getFormat<T>(); }
+//template <class T> inline GLint getInternalFormat() { return (GLint)getFormat<T>(); }
+
+template <class T> inline GLint getInternalFormat() { CUDA_OPENGL_ERROR("unsupported texture format"); }
+
+#define CUDA_OPENGL_INTERNAL_FORMAT(a, b) template <> inline GLint getInternalFormat<a>() { return b; }
+
+CUDA_OPENGL_INTERNAL_FORMAT(unsigned char , GL_LUMINANCE8)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uchar1 , GL_LUMINANCE8)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uchar2 , GL_LUMINANCE8_ALPHA8)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uchar3 , GL_RGB8)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uchar4 , GL_RGBA8)
+
+CUDA_OPENGL_INTERNAL_FORMAT(char          , GL_LUMINANCE8I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct char1  , GL_LUMINANCE8I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct char2  , GL_LUMINANCE_ALPHA8I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct char3  , GL_RGB8I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct char4  , GL_RGBA8I_EXT)
+
+CUDA_OPENGL_INTERNAL_FORMAT(unsigned short, GL_LUMINANCE16)
+CUDA_OPENGL_INTERNAL_FORMAT(struct ushort1, GL_LUMINANCE16)
+CUDA_OPENGL_INTERNAL_FORMAT(struct ushort2, GL_LUMINANCE16_ALPHA16)
+CUDA_OPENGL_INTERNAL_FORMAT(struct ushort3, GL_RGB16)
+CUDA_OPENGL_INTERNAL_FORMAT(struct ushort4, GL_RGBA16)
+
+CUDA_OPENGL_INTERNAL_FORMAT(short         , GL_LUMINANCE16I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct short1 , GL_LUMINANCE16I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct short2 , GL_LUMINANCE_ALPHA16I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct short3 , GL_RGB16I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct short4 , GL_RGBA16I_EXT)
+
+CUDA_OPENGL_INTERNAL_FORMAT(unsigned int  , GL_LUMINANCE32UI_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uint1  , GL_LUMINANCE32UI_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uint2  , GL_LUMINANCE_ALPHA32UI_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uint3  , GL_RGB32UI_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct uint4  , GL_RGBA32UI_EXT)
+
+CUDA_OPENGL_INTERNAL_FORMAT(int           , GL_LUMINANCE32I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct int1   , GL_LUMINANCE32I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct int2   , GL_LUMINANCE_ALPHA32I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct int3   , GL_RGB32I_EXT)
+CUDA_OPENGL_INTERNAL_FORMAT(struct int4   , GL_RGBA32I_EXT)
+
+CUDA_OPENGL_INTERNAL_FORMAT(float         , GL_LUMINANCE32F_ARB)
+CUDA_OPENGL_INTERNAL_FORMAT(struct float1 , GL_LUMINANCE32F_ARB)
+CUDA_OPENGL_INTERNAL_FORMAT(struct float2 , GL_LUMINANCE_ALPHA32F_ARB)
+CUDA_OPENGL_INTERNAL_FORMAT(struct float3 , GL_RGB32F_ARB)
+CUDA_OPENGL_INTERNAL_FORMAT(struct float4 , GL_RGBA32F_ARB)
+
+#undef CUDA_OPENGL_INTERNAL_FORMAT
+
 
 //------------------------------------------------------------------------------
 

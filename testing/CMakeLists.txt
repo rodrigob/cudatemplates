@@ -142,6 +142,9 @@ cuda_add_executable(array_by_value array_by_value.cu)
 
 cuda_add_executable(streams streams.cu)
 
+cuda_add_executable(ogl_texture ogl_texture.cu)
+target_link_libraries(ogl_texture ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES})
+
 # cuda_add_executable(vector vector.cpp)
 
 if(WIN32)
