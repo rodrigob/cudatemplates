@@ -157,6 +157,15 @@ int main(int argc, char *argv[])
     }
   #endif
 
+  const GLubyte *str = glGetString(GL_EXTENSIONS);
+  bool has_texture_integer = (strstr((const char *)str, "GL_EXT_texture_integer") != 0);
+  bool has_texture_float = (strstr((const char *)str, "GL_ARB_texture_float") != 0);
+
+  if(!has_texture_integer)
+    fprintf(stderr, "GL_EXT_texture_integer not supported!\n");
+  if(!has_texture_float)
+    fprintf(stderr, "GL_ARB_texture_float not supported!\n");
+
   int result = 0;
   result += testOglTexture<unsigned char>(&myrand<unsigned char, true>,  &mycomp<unsigned char>);
   result += testOglTexture<struct uchar1>(&myrand1<struct uchar1, true>, &mycomp1<struct uchar1>);
