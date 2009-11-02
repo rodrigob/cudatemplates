@@ -22,6 +22,8 @@
 #define CUDA_OPENGL_TYPE_H
 
 
+#include <string.h>
+
 #include <GL/gl.h>
 
 #include <vector_types.h>
@@ -206,43 +208,16 @@ CUDA_OPENGL_TYPE(struct float4 , GL_FLOAT)
 
 
 //------------------------------------------------------------------------------
-bool ext_texture_integer_supported()
+static bool ext_texture_integer_supported()
 {
-  class check
-  {
-  private:
-    bool chk;
-  public:
-    check() 
-    {
-      const GLubyte *str = glGetString(GL_EXTENSIONS);
-      chk = (strstr((const char *)str, "GL_EXT_texture_integer") != 0);
-      //we could make an assert here, or post a warning if possible
-    }
-    bool ok() const { return chk; }
-  };
-  static check _ext_texture_integer_supported;
-  return _ext_texture_integer_supported.ok();
+  const GLubyte *str = glGetString(GL_EXTENSIONS);
+  return strstr((const char *)str, "GL_EXT_texture_integer") != 0;
 }
 
-bool arb_texture_float_supported()
+static bool arb_texture_float_supported()
 {
-  class check
-  {
-  private:
-    bool chk;
-  public:
-    check() 
-    {
-      const GLubyte *str = glGetString(GL_EXTENSIONS);
-      chk = (strstr((const char *)str, "GL_ARB_texture_float") != 0);
-      //we could make an assert here, or post a warning if possible
-    }
-    bool ok() const { return chk; }
-  };
-  
-  static check _arb_texture_float_supported;
-  return _arb_texture_float_supported.ok();
+  const GLubyte *str = glGetString(GL_EXTENSIONS);
+  return strstr((const char *)str, "GL_ARB_texture_float") != 0;
 }
 
 //------------------------------------------------------------------------------

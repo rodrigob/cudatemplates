@@ -164,13 +164,19 @@ template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 alloc()
 {
-  // check for non-power-of-two extension:
-  static bool has_npot_extension, init_npot_extension = false;
+  // check for OpenGL extensions:
+  static bool init_extensions = false;
+  static bool has_npot_extension;
 
-  if(!init_npot_extension) {
+  if(!init_extensions) {
     const GLubyte *str = glGetString(GL_EXTENSIONS);
     has_npot_extension = (strstr((const char *)str, "GL_ARB_texture_non_power_of_two") != 0);
-    init_npot_extension = true;
+
+    //check if format is supported
+    if(!formatSupported<Type>())
+      CUDA_ERROR("Texture format not supported");
+
+    init_extensions = true;
   }
 
   // if not available, check for power-of-two texture image dimensions:
@@ -179,10 +185,6 @@ alloc()
       if((this->size[i] & (this->size[i] - 1)) != 0)
 	CUDA_ERROR("Texture size must be power of two");
 
-
-  //check if format is supported
-  if(!formatSupported<Type>())
-    CUDA_ERROR("Texture format not supported");
 
   this->free();
   CUDA_OPENGL_CHECK(glGenTextures(1, &texname));
