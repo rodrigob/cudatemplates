@@ -34,6 +34,7 @@ namespace OpenGL {
 
 template <class T> GLint getInternalFormat();
 
+
 //------------------------------------------------------------------------------
 
 /**
@@ -45,6 +46,7 @@ template <class T> GLint getInternalFormat();
 template <class T> inline  GLenum getFormat() { CUDA_OPENGL_ERROR("unsupported texture format"); }
 
 #define CUDA_OPENGL_FORMAT(a, b) template <> inline GLenum getFormat<a>() { return b; }
+#define CUDA_OPENGL_FORMAT_CHECKED(a, b, support, alternative) template <> inline GLenum getFormat<a>() { if(support)return b; }
 
 CUDA_OPENGL_FORMAT(unsigned char , GL_LUMINANCE)
 CUDA_OPENGL_FORMAT(struct uchar1 , GL_LUMINANCE)
@@ -89,6 +91,7 @@ CUDA_OPENGL_FORMAT(struct float3 , GL_RGB)
 CUDA_OPENGL_FORMAT(struct float4 , GL_RGBA)
 
 #undef CUDA_OPENGL_FORMAT
+#undef CUDA_OPENGL_FORMAT_CHECKED
 
 //------------------------------------------------------------------------------
 
@@ -200,6 +203,102 @@ CUDA_OPENGL_TYPE(struct float3 , GL_FLOAT)
 CUDA_OPENGL_TYPE(struct float4 , GL_FLOAT)
 
 #undef CUDA_OPENGL_TYPE
+
+
+//------------------------------------------------------------------------------
+bool ext_texture_integer_supported()
+{
+  class check
+  {
+  private:
+    bool chk;
+  public:
+    check() 
+    {
+      const GLubyte *str = glGetString(GL_EXTENSIONS);
+      chk = (strstr((const char *)str, "GL_EXT_texture_integer") != 0);
+      //we could make an assert here, or post a warning if possible
+    }
+    bool ok() const { return chk; }
+  };
+  static check _ext_texture_integer_supported;
+  return _ext_texture_integer_supported.ok();
+}
+
+bool arb_texture_float_supported()
+{
+  class check
+  {
+  private:
+    bool chk;
+  public:
+    check() 
+    {
+      const GLubyte *str = glGetString(GL_EXTENSIONS);
+      chk = (strstr((const char *)str, "GL_ARB_texture_float") != 0);
+      //we could make an assert here, or post a warning if possible
+    }
+    bool ok() const { return chk; }
+  };
+  
+  static check _arb_texture_float_supported;
+  return _arb_texture_float_supported.ok();
+}
+
+//------------------------------------------------------------------------------
+
+/**
+   Method to check if texture format is supported
+   @return true if supported
+*/
+
+template <class T> inline bool formatSupported() { CUDA_OPENGL_ERROR("unsupported texture type"); }
+
+#define CUDA_OPENGL_FORMAT_SUPPORTED(a, b) template <> inline bool formatSupported<a>() { return b; }
+
+CUDA_OPENGL_FORMAT_SUPPORTED(unsigned char , true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uchar1 , true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uchar2 , true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uchar3 , true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uchar4 , true)
+
+CUDA_OPENGL_FORMAT_SUPPORTED(char          , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct char1  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct char2  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct char3  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct char4  , ext_texture_integer_supported())
+
+CUDA_OPENGL_FORMAT_SUPPORTED(unsigned short, true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct ushort1, true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct ushort2, true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct ushort3, true)
+CUDA_OPENGL_FORMAT_SUPPORTED(struct ushort4, true)
+
+CUDA_OPENGL_FORMAT_SUPPORTED(short         , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct short1 , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct short2 , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct short3 , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct short4 , ext_texture_integer_supported())
+
+CUDA_OPENGL_FORMAT_SUPPORTED(unsigned int  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uint1  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uint2  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uint3  , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct uint4  , ext_texture_integer_supported())
+
+CUDA_OPENGL_FORMAT_SUPPORTED(int           , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct int1   , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct int2   , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct int3   , ext_texture_integer_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct int4   , ext_texture_integer_supported())
+
+CUDA_OPENGL_FORMAT_SUPPORTED(float         , arb_texture_float_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct float1 , arb_texture_float_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct float2 , arb_texture_float_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct float3 , arb_texture_float_supported())
+CUDA_OPENGL_FORMAT_SUPPORTED(struct float4 , arb_texture_float_supported())
+
+#undef CUDA_OPENGL_FORMAT_SUPPORTED
 
 }
 }

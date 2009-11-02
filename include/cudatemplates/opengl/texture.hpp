@@ -179,6 +179,11 @@ alloc()
       if((this->size[i] & (this->size[i] - 1)) != 0)
 	CUDA_ERROR("Texture size must be power of two");
 
+
+  //check if format is supported
+  if(!formatSupported<Type>())
+    CUDA_ERROR("Texture format not supported");
+
   this->free();
   CUDA_OPENGL_CHECK(glGenTextures(1, &texname));
   CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
