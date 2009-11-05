@@ -73,7 +73,19 @@ check_bounds(const Layout<Type1, Dim> &dst, const Layout<Type2, Dim> &src,
        (dst_ofs[i] + size[i] > dst.size[i]) ||
        (src_ofs[i] >= src.size[i]) ||
        (src_ofs[i] + size[i] > src.size[i]))
-      CUDA_ERROR("out of bounds");
+      {
+	CUDA_ERROR("out of bounds:");
+	printf(" dimension: %lu"
+	       " copy size: %lu\n"
+	       "  src size: %lu\n"
+	       "  src offs: %lu\n"
+	       "  dst size: %lu\n"
+	       "  dst offs: %lu\n",
+	       i,
+	       size[i],
+	       src.size[i], src_ofs[i],
+	       dst.size[i], dst_ofs[i]);
+      }
   }
 }
 
@@ -773,6 +785,28 @@ copyFromSymbol(Pointer<Type, Dim> &dst, const Symbol<Type, Dim> &src, cudaMemcpy
   CUDA_CHECK(cudaMemcpyFromSymbol(dst.getBuffer(), src.getSymbol(), dst.getBytes(), 0, kind));
 }
 
+template<class Type, unsigned Dim>
+void
+copyFromSymbol(Pointer<Type, Dim> &dst, 
+	       const Symbol<Type, Dim> &src, 
+	       const Cuda::Size<Dim> &dst_ofs,
+	       const Cuda::Size<Dim> &src_ofs,
+	       const Cuda::Size<Dim> &size,
+	       cudaMemcpyKind kind)
+{
+  CUDA_STATIC_ASSERT(Dim == 1);
+
+  check_bounds(dst, src, dst_ofs, src_ofs, size);
+
+  if (Dim == 1) {
+      CUDA_CHECK(cudaMemcpyFromSymbol(&dst.getBuffer()[dst_ofs[0]], 
+				      src.getSymbol(), 
+				      size[0]*sizeof(Type), 
+				      src_ofs[0]*sizeof(Type), 
+				      kind));
+  }
+}
+
 /**
    Copy CUDA symbol to host memory.
    @param dst destination pointer (host memory)
@@ -783,6 +817,36 @@ void
 copy(HostMemory<Type, Dim> &dst, const Symbol<Type, Dim> &src)
 {
   copyFromSymbol(dst, src, cudaMemcpyDeviceToHost);
+}
+
+/**
+   Copy CUDA symbol to host memory.
+   @param dst destination pointer (host memory)
+   @param src source symbol (device memory)
+*/
+template<class Type, unsigned Dim>
+void
+copy(HostMemory<Type, Dim> &dst, const Symbol<Type, Dim> &src,
+     const Size<Dim> &dst_ofs,
+     const Size<Dim> &src_ofs,
+     const Size<Dim> &size)
+{
+  copyFromSymbol(dst, src, dst_ofs, src_ofs, size, cudaMemcpyDeviceToHost);
+}
+
+/**
+   Copy CUDA symbol to device memory.
+   @param dst destination pointer (device memory)
+   @param src source symbol (device memory)
+*/
+template<class Type, unsigned Dim>
+void
+copy(DeviceMemory<Type, Dim> &dst, const Symbol<Type, Dim> &src,
+     const Size<Dim> &dst_ofs,
+     const Size<Dim> &src_ofs,
+     const Size<Dim> &size)
+{
+  copyFromSymbol(dst, src, dst_ofs, src_ofs, size, cudaMemcpyDeviceToDevice);
 }
 
 /**
