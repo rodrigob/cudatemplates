@@ -21,7 +21,7 @@
 #ifndef CUDA_COPY_H
 #define CUDA_COPY_H
 
-
+#include <stdio.h>
 #include <cudatemplates/array.hpp>
 #include <cudatemplates/devicememory.hpp>
 #include <cudatemplates/devicememorypitched.hpp>
