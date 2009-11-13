@@ -33,7 +33,7 @@ inline DeviceMemoryLinear(const DeviceMemoryLinear<Type, Dim> &x):
   DeviceMemoryStorage<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -44,7 +44,7 @@ inline DeviceMemoryLinear(const Name &x):
   DeviceMemoryStorage<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -55,7 +55,7 @@ inline DeviceMemoryLinear(const Name &x, const Size<Dim> &ofs, const Size<Dim> &
   DeviceMemoryStorage<Type, Dim>(size)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x, Size<Dim>(), ofs, size);
 }
 

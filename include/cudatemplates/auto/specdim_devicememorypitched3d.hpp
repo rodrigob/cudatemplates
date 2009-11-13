@@ -140,27 +140,27 @@ public:
   /**
      Allocate memory.
   */
-  inline void alloc()
+  inline void realloc()
   {
-    DeviceMemoryPitched<Type, 3>::alloc();
+    DeviceMemoryPitched<Type, 3>::realloc();
   }
 
   /**
      Allocate memory.
      @param _size size to be allocated
   */
-  inline void alloc(const Size<3> &_size)
+  inline void realloc(const Size<3> &_size)
   {
-    Storage<Type, 3>::alloc(_size);
+    Storage<Type, 3>::realloc(_size);
   }
 
   /**
      Allocate memory.
      size0, size1, size2 size to be allocated
   */
-  inline void alloc(size_t size0, size_t size1, size_t size2)
+  inline void realloc(size_t size0, size_t size1, size_t size2)
   {
-    Storage<Type, 3>::alloc(Size<3>(size0, size1, size2));
+    Storage<Type, 3>::realloc(Size<3>(size0, size1, size2));
   }
 
 };

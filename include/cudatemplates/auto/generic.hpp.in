@@ -52,9 +52,9 @@ public:
   {
   }
 
-  inline void alloc()
+  inline void realloc()
   {
-    @Name@<Type, @Dim@>::alloc();
+    @Name@<Type, @Dim@>::realloc();
   }
 
   inline @Name@@Dim@D(@SizeArgDecl@):
@@ -64,9 +64,9 @@ public:
   {
   }
 
-  inline void alloc(@SizeArgDecl@)
+  inline void realloc(@SizeArgDecl@)
   {
-    Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
+    Storage<Type, @Dim@>::realloc(Size<@Dim@>(@SizeArgs@));
   }
 };
 

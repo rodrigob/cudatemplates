@@ -71,7 +71,7 @@ public:
     Storage<Type, Dim>(_size)
   {
     init();
-    alloc();
+    realloc();
   }
 
   /**
@@ -83,7 +83,7 @@ public:
     Layout<Type, Dim>(layout),
     Storage<Type, Dim>(layout)
   {
-    alloc();
+    realloc();
   }
 
   /**
@@ -98,15 +98,15 @@ public:
   /**
      Allocate texture memory.
   */
-  void alloc();
+  void realloc();
 
   /**
      Allocate texture memory.
      @_size size to be allocated
   */
-  inline void alloc(const Size<Dim> &_size)
+  inline void realloc(const Size<Dim> &_size)
   {
-    Storage<Type, Dim>::alloc(_size);
+    Storage<Type, Dim>::realloc(_size);
   }
 
   /**
@@ -162,7 +162,7 @@ private:
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
-alloc()
+realloc()
 {
   // check for OpenGL extensions:
   static bool init_extensions = false;

@@ -69,7 +69,7 @@ public:
     Storage<Type, Dim>(_size),
     array(0)
   {
-    alloc();
+    realloc();
   }
 
   /**
@@ -81,7 +81,7 @@ public:
     Storage<Type, Dim>(layout),
     array(0)
   {
-    alloc();
+    realloc();
   }
 
 #include "auto/copy_array.hpp"
@@ -97,15 +97,15 @@ public:
   /**
      Allocate GPU memory.
   */
-  void alloc();
+  void realloc();
 
   /**
      Allocate GPU memory.
      @_size size to be allocated
   */
-  inline void alloc(const Size<Dim> &_size)
+  inline void realloc(const Size<Dim> &_size)
   {
-    Storage<Type, Dim>::alloc(_size);
+    Storage<Type, Dim>::realloc(_size);
   }
 
 #ifdef __CUDACC__
@@ -152,7 +152,7 @@ private:
 
 template <class Type, unsigned Dim>
 void Array<Type, Dim>::
-alloc()
+realloc()
 {
   CUDA_STATIC_ASSERT(Dim >= 1);
   this->free();

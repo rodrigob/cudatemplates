@@ -33,7 +33,7 @@ inline GilReference(const GilReference<Type, Dim> &x):
   HostMemoryReference<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -44,7 +44,7 @@ inline GilReference(const Name &x):
   HostMemoryReference<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -55,7 +55,7 @@ inline GilReference(const Name &x, const Size<Dim> &ofs, const Size<Dim> &size):
   HostMemoryReference<Type, Dim>(size)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x, Size<Dim>(), ofs, size);
 }
 

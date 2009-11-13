@@ -140,27 +140,27 @@ public:
   /**
      Allocate memory.
   */
-  inline void alloc()
+  inline void realloc()
   {
-    HostMemoryLocked<Type, 1>::alloc();
+    HostMemoryLocked<Type, 1>::realloc();
   }
 
   /**
      Allocate memory.
      @param _size size to be allocated
   */
-  inline void alloc(const Size<1> &_size)
+  inline void realloc(const Size<1> &_size)
   {
-    Storage<Type, 1>::alloc(_size);
+    Storage<Type, 1>::realloc(_size);
   }
 
   /**
      Allocate memory.
      size0 size to be allocated
   */
-  inline void alloc(size_t size0)
+  inline void realloc(size_t size0)
   {
-    Storage<Type, 1>::alloc(Size<1>(size0));
+    Storage<Type, 1>::realloc(Size<1>(size0));
   }
 
 };

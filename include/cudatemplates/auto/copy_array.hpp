@@ -33,7 +33,7 @@ inline Array(const Array<Type, Dim> &x):
   Storage<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -44,7 +44,7 @@ inline Array(const Name &x):
   Storage<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -55,7 +55,7 @@ inline Array(const Name &x, const Size<Dim> &ofs, const Size<Dim> &size):
   Storage<Type, Dim>(size)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x, Size<Dim>(), ofs, size);
 }
 

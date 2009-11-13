@@ -59,7 +59,7 @@ public:
     Pointer<Type, Dim>(_size),
     HostMemoryStorage<Type, Dim>(_size)
   {
-    alloc(flags);
+    realloc(flags);
   }
 
   /**
@@ -71,7 +71,7 @@ public:
     Pointer<Type, Dim>(layout),
     HostMemoryStorage<Type, Dim>(layout)
   {
-    alloc(flags);
+    realloc(flags);
   }
 
 #include "auto/copy_hostmemorylocked.hpp"
@@ -87,13 +87,13 @@ public:
   /**
      Allocate page-locked CPU memory.
   */
-  void alloc();
+  void realloc();
 
   /**
      Allocate page-locked CPU memory.
      @param flags see CUDA Programming Guide section 3.2.5
   */
-  void alloc(unsigned flags);
+  void realloc(unsigned flags);
 
   /**
      Free page-locked CPU memory.
@@ -103,14 +103,14 @@ public:
 
 template <class Type, unsigned Dim>
 void HostMemoryLocked<Type, Dim>::
-alloc()
+realloc()
 {
-  alloc(cudaHostAllocDefault);
+  realloc(cudaHostAllocDefault);
 }
 
 template <class Type, unsigned Dim>
 void HostMemoryLocked<Type, Dim>::
-alloc(unsigned flags)
+realloc(unsigned flags)
 {
   this->setPitch(0);
   // CUDA_CHECK(cudaMallocHost((void **)&this->buffer, this->getSize() * sizeof(Type)));

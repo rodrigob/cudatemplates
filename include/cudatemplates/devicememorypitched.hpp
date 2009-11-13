@@ -61,7 +61,7 @@ public:
     Pointer<Type, Dim>(_size),
     DeviceMemoryStorage<Type, Dim>(_size)
   {
-    alloc();
+    realloc();
   }
 
   /**
@@ -73,7 +73,7 @@ public:
     Pointer<Type, Dim>(layout),
     DeviceMemoryStorage<Type, Dim>(layout)
   {
-    alloc();
+    realloc();
   }
 
 #include "auto/copy_devicememorypitched.hpp"
@@ -81,15 +81,15 @@ public:
   /**
      Allocate GPU memory.
   */
-  void alloc();
+  void realloc();
 
   /**
      Allocate GPU memory.
      @_size size to be allocated
   */
-  inline void alloc(const Size<Dim> &_size)
+  inline void realloc(const Size<Dim> &_size)
   {
-    DeviceMemoryStorage<Type, Dim>::alloc(_size);
+    DeviceMemoryStorage<Type, Dim>::realloc(_size);
   }
 
   /**
@@ -101,7 +101,7 @@ public:
 
 template <class Type, unsigned Dim>
 void DeviceMemoryPitched<Type, Dim>::
-alloc()
+realloc()
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
   this->free();

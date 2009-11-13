@@ -102,16 +102,10 @@ public:
      @param _size requested size (may be padded by subclasses to fulfill
      alignment requirements).
   */
-  Layout(const Size<Dim> &_size):
-    region_size(_size)
+  Layout(const Size<Dim> &_size)
   {
-    for(int i = Dim; i--;)
-    {
-      spacing[i] = 1;
-      region_ofs[i] = 0;
-    }
-
     setSize(_size);
+    initSpacingRegion();
   }
 
   /**
@@ -230,7 +224,7 @@ public:
 
   /**
      Set size.
-     This also removed any padding.
+     This also removes any padding.
      @param _size new size
   */
   void setSize(const Size<Dim> &_size)
@@ -277,6 +271,19 @@ public:
      This is currently unused.
   */
   float spacing[Dim];
+
+protected:
+  /**
+     Initializes spacing and region according to previously set size.
+  */
+  void initSpacingRegion()
+  {
+    for(size_t i = Dim; i--;) {
+      spacing[i] = 1;
+      region_ofs[i] = 0;
+      region_size[i] = size[i];
+    }
+  }
 };
 
 inline int

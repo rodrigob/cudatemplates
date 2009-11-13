@@ -33,7 +33,7 @@ inline HostMemoryReference(const HostMemoryReference<Type, Dim> &x):
   HostMemory<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -44,7 +44,7 @@ inline HostMemoryReference(const Name &x):
   HostMemory<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -55,7 +55,7 @@ inline HostMemoryReference(const Name &x, const Size<Dim> &ofs, const Size<Dim> 
   HostMemory<Type, Dim>(size)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x, Size<Dim>(), ofs, size);
 }
 

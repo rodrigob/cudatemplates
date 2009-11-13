@@ -33,7 +33,7 @@ inline HostMemoryLocked(const HostMemoryLocked<Type, Dim> &x):
   HostMemoryStorage<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -44,7 +44,7 @@ inline HostMemoryLocked(const Name &x):
   HostMemoryStorage<Type, Dim>(x)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x);
 }
 
@@ -55,7 +55,7 @@ inline HostMemoryLocked(const Name &x, const Size<Dim> &ofs, const Size<Dim> &si
   HostMemoryStorage<Type, Dim>(size)
 {
   this->init();
-  this->alloc();
+  this->realloc();
   copy(*this, x, Size<Dim>(), ofs, size);
 }
 

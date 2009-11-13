@@ -71,7 +71,7 @@ public:
     DeviceMemoryStorage<Type, Dim>(_size),
     bufname(0), target(t), usage(u), registered(false)
   {
-    alloc();
+    realloc();
   }
 
   /**
@@ -87,7 +87,7 @@ public:
     bufname(0), target(t), usage(u),
     registered(false)
   {
-    alloc();
+    realloc();
   }
 
   ~BufferObject();
@@ -97,15 +97,15 @@ public:
   /**
      Allocate buffer memory.
   */
-  void alloc();
+  void realloc();
 
   /**
      Allocate buffer memory.
      @_size size to be allocated
   */
-  inline void alloc(const Size<Dim> &_size)
+  inline void realloc(const Size<Dim> &_size)
   {
-    DeviceMemoryStorage<Type, Dim>::alloc(_size);
+    DeviceMemoryStorage<Type, Dim>::realloc(_size);
   }
 
   /**
@@ -286,7 +286,7 @@ unmapBuffer()
 
 template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
-alloc()
+realloc()
 {
   this->free();
   this->setPitch(0);

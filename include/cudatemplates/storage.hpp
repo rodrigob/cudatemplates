@@ -57,7 +57,7 @@ public:
 
   /**
      Constructor.
-     See Storage::alloc(const Layout<Type, Dim> &) for possible performance implications.
+     See Storage::realloc(const Layout<Type, Dim> &) for possible performance implications.
      @param layout requested layout
   */
   inline Storage(const Layout<Type, Dim> &layout):
@@ -74,23 +74,46 @@ public:
 
   /**
      Allocate memory.
+     This method also initializes spacing and region.
   */
-  virtual void alloc() = 0;
+  void alloc();
 
   /**
      Allocate memory.
+     This method also initializes spacing and region.
      @param _size requested size
   */
   void alloc(const Size<Dim> &_size);
 
   /**
      Allocate memory.
-     This uses the requested layout regardless of constraints imposed by
-     subclasses (such as DeviceMemoryPitched). Use with care to avoid
-     performance penalties!
+     This method also initializes spacing and region.
      @param layout requested layout
   */
   void alloc(const Layout<Type, Dim> &layout);
+
+  /**
+     Reallocate memory.
+     This method doesn't modify spacing and region.
+  */
+  virtual void realloc() = 0;
+
+  /**
+     Reallocate memory.
+     This method doesn't modify spacing and region.
+     @param _size requested size
+  */
+  void realloc(const Size<Dim> &_size);
+
+  /**
+     Reallocate memory.
+     This uses the requested layout regardless of constraints imposed by
+     subclasses (such as DeviceMemoryPitched). Use with care to avoid
+     performance penalties!
+     This method doesn't modify spacing and region.
+     @param layout requested layout
+  */
+  void realloc(const Layout<Type, Dim> &layout);
 
   /**
      Free memory.
@@ -119,20 +142,44 @@ protected:
 
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
+alloc()
+{
+  realloc();
+  this->initSpacingRegion();
+}
+
+template <class Type, unsigned Dim>
+void Storage<Type, Dim>::
 alloc(const Size<Dim> &_size)
 {
-  free();
-  this->setSize(_size);
-  alloc();
+  realloc(_size);
+  this->initSpacingRegion();
 }
 
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 alloc(const Layout<Type, Dim> &layout)
 {
+  realloc(layout);
+  this->initSpacingRegion();
+}
+
+template <class Type, unsigned Dim>
+void Storage<Type, Dim>::
+realloc(const Size<Dim> &_size)
+{
+  free();
+  this->setSize(_size);
+  realloc();
+}
+
+template <class Type, unsigned Dim>
+void Storage<Type, Dim>::
+realloc(const Layout<Type, Dim> &layout)
+{
   free();
   this->setLayout(layout);
-  alloc();
+  realloc();
 }
 
 }  // namespace Cuda
