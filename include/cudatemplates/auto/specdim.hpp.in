@@ -140,13 +140,39 @@ public:
   /**
      Allocate memory.
   */
+  inline void alloc()
+  {
+    @Name@<Type, @Dim@>::alloc();
+  }
+
+  /**
+     Allocate memory.
+     @param _size size to be allocated
+  */
+  inline void alloc(const Size<@Dim@> &_size)
+  {
+    Storage<Type, @Dim@>::alloc(_size);
+  }
+
+  /**
+     Allocate memory.
+     @SizeArgs@ size to be allocated
+  */
+  inline void alloc(@SizeArgDecl@)
+  {
+    Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
+  }
+
+  /**
+     Re-allocate memory.
+  */
   inline void realloc()
   {
     @Name@<Type, @Dim@>::realloc();
   }
 
   /**
-     Allocate memory.
+     Re-allocate memory.
      @param _size size to be allocated
   */
   inline void realloc(const Size<@Dim@> &_size)
@@ -155,7 +181,7 @@ public:
   }
 
   /**
-     Allocate memory.
+     Re-allocate memory.
      @SizeArgs@ size to be allocated
   */
   inline void realloc(@SizeArgDecl@)

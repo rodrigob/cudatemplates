@@ -140,13 +140,39 @@ public:
   /**
      Allocate memory.
   */
+  inline void alloc()
+  {
+    Array<Type, 2>::alloc();
+  }
+
+  /**
+     Allocate memory.
+     @param _size size to be allocated
+  */
+  inline void alloc(const Size<2> &_size)
+  {
+    Storage<Type, 2>::alloc(_size);
+  }
+
+  /**
+     Allocate memory.
+     size0, size1 size to be allocated
+  */
+  inline void alloc(size_t size0, size_t size1)
+  {
+    Storage<Type, 2>::alloc(Size<2>(size0, size1));
+  }
+
+  /**
+     Re-allocate memory.
+  */
   inline void realloc()
   {
     Array<Type, 2>::realloc();
   }
 
   /**
-     Allocate memory.
+     Re-allocate memory.
      @param _size size to be allocated
   */
   inline void realloc(const Size<2> &_size)
@@ -155,7 +181,7 @@ public:
   }
 
   /**
-     Allocate memory.
+     Re-allocate memory.
      size0, size1 size to be allocated
   */
   inline void realloc(size_t size0, size_t size1)
