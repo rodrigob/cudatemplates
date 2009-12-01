@@ -90,6 +90,29 @@ public:
     }
   }
 
+  inline DeviceMemoryReference(const DeviceMemoryReference<Type, Dim> &other) :
+    Layout<Type, Dim>(other),
+    Pointer<Type, Dim>(other),
+    DeviceMemory<Type, Dim>(other)
+  {
+    this->buffer = other.buffer;
+    this->size = other.size;
+    this->region_ofs = other.region_ofs;
+    this->region_size = other.region_size;
+    this->stride = other.stride;
+//    this->spacing = other.spacing;
+  }
+
+  inline DeviceMemoryReference& operator= (const DeviceMemoryReference& other)
+  {
+    this->buffer = other.buffer;
+    this->size = other.size;
+    this->region_ofs = other.region_ofs;
+    this->region_size = other.region_size;
+    this->stride = other.stride;
+    this->spacing = other.spacing;
+  }
+
 protected:
   /**
      Default constructor.
