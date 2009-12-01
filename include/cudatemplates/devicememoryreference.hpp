@@ -90,6 +90,11 @@ public:
     }
   }
 
+  /**
+     Copy Constructor.
+     Ensures that the layout and pointer is correct when the copy constructor is invoked.
+     @param other existing device memory reference that is copied.
+  */
   inline DeviceMemoryReference(const DeviceMemoryReference<Type, Dim> &other) :
     Layout<Type, Dim>(other),
     Pointer<Type, Dim>(other),
@@ -100,9 +105,13 @@ public:
     this->region_ofs = other.region_ofs;
     this->region_size = other.region_size;
     this->stride = other.stride;
-//    this->spacing = other.spacing;
   }
 
+  /**
+     Asignment operator.
+     Ensures that the layout and pointer is correct when the asignment operator is invoked.
+     @param other existing device memory reference that is copied.
+  */
   inline DeviceMemoryReference& operator= (const DeviceMemoryReference& other)
   {
     this->buffer = other.buffer;
@@ -111,6 +120,7 @@ public:
     this->region_size = other.region_size;
     this->stride = other.stride;
     this->spacing = other.spacing;
+    return *this;
   }
 
 protected:
