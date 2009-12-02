@@ -168,6 +168,9 @@ template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 realloc(const Size<Dim> &_size)
 {
+  if(_size == this->size)
+    return;
+
   free();
   this->setSize(_size);
   realloc();
@@ -177,6 +180,9 @@ template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 realloc(const Layout<Type, Dim> &layout)
 {
+  if(layout == *this)
+    return;
+
   free();
   this->setLayout(layout);
   realloc();
