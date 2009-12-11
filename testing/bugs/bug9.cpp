@@ -26,7 +26,7 @@ int main() {
 
   DeviceMemoryLinear<int, 1>* device = new DeviceMemoryLinear<int, 1>(host);
 
-  //copy(host, *device);
+  copy(host, *device);
 
   delete device;
   delete[] input;
