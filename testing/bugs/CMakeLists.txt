@@ -31,3 +31,4 @@ include_directories(
 #cuda_add_executable(bug5 bug5.cu)
 #cuda_add_executable(bug7 bug7.cu)
 cuda_add_executable(bug8 bug8.cpp)
+cuda_add_executable(bug9 bug9.cpp)
