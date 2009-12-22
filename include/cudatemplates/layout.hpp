@@ -305,7 +305,7 @@ getExecutionConfiguration(dim3 &gridDim, dim3 &blockDim, bool &aligned,
   // which is not yet implemented:
   CUDA_STATIC_ASSERT(Dim <= 2);
 
-  switch(Dim) {
+  switch(_Dim) {
   case 1:
     blockDim = dim3(256);
     gridDim = dim3(numblocks(rofs[0], rsize[0], blockDim.x));
