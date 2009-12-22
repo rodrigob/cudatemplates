@@ -75,12 +75,25 @@ endif(WINDOWS)
 
 # test programs:
 
+add_executable(array array.cpp)
+target_link_libraries(array ${CUDA_LIBRARIES})
+
+cuda_add_executable(array_by_value array_by_value.cu)
+
+add_executable(blas blas.cpp)
+target_link_libraries(blas ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
+
+add_executable(border border.cpp)
+target_link_libraries(border ${CUDA_LIBRARIES})
+
+cuda_add_executable(buffer_object buffer_object.cpp buffer_object_init.cu)
+target_link_libraries(buffer_object ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
+
+cuda_add_executable(color_speed_test color_speed_test.cu)
+
 cuda_add_executable(copy copy.cpp copy_instantiate.cu)
 
 cuda_add_executable(convert convert.cu)
-
-cuda_add_executable(pack pack.cu)
-add_dependencies(pack create_pack)
 
 add_executable(demo demo.cpp)
 target_link_libraries(demo ${CUDA_LIBRARIES})
@@ -88,10 +101,7 @@ target_link_libraries(demo ${CUDA_LIBRARIES})
 add_executable(fft fft.cpp)
 target_link_libraries(fft ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})
 
-if(ITK_FOUND)
-  add_executable(itk itk.cpp)
-  target_link_libraries(itk ${CUDA_LIBRARIES} ${ITK_LIBRARIES})
-endif(ITK_FOUND)
+cuda_add_executable(fillrate fillrate.cu)
 
 if(Boost_FOUND)
   add_executable(gil gil.cpp)
@@ -103,30 +113,36 @@ if(OpenCV_FOUND)
   target_link_libraries(ipl ${CUDA_LIBRARIES} ${OPENCV_LIBRARIES})
 endif(OpenCV_FOUND)
 
+if(ITK_FOUND)
+  add_executable(itk itk.cpp)
+  target_link_libraries(itk ${CUDA_LIBRARIES} ${ITK_LIBRARIES})
+endif(ITK_FOUND)
+
 cuda_add_executable(kernel kernel.cu)
 target_link_libraries(kernel ${CUDA_LIBRARIES})
 
-cuda_add_executable(texture texture.cu)
+cuda_add_executable(mapped mapped.cu)
 
-cuda_add_executable(texture_precision texture_precision.cu)
+add_executable(memset memset.cpp)
+target_link_libraries(memset ${CUDA_LIBRARIES})
+
+cuda_add_executable(ogl_texture ogl_texture.cu)
+target_link_libraries(ogl_texture ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES})
+
+cuda_add_executable(pack pack.cu)
+add_dependencies(pack create_pack)
+
+cuda_add_executable(streams streams.cu)
 
 cuda_add_executable(symbol symbol.cu)
 
 cuda_add_executable(symbol_plain symbol_plain.cu)
 
-cuda_add_executable(fillrate fillrate.cu)
+cuda_add_executable(texture texture.cu)
+
+cuda_add_executable(texture_precision texture_precision.cu)
 
 cuda_add_executable(throughput throughput.cu)
-
-add_executable(memset memset.cpp)
-target_link_libraries(memset ${CUDA_LIBRARIES})
-
-cuda_add_executable(mapped mapped.cu)
-
-cuda_add_executable(streams streams.cu)
-
-cuda_add_executable(ogl_texture ogl_texture.cu)
-target_link_libraries(ogl_texture ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES})
 
 # cuda_add_executable(vector vector.cpp)
 
@@ -143,27 +159,9 @@ endif(WIN32)
 #cuda_add_executable(precision_sm_13 precision.cu)
 
 # not working with CUDA-3.0-beta1:
-if(CUDA_VERSION_MAJOR LESS 3)
-  cuda_add_executable(color_speed_test color_speed_test.cu)
-
-  cuda_add_executable(buffer_object buffer_object.cpp buffer_object_init.cu)
-  target_link_libraries(buffer_object ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${PNG_LIBRARIES})
-
-  add_executable(border border.cpp)
-  target_link_libraries(border ${CUDA_LIBRARIES})
-
-  add_executable(blas blas.cpp)
-  target_link_libraries(blas ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
-
-  cuda_add_executable(array_by_value array_by_value.cu)
-
-  add_executable(array array.cpp)
-  target_link_libraries(array ${CUDA_LIBRARIES})
-
+if(CUDA_VERSION VERSION_LESS 3.0)
   cuda_add_executable(compat compat.cu)
-
 endif()
-
 
 # run tests:
 

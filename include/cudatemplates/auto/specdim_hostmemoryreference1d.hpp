@@ -36,7 +36,10 @@ namespace Cuda {
    HostMemoryReference template specialized for 1 dimension(s).
 */
 template <class Type>
-class HostMemoryReference1D: public HostMemoryReference<Type, 1>
+class HostMemoryReference1D:
+    virtual public Layout<Type, 1>,
+    virtual public Pointer<Type, 1>,
+    public HostMemoryReference<Type, 1>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS

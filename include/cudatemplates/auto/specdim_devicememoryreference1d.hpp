@@ -36,7 +36,10 @@ namespace Cuda {
    DeviceMemoryReference template specialized for 1 dimension(s).
 */
 template <class Type>
-class DeviceMemoryReference1D: public DeviceMemoryReference<Type, 1>
+class DeviceMemoryReference1D:
+    virtual public Layout<Type, 1>,
+    virtual public Pointer<Type, 1>,
+    public DeviceMemoryReference<Type, 1>
 {
 public:
 #ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
