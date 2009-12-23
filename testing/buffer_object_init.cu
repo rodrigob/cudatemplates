@@ -25,6 +25,8 @@
 #include <cudatemplates/opengl/bufferobject.hpp>
 #include <cudatemplates/opengl/copy.hpp>
 
+#include "buffer_object.hpp"
+
 
 const int BLOCK_SIZE = 8;
 
@@ -42,8 +44,7 @@ div_up(int x, int y)
    Compute vertex and texture coordinates.
 */
 __global__ void
-init_geometry_kernel(Cuda::OpenGL::BufferObject2D<float4>::KernelData coords,
-		     Cuda::OpenGL::BufferObject2D<float2>::KernelData texcoords)
+init_geometry_kernel(BufferObjectFloat4Type::KernelData coords, BufferObjectFloat2Type::KernelData texcoords)
 {
   int i = threadIdx.y + blockDim.y * blockIdx.y;
   int j = threadIdx.x + blockDim.x * blockIdx.x;
@@ -71,8 +72,7 @@ init_geometry_kernel(Cuda::OpenGL::BufferObject2D<float4>::KernelData coords,
    Init mesh geometry on GPU.
 */
 void
-init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
-	      Cuda::OpenGL::BufferObject2D<float2> &bufobj_texcoords)
+init_geometry(BufferObjectFloat4Type &bufobj_coords, BufferObjectFloat2Type &bufobj_texcoords)
 {
   assert(bufobj_coords.size == bufobj_texcoords.size);
 
@@ -97,7 +97,7 @@ init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
    Init mesh topology on CPU.
 */
 void
-init_topology(Cuda::OpenGL::BufferObject2D<int4> &bufobj_coordindex)
+init_topology(BufferObjectInt4Type &bufobj_coordindex)
 {
   // create topology array:
   Cuda::HostMemoryHeap2D<int4> coordindex(bufobj_coordindex.size);

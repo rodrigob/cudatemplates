@@ -37,8 +37,6 @@
 
 */
 
-#define USE_CUDA30 0
-
 #include <iostream>
 #include <stdexcept>
 
@@ -60,13 +58,7 @@
 #include <cudatemplates/opengl/texture.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
 
-#if USE_CUDA30
-#include <cudatemplates/graphics/copy.hpp>
-#include <cudatemplates/graphics/resource.hpp>
-#else
-#include <cudatemplates/opengl/bufferobject.hpp>
-#include <cudatemplates/opengl/copy.hpp>
-#endif
+#include "buffer_object.hpp"
 
 using namespace std;
 
@@ -83,10 +75,8 @@ using namespace std;
 #define WIREFRAME 0
 
 
-extern void init_geometry(Cuda::OpenGL::BufferObject2D<float4> &bufobj_coords,
-			  Cuda::OpenGL::BufferObject2D<float2> &bufobj_texcoords);
-
-extern void init_topology(Cuda::OpenGL::BufferObject2D<int4>   &bufobj_coordindex);
+extern void init_geometry(BufferObjectFloat4Type &bufobj_coords, BufferObjectFloat2Type &bufobj_texcoords);
+extern void init_topology(BufferObjectInt4Type &bufobj_coordindex);
 
 
 void
@@ -125,14 +115,6 @@ int
 main(int argc, char *argv[])
 {
   try {
-    typedef struct uchar3 PixelType;
-
-#if USE_CUDA30
-    typedef Cuda::Graphics::OpenGL::Buffer<PixelType, 2> BufferObjectType;
-#else
-    typedef Cuda::OpenGL::BufferObject<PixelType, 2> BufferObjectType;
-#endif
-
 #ifndef _WIN32
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
@@ -162,7 +144,7 @@ main(int argc, char *argv[])
 
     // create OpenGL buffer object for image and copy data:
 #ifndef _WIN32
-    BufferObjectType bufobj_image(image.size);
+    BufferObjectPixelType bufobj_image(image.size);
     copy(bufobj_image, image);
     // create OpenGL texture and copy data
     // (note that the image data could also be copied directly to the texture,
@@ -170,7 +152,7 @@ main(int argc, char *argv[])
     Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
     copy(texture, bufobj_image);
 #else
-    BufferObjectType bufobj_image(Cuda::Size<2>(256,256));
+    BufferObjectPixelType bufobj_image(Cuda::Size<2>(256,256));
     Cuda::HostMemoryHeap2D<PixelType> h_img(Cuda::Size<2>(256,256));
     for(int i = 0; i < 256*256; i++) {
       h_img[i].x = i;
@@ -198,9 +180,10 @@ main(int argc, char *argv[])
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     // create OpenGL buffer objects for geometry and topology:
-    Cuda::OpenGL::BufferObject2D<float4> bufobj_coords    (SUBDIV_X + 1, SUBDIV_Y + 1);
-    Cuda::OpenGL::BufferObject2D<float2> bufobj_texcoords (SUBDIV_X + 1, SUBDIV_Y + 1);
-    Cuda::OpenGL::BufferObject2D<int4>   bufobj_coordindex(SUBDIV_X,     SUBDIV_Y,     GL_ELEMENT_ARRAY_BUFFER);
+    Cuda::Size<2> size(SUBDIV_X, SUBDIV_Y), size1(SUBDIV_X + 1, SUBDIV_Y + 1);
+    BufferObjectFloat4Type bufobj_coords(size1);
+    BufferObjectFloat2Type bufobj_texcoords (size1);
+    BufferObjectInt4Type bufobj_coordindex(size, GL_ELEMENT_ARRAY_BUFFER);
 
     // init buffer objects:
     init_geometry(bufobj_coords, bufobj_texcoords);
