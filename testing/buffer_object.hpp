@@ -26,26 +26,36 @@
 
 
 #if USE_CUDA30
+
+#define CUDA_GRAPHICS_COMPATIBILITY
+
 #include <cudatemplates/graphics/copy.hpp>
 #include <cudatemplates/graphics/resource.hpp>
+
 #else
+
 #include <cudatemplates/opengl/bufferobject.hpp>
 #include <cudatemplates/opengl/copy.hpp>
+
 #endif
 
 
 typedef struct uchar3 PixelType;
 
 #if USE_CUDA30
+
 typedef Cuda::Graphics::OpenGL::Buffer<PixelType, 2> BufferObjectPixelType;
 typedef Cuda::Graphics::OpenGL::Buffer<int4, 2> BufferObjectInt4Type;
 typedef Cuda::Graphics::OpenGL::Buffer<float2, 2> BufferObjectFloat2Type;
 typedef Cuda::Graphics::OpenGL::Buffer<float4, 2> BufferObjectFloat4Type;
+
 #else
+
 typedef Cuda::OpenGL::BufferObject<PixelType, 2> BufferObjectPixelType;
 typedef Cuda::OpenGL::BufferObject<int4, 2> BufferObjectInt4Type;
 typedef Cuda::OpenGL::BufferObject<float2, 2> BufferObjectFloat2Type;
 typedef Cuda::OpenGL::BufferObject<float4, 2> BufferObjectFloat4Type;
+
 #endif
 
 
