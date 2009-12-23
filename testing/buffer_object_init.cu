@@ -54,8 +54,8 @@ init_geometry_kernel(BufferObjectFloat4Type::KernelData coords, BufferObjectFloa
 
   int ofs = i * coords.size[0] + j;
 
-  float fi = (float)i / coords.size[1];
-  float fj = (float)j / coords.size[0];
+  float fi = (float)i / (coords.size[1] - 1);
+  float fj = (float)j / (coords.size[0] - 1);
 
   // coordinates:
   float dx = fj - 0.5f;

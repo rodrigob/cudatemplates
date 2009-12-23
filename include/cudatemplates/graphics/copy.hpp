@@ -55,11 +55,11 @@ copy(Cuda::OpenGL::Texture<Type, Dim> &dst, const OpenGL::Buffer<Type, Dim> &src
   buf_t *src2;
   src2 = const_cast<buf_t *>(&src);
 
-  src2->disconnect();
-  src2->bind(GL_PIXEL_UNPACK_BUFFER);
+  GLenum target = src2->setTarget(GL_PIXEL_UNPACK_BUFFER);
+  Resource::state_t state = src2->setState(Resource::STATE_GRAPHICS_BOUND);
   dst.glTexSubImage(0);
-  src2->unbind(GL_PIXEL_UNPACK_BUFFER);
-  src2->connect();
+  src2->setState(state);
+  src2->setTarget(target);
 }
 
 /**

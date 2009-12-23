@@ -22,6 +22,9 @@
 #define CUDA_GRAPHICS_RESOURCE_H
 
 
+#include <iostream>
+
+
 #include <assert.h>
 
 #include <cuda_runtime_api.h>
@@ -37,67 +40,161 @@ namespace Graphics {
 class Resource
 {
 public:
-  inline Resource():
-    resource(0), mapped(false)
+  typedef enum {
+    STATE_GRAPHICS_BOUND = 1,
+    STATE_UNUSED,
+    STATE_CUDA_REGISTERED,
+    STATE_CUDA_MAPPED
+  } state_t;
+
+  Resource():
+    resource(0)
   {
   }
 
   virtual ~Resource()
   {
-    unregisterObject();
+    setState(STATE_UNUSED);
   }
-
-  inline void map()
-  {
-    if(mapped)
-      return;
-
-    registerObject();
-    CUDA_CHECK(cudaGraphicsMapResources(1, &resource, 0));
-    mapInternal();
-    mapped = true;
-  }
-
-  virtual void registerObject() = 0;
 
   inline void setMapFlags(unsigned int flags)
   {
     CUDA_CHECK(cudaGraphicsResourceSetMapFlags(resource, flags));
   }
 
-  inline void unmap()
+  /**
+     Get object state.
+     @return current object state
+  */
+  state_t getState() const
   {
-    if(!mapped)
-      return;
+    if(isMapped())
+      return STATE_CUDA_MAPPED;
 
-    CUDA_CHECK(cudaGraphicsUnmapResources(1, &resource, 0));
-    unmapInternal();
-    mapped = false;
-  }
+    if(isRegistered())
+      return STATE_CUDA_REGISTERED;
 
-  inline void unregisterObject()
-  {
-    if(resource == 0)
-      return;
+    if(isBound())
+      return STATE_GRAPHICS_BOUND;
 
-    unmap();
-    CUDA_CHECK(cudaGraphicsUnregisterResource(resource));
-    resource = 0;
+    return STATE_UNUSED;
   }
 
   /**
-     compatibility methods (will be removed later):
+     Set object state.
+     @param state_new new object state
+     @return old object state
   */
-  inline void connect() { map(); }
-  inline void disconnect() { unregisterObject(); }
+  state_t setState(state_t state_new)
+  {
+    state_t state_old = getState();
+
+    if(state_new > state_old) {
+#define COND(state) if((state_old < STATE_ ## state) && (state_new >= STATE_ ## state))
+      COND(UNUSED) unbindObject();
+      COND(CUDA_REGISTERED) registerObject();
+      COND(CUDA_MAPPED) mapObject();
+#undef COND
+    }
+    else if(state_new < state_old) {
+#define COND(state) if((state_old > STATE_ ## state) && (state_new <= STATE_ ## state))
+      COND(CUDA_REGISTERED) unmapObject();
+      COND(UNUSED) unregisterObject();
+      COND(GRAPHICS_BOUND) bindObject();
+#undef COND
+    }
+
+    return state_old;
+  }
+
+#ifdef CUDA_GRAPHICS_COMPATIBILITY
+  inline void bind() { setState(STATE_GRAPHICS_BOUND); }
+  inline void connect() { setState(STATE_CUDA_MAPPED); }
+  inline void disconnect() { setState(STATE_UNUSED); }
+#endif
 
 protected:
   cudaGraphicsResource *resource;
-  bool mapped;
 
 private:
+  /**
+     Bind object for use with graphics API.
+     This should only be called from setState() to avoid invalid state transitions.
+  */
+  virtual void bindObject() = 0;
+
+  /**
+     Check bound state.
+     @return true if object is currently bound for use with graphics API.
+  */
+  virtual bool isBound() const = 0;
+
+  /**
+     Check mapped state.
+     @return true if object is currently mapped for use with CUDA.
+  */
+  virtual bool isMapped() const = 0;
+
+  /**
+     Check registered state.
+     @return true if object is currently registered for use with CUDA.
+  */
+  bool isRegistered() const
+  {
+    return resource != 0;
+  }
+
+  /**
+     Object-specific part of map action.
+  */
   virtual void mapInternal() = 0;
+
+  /**
+     Map object for use with CUDA.
+     This should only be called from setState() to avoid invalid state transitions.
+  */
+  void mapObject()
+  {
+    CUDA_CHECK(cudaGraphicsMapResources(1, &resource, 0));
+    mapInternal();
+  }
+
+  /**
+     Register object for use with CUDA.
+     This should only be called from setState() to avoid invalid state transitions.
+  */
+  virtual void registerObject() = 0;
+
+  /**
+     Unbind object.
+     This should only be called from setState() to avoid invalid state transitions.
+  */
+  virtual void unbindObject() = 0;
+
+  /**
+     Object-specific part of unmap action.
+  */
   virtual void unmapInternal() = 0;
+
+  /**
+     Unmap object.
+     This should only be called from setState() to avoid invalid state transitions.
+  */
+  void unmapObject()
+  {
+    unmapInternal();
+    CUDA_CHECK(cudaGraphicsUnmapResources(1, &resource, 0));
+  }
+
+  /**
+     Unregister object.
+     This should only be called from setState() to avoid invalid state transitions.
+  */
+  void unregisterObject()
+  {
+    CUDA_CHECK(cudaGraphicsUnregisterResource(resource));
+    resource = 0;
+  }
 };
 
 namespace OpenGL {
@@ -153,6 +250,22 @@ public:
   // #include "auto/copy_opengl_bufferobject.hpp"
 
   /**
+     Bind the buffer object to the given target.
+     @param t target to which the buffer object should be bound
+  */
+  /*
+  inline void bind(GLenum t)
+  {
+    CUDA_OPENGL_CHECK(glBindBuffer(t, this->bufname));
+  }
+  */
+
+  /**
+     Free buffer memory.
+  */
+  void free();
+
+  /**
      Allocate buffer memory.
   */
   void realloc();
@@ -167,45 +280,41 @@ public:
   }
 
   /**
-     Bind the buffer object to the target specified in the constructor.
+     Set buffer object target.
+     If the buffer object is currently bound to a different target, it will be
+     unbound and then bound to the new target.
+     @param target_new new target
+     @return old target
   */
-  inline void bind() { CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->bufname)); }
-
-  /**
-     Bind the buffer object to the given target.
-     @param t target to which the buffer object should be bound
-  */
-  inline void bind(GLenum t) { CUDA_OPENGL_CHECK(glBindBuffer(t, this->bufname)); }
-
-  /**
-     Register OpenGL buffer object for use in CUDA.
-  */
-  void registerObject()
+  GLenum setTarget(GLenum target_new)
   {
-    if(resource != 0)
-      return;
+    if(target_new == target)
+      return target;
 
-    CUDA_CHECK(cudaGraphicsGLRegisterBuffer(&resource, bufname, flags));
-    assert(resource != 0);
+    GLenum target_old = target;
+    state_t state = getState();
+
+    if(state == STATE_GRAPHICS_BOUND)
+      setState(STATE_UNUSED);
+
+    target = target_new;
+    setState(state);
+    return target_old;
   }
-
-  /**
-     Unbind the buffer object from the target specified in the constructor.
-  */
-  inline void unbind() { CUDA_OPENGL_CHECK(glBindBuffer(this->target, 0)); }
 
   /**
      Unbind the buffer object from the given target.
      @param t target from which the buffer object should be unbound
   */
+  /*
   inline static void unbind(GLenum t) {
     CUDA_OPENGL_CHECK(glBindBuffer(t, 0));
   }
-
-  /**
-     Free buffer memory.
   */
-  void free();
+
+#ifdef CUDA_GRAPHICS_COMPATIBILITY
+  inline void bind() { Resource::bind(); }
+#endif
 
 private:
   /**
@@ -228,6 +337,48 @@ private:
   */
   unsigned int flags;
 
+  /**
+     Bind the buffer object to the target specified in the constructor.
+  */
+  void bindObject()
+  {
+    CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->bufname));
+  }
+
+  /**
+     Check bind status.
+     @return true if buffer is currently bound for use with OpenGL
+  */
+  bool isBound() const
+  {
+    GLenum pname;
+    GLint param;
+
+    switch(target) {
+#define BUFFER_CASE(name) case GL_ ## name ## _BUFFER: pname = GL_ ## name ## _BUFFER_BINDING; break
+      BUFFER_CASE(ARRAY);
+      BUFFER_CASE(ELEMENT_ARRAY);
+      BUFFER_CASE(PIXEL_PACK);
+      BUFFER_CASE(PIXEL_UNPACK);
+#undef BUFFER_CASE
+    }
+    
+    glGetIntegerv(pname, &param);
+    return param != 0;
+  }
+
+  /**
+     Check map status.
+     @return true if buffer is currently mapped for use with CUDA
+  */
+  bool isMapped() const
+  {
+    return this->buffer != 0;
+  }
+
+  /**
+     Object-specific part of map action.
+  */
   void mapInternal()
   {
     size_t bytes;
@@ -240,6 +391,28 @@ private:
       CUDA_ERROR("size mismatch");
   }
 
+  /**
+     Register OpenGL buffer object for use with CUDA.
+  */
+  void registerObject()
+  {
+    CUDA_CHECK(cudaGraphicsGLRegisterBuffer(&resource, bufname, flags));
+
+    if(this->resource == 0)
+      CUDA_ERROR("register buffer object failed");
+  }
+
+  /**
+     Unbind the buffer object from the target specified in the constructor.
+  */
+  inline void unbindObject()
+  {
+    CUDA_OPENGL_CHECK(glBindBuffer(this->target, 0));
+  }
+
+  /**
+     Object-specific part of unmap action.
+  */
   void unmapInternal()
   {
     this->buffer = 0;
@@ -260,12 +433,11 @@ realloc()
   CUDA_OPENGL_CHECK(glGenBuffers(1, &(this->bufname)));
 
   if(this->bufname == 0)
-    CUDA_OPENGL_ERROR("generate buffer object failed");
+    CUDA_ERROR("generate buffer object failed");
 
-  bind();
+  setState(STATE_GRAPHICS_BOUND);
   CUDA_OPENGL_CHECK(glBufferData(this->target, p * sizeof(Type), 0, this->usage));
-  unbind();
-  map();
+  setState(STATE_CUDA_MAPPED);
 }
 
 template <class Type, unsigned Dim>
@@ -275,8 +447,7 @@ free()
   if(this->bufname == 0)
     return;
 
-  unregisterObject();
-  glBindBuffer(this->target, 0);
+  setState(STATE_UNUSED);
   glDeleteBuffers(1, &(this->bufname));
   bufname = 0;
 }
