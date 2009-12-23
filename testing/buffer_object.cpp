@@ -37,6 +37,8 @@
 
 */
 
+#define USE_CUDA30 0
+
 #include <iostream>
 #include <stdexcept>
 
@@ -55,10 +57,16 @@
 
 #include <cudatemplates/copy.hpp>
 #include <cudatemplates/gilreference.hpp>
-#include <cudatemplates/opengl/bufferobject.hpp>
-#include <cudatemplates/opengl/copy.hpp>
 #include <cudatemplates/opengl/texture.hpp>
 #include <cudatemplates/hostmemoryheap.hpp>
+
+#if USE_CUDA30
+#include <cudatemplates/graphics/copy.hpp>
+#include <cudatemplates/graphics/resource.hpp>
+#else
+#include <cudatemplates/opengl/bufferobject.hpp>
+#include <cudatemplates/opengl/copy.hpp>
+#endif
 
 using namespace std;
 
@@ -119,6 +127,12 @@ main(int argc, char *argv[])
   try {
     typedef struct uchar3 PixelType;
 
+#if USE_CUDA30
+    typedef Cuda::Graphics::OpenGL::Buffer<PixelType, 2> BufferObjectType;
+#else
+    typedef Cuda::OpenGL::BufferObject<PixelType, 2> BufferObjectType;
+#endif
+
 #ifndef _WIN32
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;
@@ -148,7 +162,7 @@ main(int argc, char *argv[])
 
     // create OpenGL buffer object for image and copy data:
 #ifndef _WIN32
-    Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(image.size);
+    BufferObjectType bufobj_image(image.size);
     copy(bufobj_image, image);
     // create OpenGL texture and copy data
     // (note that the image data could also be copied directly to the texture,
@@ -156,7 +170,7 @@ main(int argc, char *argv[])
     Cuda::OpenGL::Texture<PixelType, 2> texture(image.size);
     copy(texture, bufobj_image);
 #else
-    Cuda::OpenGL::BufferObject2D<PixelType> bufobj_image(Cuda::Size<2>(256,256));
+    BufferObjectType bufobj_image(Cuda::Size<2>(256,256));
     Cuda::HostMemoryHeap2D<PixelType> h_img(Cuda::Size<2>(256,256));
     for(int i = 0; i < 256*256; i++) {
       h_img[i].x = i;
