@@ -51,7 +51,7 @@ copy(Cuda::OpenGL::Texture<Type, Dim> &dst, const OpenGL::Buffer<Type, Dim> &src
 
   // copying a buffer object to a texture requires unmapping the buffer object,
   // we therefore need a non-const pointer (nvcc can't handle references here):
-  typedef ::Cuda::Graphics::OpenGL::Buffer<Type, Dim> buf_t;
+  typedef OpenGL::Buffer<Type, Dim> buf_t;
   buf_t *src2;
   src2 = const_cast<buf_t *>(&src);
 

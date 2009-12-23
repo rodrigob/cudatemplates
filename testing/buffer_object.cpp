@@ -115,6 +115,10 @@ int
 main(int argc, char *argv[])
 {
   try {
+#if USE_CUDA30
+    CUDA_CHECK(cudaGLSetGLDevice(0));
+#endif
+
 #ifndef _WIN32
     // read image:
     Cuda::GilReference2D<PixelType>::gil_image_t gil_image;

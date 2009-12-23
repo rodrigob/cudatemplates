@@ -22,7 +22,7 @@
 #define BUFFER_OBJECT_H
 
 
-#define USE_CUDA30 0
+#define USE_CUDA30 1
 
 
 #if USE_CUDA30
@@ -38,9 +38,9 @@ typedef struct uchar3 PixelType;
 
 #if USE_CUDA30
 typedef Cuda::Graphics::OpenGL::Buffer<PixelType, 2> BufferObjectPixelType;
-typedef Cuda::Graphics::OpenGL::BufferObject<int4, 2> BufferObjectInt4Type;
-typedef Cuda::Graphics::OpenGL::BufferObject<float2, 2> BufferObjectFloat2Type;
-typedef Cuda::Graphics::OpenGL::BufferObject<float4, 2> BufferObjectFloat4Type;
+typedef Cuda::Graphics::OpenGL::Buffer<int4, 2> BufferObjectInt4Type;
+typedef Cuda::Graphics::OpenGL::Buffer<float2, 2> BufferObjectFloat2Type;
+typedef Cuda::Graphics::OpenGL::Buffer<float4, 2> BufferObjectFloat4Type;
 #else
 typedef Cuda::OpenGL::BufferObject<PixelType, 2> BufferObjectPixelType;
 typedef Cuda::OpenGL::BufferObject<int4, 2> BufferObjectInt4Type;

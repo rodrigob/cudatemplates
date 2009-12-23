@@ -42,7 +42,7 @@ public:
   {
   }
 
-  inline ~Resource()
+  virtual ~Resource()
   {
     unregisterObject();
   }
@@ -54,6 +54,7 @@ public:
 
     registerObject();
     CUDA_CHECK(cudaGraphicsMapResources(1, &resource, 0));
+    mapInternal();
     mapped = true;
   }
 
@@ -70,6 +71,7 @@ public:
       return;
 
     CUDA_CHECK(cudaGraphicsUnmapResources(1, &resource, 0));
+    unmapInternal();
     mapped = false;
   }
 
@@ -92,6 +94,10 @@ public:
 protected:
   cudaGraphicsResource *resource;
   bool mapped;
+
+private:
+  virtual void mapInternal() = 0;
+  virtual void unmapInternal() = 0;
 };
 
 namespace OpenGL {
@@ -221,6 +227,23 @@ private:
      Flags for buffer registration in CUDA.
   */
   unsigned int flags;
+
+  void mapInternal()
+  {
+    size_t bytes;
+    CUDA_CHECK(cudaGraphicsResourceGetMappedPointer((void **)&this->buffer, &bytes, resource));
+    
+    if(this->buffer == 0)
+      CUDA_ERROR("map buffer object failed");
+
+    if(bytes != this->getBytes())
+      CUDA_ERROR("size mismatch");
+  }
+
+  void unmapInternal()
+  {
+    this->buffer = 0;
+  }
 };
 
 template <class Type, unsigned Dim>
