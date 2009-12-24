@@ -23,7 +23,7 @@
 
 
 // #include <cudatemplates/hostmemory.hpp>
-#include <cudatemplates/graphics/resource.hpp>
+#include <cudatemplates/graphics/opengl/buffer.hpp>
 #include <cudatemplates/opengl/error.hpp>
 #include <cudatemplates/opengl/texture.hpp>
 

@@ -30,7 +30,7 @@
 #define CUDA_GRAPHICS_COMPATIBILITY
 
 #include <cudatemplates/graphics/copy.hpp>
-#include <cudatemplates/graphics/resource.hpp>
+#include <cudatemplates/graphics/opengl/buffer.hpp>
 
 #else
 
