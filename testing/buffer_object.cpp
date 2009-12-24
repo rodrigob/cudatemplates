@@ -69,8 +69,8 @@ using namespace std;
       printf( "Error %x at line %d, %s\n", err, __LINE__, gluErrorString(err)); \
   }
 
-#define SUBDIV_X  3
-#define SUBDIV_Y  3
+#define SUBDIV_X  127
+#define SUBDIV_Y  127
 
 #define WIREFRAME 0
 

@@ -22,9 +22,6 @@
 #define CUDA_GRAPHICS_RESOURCE_H
 
 
-#include <iostream>
-
-
 #include <assert.h>
 
 #include <cuda_runtime_api.h>
@@ -210,7 +207,7 @@ public:
      @param u usage pattern of the data store
   */
   inline Buffer(GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW, unsigned int f = 0):
-    bufname(0), target(t), usage(u), flags(f)
+    bufname(0), target(t), usage(u), flags(f), bound(false)
   {
   }
 #endif
@@ -225,7 +222,7 @@ public:
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
     DeviceMemoryStorage<Type, Dim>(_size),
-    bufname(0), target(t), usage(u), flags(f)
+    bufname(0), target(t), usage(u), flags(f), bound(false)
   {
     realloc();
   }
@@ -240,7 +237,7 @@ public:
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
     DeviceMemoryStorage<Type, Dim>(layout),
-    bufname(0), target(t), usage(u), flags(f)
+    bufname(0), target(t), usage(u), flags(f), bound(false)
   {
     realloc();
   }
@@ -338,11 +335,17 @@ private:
   unsigned int flags;
 
   /**
+     Flag to indicate bind status.
+  */
+  bool bound;
+
+  /**
      Bind the buffer object to the target specified in the constructor.
   */
   void bindObject()
   {
     CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->bufname));
+    bound = true;
   }
 
   /**
@@ -351,20 +354,7 @@ private:
   */
   bool isBound() const
   {
-    GLenum pname;
-    GLint param;
-
-    switch(target) {
-#define BUFFER_CASE(name) case GL_ ## name ## _BUFFER: pname = GL_ ## name ## _BUFFER_BINDING; break
-      BUFFER_CASE(ARRAY);
-      BUFFER_CASE(ELEMENT_ARRAY);
-      BUFFER_CASE(PIXEL_PACK);
-      BUFFER_CASE(PIXEL_UNPACK);
-#undef BUFFER_CASE
-    }
-    
-    glGetIntegerv(pname, &param);
-    return param != 0;
+    return bound;
   }
 
   /**
@@ -407,6 +397,7 @@ private:
   */
   inline void unbindObject()
   {
+    bound = false;
     CUDA_OPENGL_CHECK(glBindBuffer(this->target, 0));
   }
 
