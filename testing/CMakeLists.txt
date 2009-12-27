@@ -132,6 +132,9 @@ target_link_libraries(ogl_texture ${CUDA_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_L
 cuda_add_executable(pack pack.cu)
 add_dependencies(pack create_pack)
 
+cuda_add_executable(render render.cu)
+target_link_libraries(render ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+
 cuda_add_executable(streams streams.cu)
 
 cuda_add_executable(symbol symbol.cu)

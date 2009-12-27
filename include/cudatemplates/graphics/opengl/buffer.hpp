@@ -24,8 +24,10 @@
 
 #include <assert.h>
 
+#include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
 
+#include <cudatemplates/devicememory.hpp>
 #include <cudatemplates/error.hpp>
 #include <cudatemplates/layout.hpp>
 #include <cudatemplates/opengl/error.hpp>
