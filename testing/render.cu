@@ -19,8 +19,10 @@
 */
 
 
-#define USE_CUDA30 0
+#define USE_CUDA30 1
 
+
+#include <time.h>
 
 #include <iostream>
 
@@ -49,10 +51,26 @@ typedef Cuda::OpenGL::BufferObject<PixelType, 2> FramebufferType;
 using namespace std;
 
 
-Cuda::Size<2> size0(512, 512);
+Cuda::Size<2> size0(1024, 1024);
 
 FramebufferType *bufobj = 0;
 
+
+/**
+  Clear framebuffer.
+*/
+void
+clear()
+{
+#if USE_CUDA30
+  bufobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
+#else
+  bufobj->unbind();
+  bufobj->connect();
+#endif
+
+  Cuda::copy(*bufobj, make_uchar3(255, 255, 128));
+}
 
 void
 reshape(int w, int h)
@@ -64,18 +82,7 @@ reshape(int w, int h)
 void
 display()
 {
-  // clear framebuffer:
-  Cuda::copy(*bufobj, make_uchar3(255, 255, 128));
-
-  // save OpenGL state and reset transformation:
-  glPushAttrib(GL_ENABLE_BIT);
-  glDisable(GL_DEPTH_TEST);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
+  clear();
 
   // transfer pixels:
   glRasterPos2i(-1, -1);
@@ -89,23 +96,26 @@ display()
 
   glDrawPixels(bufobj->size[0], bufobj->size[1], GL_RGB, GL_UNSIGNED_BYTE, 0);
 
-#if USE_CUDA30
-  bufobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
-#else
-  bufobj->unbind();
-  bufobj->connect();
-#endif
-
-  // restore OpenGL state:
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  glPopAttrib();
-
   // postprocess:
   glutSwapBuffers();
   glutPostRedisplay();
+
+  // timing:
+  static int count = 0;
+  static time_t tprev = 0;
+
+  ++count;
+  time_t t = time(0);
+
+  if(tprev == 0)
+    tprev = t;
+
+  if(t == tprev)
+    return;
+
+  cout << count << " FPS\n";
+  count = 0;
+  tprev = t;
 }
 
 void
@@ -133,7 +143,15 @@ main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
 
     // create OpenGL buffer object:
-    bufobj = new FramebufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_DYNAMIC_COPY);
+    bufobj = new FramebufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STATIC_DRAW, cudaGraphicsMapFlagsWriteDiscard);
+    clear();
+
+    // reset OpenGL transformation:
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     // enter main loop:
     glutMainLoop();
