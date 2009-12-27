@@ -132,7 +132,7 @@ public:
     state_t state = getState();
 
     if(state == STATE_GRAPHICS_BOUND)
-      setState(STATE_UNUSED);
+      setState(STATE_INACTIVE);
 
     target = target_new;
     setState(state);
@@ -266,8 +266,13 @@ realloc()
   if(this->bufname == 0)
     CUDA_ERROR("generate buffer object failed");
 
-  setState(STATE_GRAPHICS_BOUND);
+  // do an explicit bind/unbind since the state "INACTIVE" can only be entered
+  // after data has been allocated with glBufferData:
+  bindObject();
   CUDA_OPENGL_CHECK(glBufferData(this->target, p * sizeof(Type), 0, this->usage));
+  unbindObject();
+
+  // prepare object for use with CUDA:
   setState(STATE_CUDA_MAPPED);
 }
 

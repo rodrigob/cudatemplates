@@ -38,9 +38,9 @@ class Resource
 {
 public:
   typedef enum {
-    STATE_GRAPHICS_BOUND = 1,
-    STATE_UNUSED,
-    STATE_CUDA_REGISTERED,
+    STATE_UNUSED = 0,
+    STATE_GRAPHICS_BOUND,
+    STATE_INACTIVE,
     STATE_CUDA_MAPPED
   } state_t;
 
@@ -68,11 +68,11 @@ public:
     if(isMapped())
       return STATE_CUDA_MAPPED;
 
-    if(isRegistered())
-      return STATE_CUDA_REGISTERED;
-
     if(isBound())
       return STATE_GRAPHICS_BOUND;
+
+    if(isRegistered())
+      return STATE_INACTIVE;
 
     return STATE_UNUSED;
   }
@@ -86,19 +86,47 @@ public:
   {
     state_t state_old = getState();
 
-    if(state_new > state_old) {
-#define COND(state) if((state_old < STATE_ ## state) && (state_new >= STATE_ ## state))
-      COND(UNUSED) unbindObject();
-      COND(CUDA_REGISTERED) registerObject();
-      COND(CUDA_MAPPED) mapObject();
-#undef COND
+    if(state_new == state_old)
+      return state_old;
+
+    switch(state_old) {
+    case STATE_UNUSED: {
+      registerObject();
+      setState(state_new);
+      break;
     }
-    else if(state_new < state_old) {
-#define COND(state) if((state_old > STATE_ ## state) && (state_new <= STATE_ ## state))
-      COND(CUDA_REGISTERED) unmapObject();
-      COND(UNUSED) unregisterObject();
-      COND(GRAPHICS_BOUND) bindObject();
-#undef COND
+
+    case STATE_GRAPHICS_BOUND: {
+      unbindObject();
+      setState(state_new);
+      break;
+    }
+
+    case STATE_INACTIVE: {
+      switch(state_new) {
+      case STATE_UNUSED:
+	unregisterObject();
+	break;
+
+      case STATE_GRAPHICS_BOUND:
+	bindObject();
+	break;
+
+      case STATE_CUDA_MAPPED:
+	mapObject();
+	break;
+
+      case STATE_INACTIVE:  // avoid warning message
+	break;
+      }
+
+      break;
+    }
+
+    case STATE_CUDA_MAPPED: {
+      unmapObject();
+      setState(state_new);
+    }
     }
 
     return state_old;

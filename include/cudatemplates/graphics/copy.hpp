@@ -77,6 +77,38 @@ copy(Texture<Type, Dim> &dst, const HostMemory<Type, Dim> &src)
 }
 */
 
+/**
+   Copy to buffer object.
+   @param dst destination buffer object
+   @param src generic source
+*/
+template<class Type, unsigned Dim, class Other>
+void
+copy(OpenGL::Buffer<Type, Dim> &dst, const Other &src)
+{
+  Resource::state_t state = dst.setState(Resource::STATE_CUDA_MAPPED);
+  copy((DeviceMemory<Type, Dim> &)dst, src);
+  dst.setState(state);
+}
+
+/**
+   Copy from buffer object.
+   @param dst generic destination
+   @param src source buffer object
+*/
+template<class Type, unsigned Dim, class Other>
+void
+copy(Other &dst, const OpenGL::Buffer<Type, Dim> &src)
+{
+  typedef OpenGL::Buffer<Type, Dim> buf_t;
+  buf_t *src2;
+  src2 = const_cast<buf_t *>(&src);
+
+  Resource::state_t state = src2->setState(Resource::STATE_GRAPHICS_BOUND);
+  copy(dst, (const DeviceMemory<Type, Dim> &)src2);
+  src2->setState(state);
+}
+
 }  // namespace Graphics
 }  // namespace Cuda
 
