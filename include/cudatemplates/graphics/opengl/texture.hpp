@@ -18,117 +18,33 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CUDA_OPENGL_TEXTURE_H
-#define CUDA_OPENGL_TEXTURE_H
+#ifndef CUDA_GRAPHICS_OPENGL_TEXTURE_H
+#define CUDA_GRAPHICS_OPENGL_TEXTURE_H
 
 
-#include <string.h>
+#include <assert.h>
 
-#include <GL/gl.h>
-
-#ifndef _WIN32
-#include <GL/glext.h>
-#endif
-
-#include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
+#include <cuda_runtime_api.h>
 
+// #include <cudatemplates/devicememory.hpp>
+#include <cudatemplates/error.hpp>
+#include <cudatemplates/graphics/opengl/image.hpp>
+// #include <cudatemplates/layout.hpp>
 #include <cudatemplates/opengl/error.hpp>
 #include <cudatemplates/opengl/type.hpp>
-#include <cudatemplates/storage.hpp>
 
 
 namespace Cuda {
+namespace Graphics {
 namespace OpenGL {
 
-/**
-   Representation of OpenGL texture.
-*/
 template <class Type, unsigned Dim>
 class Texture:
     virtual public Layout<Type, Dim>,
-    public Storage<Type, Dim>
+    public Image<Type, Dim>
 {
-  CUDA_STATIC_ASSERT(Dim <= 3);
-
 public:
-#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
-  /**
-     Default constructor.
-  */
-  inline Texture()
-  {
-    init();
-  }
-#endif
-
-  /**
-     Constructor.
-     @param _size requested size of memory block.
-  */
-  inline Texture(const Size<Dim> &_size):
-    Layout<Type, Dim>(_size),
-    Storage<Type, Dim>(_size)
-  {
-    init();
-    realloc();
-  }
-
-  /**
-     Constructor.
-     @param layout requested size of memory block.
-  */
-  inline Texture(const Layout<Type, Dim> &layout):
-    texname(0),
-    Layout<Type, Dim>(layout),
-    Storage<Type, Dim>(layout)
-  {
-    realloc();
-  }
-
-  /**
-     Destructor.
-     @param layout requested size of memory block.
-  */
-  inline ~Texture()
-  {
-    free();
-  }
-
-  /**
-     Allocate texture memory.
-  */
-  void realloc();
-
-  /**
-     Allocate texture memory.
-     @_size size to be allocated
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    Storage<Type, Dim>::realloc(_size);
-  }
-
-  /**
-     Bind OpenGL texture object.
-  */
-  inline void bind()
-  {
-    CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
-  }
-
-  /**
-     Free texture memory.
-  */
-  void free();
-
-  inline GLuint getName() const { return texname; }
-
-  /**
-     Initialize texture name.
-  */
-  inline void init() { texname = 0; }
-
   /**
      Get OpenGL texture target.
   */
@@ -143,27 +59,130 @@ public:
     return 0;  // satisfy compiler
   }
 
-  void glTexSubImage(const GLvoid *pixels);
+#ifndef CUDA_NO_DEFAULT_CONSTRUCTORS
+  /**
+     Default constructor.
+     @param t target to which the texture object is bound
+     @param u usage pattern of the data store
+  */
+  inline Texture():
+    Layout<Type, Dim>(),
+    Image<Type, Dim>(0)
+  {
+  }
+#endif
 
   /**
-     Unbind OpenGL buffer object.
+     Constructor.
+     @param _size requested size of memory block.
+     @param t target to which the texture object is bound
+     @param u usage pattern of the data store
   */
-  static inline void unbind()
+  inline Texture(const Size<Dim> &_size, unsigned int f = 0):
+    Layout<Type, Dim>(_size),
+    Image<Type, Dim>(_size, f)
   {
-    CUDA_OPENGL_CHECK(glBindTexture(target(), 0));
+    realloc();
   }
+
+  /**
+     Constructor.
+     @param layout requested size of memory block.
+     @param t target to which the texture object is bound
+     @param u usage pattern of the data store
+  */
+  inline Texture(const Layout<Type, Dim> &layout, unsigned int f = 0):
+    Layout<Type, Dim>(layout),
+    Image<Type, Dim>(layout, f)
+  {
+    realloc();
+  }
+
+  ~Texture();
+
+  // #include "auto/copy_opengl_textureobject.hpp"
+
+  /**
+     Bind the texture object to the given target.
+     @param t target to which the texture object should be bound
+  */
+  /*
+  inline void bind(GLenum t)
+  {
+    CUDA_OPENGL_CHECK(glBindTexture(t, this->name));
+  }
+  */
+
+  /**
+     Free texture memory.
+  */
+  void free();
+
+  /**
+     Allocate texture memory.
+  */
+  void realloc();
+
+  /**
+     Allocate texture memory.
+     @_size size to be allocated
+  */
+  /*
+  inline void realloc(const Size<Dim> &_size)
+  {
+    DeviceMemoryStorage<Type, Dim>::realloc(_size);
+  }
+  */
+
+  /**
+     Unbind the texture object from the given target.
+     @param t target from which the texture object should be unbound
+  */
+  /*
+  inline static void unbind(GLenum t) {
+    CUDA_OPENGL_CHECK(glBindTexture(t, 0));
+  }
+  */
+
+#ifdef CUDA_GRAPHICS_COMPATIBILITY
+  inline void bind() { Graphics::Resource::bind(); }
+#endif
 
 private:
   /**
-     Buffer object name.
+     Bind the texture.
   */
-  GLuint texname;
+  void bindObjectInternal()
+  {
+    CUDA_OPENGL_CHECK(glBindTexture(target(), this->name));
+  }
+
+  /**
+     Register OpenGL texture for use with CUDA.
+  */
+  void registerObject()
+  {
+    CUDA_CHECK(cudaGraphicsGLRegisterImage(&this->resource, this->name, target(), this->flags));
+
+    if(this->resource == 0)
+      CUDA_ERROR("register texture failed");
+  }
+
+  /**
+     Unbind the texture.
+  */
+  inline void unbindObjectInternal()
+  {
+    CUDA_OPENGL_CHECK(glBindTexture(target(), 0));
+  }
 };
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 realloc()
 {
+  using namespace Cuda::OpenGL;
+
   // check for OpenGL extensions:
   static bool init_extensions = false;
   static bool has_npot_extension;
@@ -186,9 +205,16 @@ realloc()
 	CUDA_ERROR("Texture size must be power of two");
 
   this->free();
-  CUDA_OPENGL_CHECK(glGenTextures(1, &texname));
-  CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
+  CUDA_OPENGL_CHECK(glGenTextures(1, &(this->name)));
 
+  if(this->name == 0)
+    CUDA_ERROR("generate texture failed");
+
+  // do an explicit bind/unbind since the state "INACTIVE" can only be entered
+  // after data has been allocated with glTextureData:
+  bindObjectInternal();
+
+  // see "http://forums.nvidia.com/index.php?showtopic=151892" for format issues
   GLint internalFormat = getInternalFormat<Type>();
   GLenum format = getFormat<Type>();
   GLenum type = getType<Type>();
@@ -212,55 +238,35 @@ realloc()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-}
 
-template <class Type, unsigned Dim>
-void Texture<Type, Dim>::
-glTexSubImage(const GLvoid *pixels)
-{
-  bind();
+  unbindObjectInternal();
 
-  GLenum format = getFormat<Type>();
-  GLenum type = getType<Type>();
-
-  switch(Dim) {
-  case 1:
-    CUDA_OPENGL_CHECK(glTexSubImage1D(target(), 0,
-				      0, this->size[0],
-				      format, type, pixels));
-    break;
-
-  case 2:
-    CUDA_OPENGL_CHECK(glTexSubImage2D(target(), 0,
-				      0, 0, this->size[0], this->size[1],
-				      format, type, pixels));
-    break;
-
-  case 3:
-    CUDA_OPENGL_CHECK(glTexSubImage3D(target(), 0,
-				      0, 0, 0, this->size[0], this->size[1], this->size[2],
-				      format, type, pixels));
-  }
-
-  unbind();
+  // prepare object for use with CUDA:
+  this->setState(Graphics::Resource::STATE_CUDA_MAPPED);
 }
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 free()
 {
-  if(this->texname == 0)
+  if(this->name == 0)
     return;
 
-  CUDA_OPENGL_CHECK(glDeleteTextures(1, &texname));
-  init();
+  this->setState(Graphics::Resource::STATE_UNUSED);
+  CUDA_OPENGL_CHECK(glDeleteTextures(1, &(this->name)));
+  this->name = 0;
+}
+
+template <class Type, unsigned Dim>
+Texture<Type, Dim>::
+~Texture()
+{
+  this->free();
 }
 
 }  // namespace OpenGL
+}  // namespace Graphics
 }  // namespace Cuda
-
-
-#include "../auto/specdim_texture.hpp"
 
 
 #endif

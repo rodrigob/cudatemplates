@@ -44,18 +44,14 @@ public:
     STATE_CUDA_MAPPED
   } state_t;
 
-  Resource():
-    resource(0)
-  {
-  }
-
   virtual ~Resource()
   {
     setState(STATE_UNUSED);
   }
 
-  inline void setMapFlags(unsigned int flags)
+  inline void setMapFlags(unsigned int f)
   {
+    flags = f;
     CUDA_CHECK(cudaGraphicsResourceSetMapFlags(resource, flags));
   }
 
@@ -140,6 +136,20 @@ public:
 
 protected:
   cudaGraphicsResource *resource;
+
+  /**
+     Flags for resource registration in CUDA.
+  */
+  unsigned int flags;
+
+  /**
+     Constructor.
+     @param f map flags
+  */
+  Resource(unsigned int f):
+    resource(0), flags(f)
+  {
+  }
 
 private:
   /**

@@ -146,7 +146,7 @@ public:
   */
   inline void init() { array = 0; }
 
-private:
+protected:
   cudaArray *array;
 };
 

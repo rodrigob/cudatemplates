@@ -19,49 +19,122 @@
 */
 
 
-#define USE_CUDA30 1
+#define USE_CUDA30  1
+#define USE_TEXTURE 0
+
+
+#if USE_TEXTURE && !USE_CUDA30
+#error binding OpenGL textures is only supported in CUDA3.0
+#endif
 
 
 #include <time.h>
 
 #include <iostream>
+#include <vector>
 
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glut.h>
 
+#include <cudatemplates/copy.hpp>
 #include <cudatemplates/copy_constant.hpp>
+#include <cudatemplates/devicememorylinear.hpp>
 
 
-typedef struct uchar3 PixelType;
+typedef struct uchar4 PixelType;
+const PixelType background(make_uchar4(255, 255, 128, 0));
+
 
 #if USE_CUDA30
 
 #include <cudatemplates/graphics/opengl/buffer.hpp>
-typedef Cuda::Graphics::OpenGL::Buffer<PixelType, 2> FramebufferType;
+#include <cudatemplates/graphics/opengl/texture.hpp>
+typedef Cuda::Graphics::OpenGL::Buffer<PixelType, 2> BufferType;
+typedef Cuda::Graphics::OpenGL::Texture<PixelType, 2> TextureType;
 
 #else
 
 #include <cudatemplates/opengl/bufferobject.hpp>
-typedef Cuda::OpenGL::BufferObject<PixelType, 2> FramebufferType;
+#include <cudatemplates/opengl/texture.hpp>
+typedef Cuda::OpenGL::BufferObject<PixelType, 2> BufferType;
+typedef Cuda::OpenGL::Texture<PixelType, 2> TextureType;
 
 #endif
+
+typedef Cuda::DeviceMemoryLinear<PixelType, 2> MemoryType;
 
 
 using namespace std;
 
 
-Cuda::Size<2> size0(1024, 1024);
+Cuda::Size<2> size0(1024, 768);
 
-FramebufferType *bufobj = 0;
 
+#if USE_TEXTURE
+
+TextureType *texobj;
+MemoryType *mem;
+
+#else
+
+BufferType *bufobj;
+
+#endif
+
+
+__global__ void
+render_kernel(Cuda::DeviceMemory<PixelType, 2>::KernelData dst)
+{
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+  int ofs = x + y * dst.size[0];
+  dst.data[ofs] = make_uchar4(255, 255, 128, 0);
+}
+
+void
+render()
+{
+  dim3 blockDim(16, 16);
+  dim3 gridDim(size0[0] / blockDim.x, size0[1] / blockDim.y);
+
+#if USE_TEXTURE
+  // Cuda::DeviceMemory<PixelType, 2> &dst(*mem);
+  render_kernel<<<gridDim, blockDim>>>(*mem);
+  texobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
+  Cuda::copy(*texobj, *mem);
+#else
+  bufobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
+  // Cuda::DeviceMemory<PixelType, 2> &dst(*bufobj);
+  render_kernel<<<gridDim, blockDim>>>(*bufobj);
+#endif
+
+  /*
+#if USE_CUDA30
+  dst.setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
+#else
+  dst.unbind();
+  dst.connect();
+#endif
+  */
+
+}
 
 /**
   Clear framebuffer.
 */
+/*
 void
 clear()
 {
+#if USE_TEXTURE
+
+  // Cuda::copy(*mem, background);
+  texobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
+  Cuda::copy(*texobj, *mem);
+
+#else
+
 #if USE_CUDA30
   bufobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
 #else
@@ -69,22 +142,34 @@ clear()
   bufobj->connect();
 #endif
 
-  Cuda::copy(*bufobj, make_uchar3(255, 255, 128));
-}
+  Cuda::copy(*bufobj, background);
 
-void
-reshape(int w, int h)
-{
-  glViewport(0, 0, w, h);
-  bufobj->realloc(Cuda::Size<2>(w, h));
+#endif
 }
+*/
 
 void
 display()
 {
-  clear();
+  // glClear(GL_COLOR_BUFFER_BIT);
 
+  // clear();
+  render();
+  
   // transfer pixels:
+
+#if USE_TEXTURE
+
+  texobj->setState(Cuda::Graphics::Resource::STATE_GRAPHICS_BOUND);
+  glBegin(GL_POLYGON);
+  glTexCoord2f(0, 0); glVertex2f(-1, -1);
+  glTexCoord2f(1, 0); glVertex2f( 1, -1);
+  glTexCoord2f(1, 1); glVertex2f( 1,  1);
+  glTexCoord2f(0, 1); glVertex2f(-1,  1);
+  glEnd();
+
+#else
+
   glRasterPos2i(-1, -1);
 
 #if USE_CUDA30
@@ -94,7 +179,9 @@ display()
   bufobj->bind();
 #endif
 
-  glDrawPixels(bufobj->size[0], bufobj->size[1], GL_RGB, GL_UNSIGNED_BYTE, 0);
+  glDrawPixels(bufobj->size[0], bufobj->size[1], GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+#endif
 
   // postprocess:
   glutSwapBuffers();
@@ -113,7 +200,8 @@ display()
   if(t == tprev)
     return;
 
-  cout << count << " FPS\n";
+  float gbps = (long long)(size0[0] * size0[1] * sizeof(PixelType) * count) / (float)(1 << 30);
+  cout << count << " frames/sec = " << gbps << " GB/sec\n";
   count = 0;
   tprev = t;
 }
@@ -138,13 +226,31 @@ main(int argc, char *argv[])
     glutInitWindowSize(size0[0], size0[1]);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow("CUDA render demo");
-    glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
 
-    // create OpenGL buffer object:
-    bufobj = new FramebufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STATIC_DRAW, cudaGraphicsMapFlagsWriteDiscard);
-    clear();
+#if USE_TEXTURE
+
+    texobj = new TextureType(size0, cudaGraphicsMapFlagsWriteDiscard);
+    mem = new MemoryType(size0);
+
+    // enable textures and set parameters:
+    texobj->setState(Cuda::Graphics::Resource::STATE_GRAPHICS_BOUND);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+#else  // USE_TEXTURE
+
+#if USE_CUDA30
+    bufobj = new BufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STATIC_DRAW, cudaGraphicsMapFlagsWriteDiscard);
+#else
+    bufobj = new BufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STATIC_DRAW);
+#endif
+
+#endif  // USE_TEXTURE
+
+    // clear();
+    render();
 
     // reset OpenGL transformation:
     glDisable(GL_DEPTH_TEST);
@@ -161,6 +267,5 @@ main(int argc, char *argv[])
     return 1;
   }
 
-  delete bufobj;
   return 0;
 }

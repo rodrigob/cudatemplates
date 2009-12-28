@@ -938,7 +938,7 @@ copy(TypeDst &dst, const TypeSrc &src,
 
     // check maximum:
     if(src_ofs[i] + size[i] >= src.size[i]) {
-      if(src_ofs[i] >= src.size[i])
+      if(src_ofs[i] >= (ssize_t)src.size[i])
 	CUDA_ERROR("source region must not be empty");
 
       size2[i] -= src_ofs[i] + size[i] - src.size[i];

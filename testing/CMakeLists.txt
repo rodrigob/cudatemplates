@@ -49,6 +49,9 @@ include_directories(${GLUT_INCLUDE_DIR})
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
+# ImageMagick:
+#find_package(ImageMagick COMPONENTS Magick++)
+#include_directories(${ImageMagick_INCLUDE_DIRS})
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 cuda_include_directories(${CMAKE_SOURCE_DIR}/include)

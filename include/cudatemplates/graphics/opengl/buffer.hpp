@@ -31,7 +31,7 @@
 #include <cudatemplates/error.hpp>
 #include <cudatemplates/layout.hpp>
 #include <cudatemplates/opengl/error.hpp>
-#include <cudatemplates/graphics/resource.hpp>
+#include <cudatemplates/graphics/opengl/resource.hpp>
 
 
 namespace Cuda {
@@ -49,7 +49,8 @@ public:
      @param u usage pattern of the data store
   */
   inline Buffer(GLenum t = GL_ARRAY_BUFFER, GLenum u = GL_STATIC_DRAW, unsigned int f = 0):
-    bufname(0), target(t), usage(u), flags(f), bound(false)
+    Resource(f),
+    target(t), usage(u)
   {
   }
 #endif
@@ -64,7 +65,8 @@ public:
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
     DeviceMemoryStorage<Type, Dim>(_size),
-    bufname(0), target(t), usage(u), flags(f), bound(false)
+    Resource(f),
+    target(t), usage(u)
   {
     realloc();
   }
@@ -79,7 +81,8 @@ public:
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
     DeviceMemoryStorage<Type, Dim>(layout),
-    bufname(0), target(t), usage(u), flags(f), bound(false)
+    Resource(f),
+    target(t), usage(u)
   {
     realloc();
   }
@@ -95,7 +98,7 @@ public:
   /*
   inline void bind(GLenum t)
   {
-    CUDA_OPENGL_CHECK(glBindBuffer(t, this->bufname));
+    CUDA_OPENGL_CHECK(glBindBuffer(t, this->name));
   }
   */
 
@@ -113,10 +116,12 @@ public:
      Allocate buffer memory.
      @_size size to be allocated
   */
+  /*
   inline void realloc(const Size<Dim> &_size)
   {
     DeviceMemoryStorage<Type, Dim>::realloc(_size);
   }
+  */
 
   /**
      Set buffer object target.
@@ -152,15 +157,10 @@ public:
   */
 
 #ifdef CUDA_GRAPHICS_COMPATIBILITY
-  inline void bind() { Resource::bind(); }
+  inline void bind() { Graphics::Resource::bind(); }
 #endif
 
 private:
-  /**
-     Buffer object name.
-  */
-  GLuint bufname;
-
   /**
      Specifies the target to which the buffer object is bound.
   */
@@ -172,31 +172,11 @@ private:
   GLenum usage;
 
   /**
-     Flags for buffer registration in CUDA.
-  */
-  unsigned int flags;
-
-  /**
-     Flag to indicate bind status.
-  */
-  bool bound;
-
-  /**
      Bind the buffer object to the target specified in the constructor.
   */
-  void bindObject()
+  void bindObjectInternal()
   {
-    CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->bufname));
-    bound = true;
-  }
-
-  /**
-     Check bind status.
-     @return true if buffer is currently bound for use with OpenGL
-  */
-  bool isBound() const
-  {
-    return bound;
+    CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->name));
   }
 
   /**
@@ -228,7 +208,7 @@ private:
   */
   void registerObject()
   {
-    CUDA_CHECK(cudaGraphicsGLRegisterBuffer(&resource, bufname, flags));
+    CUDA_CHECK(cudaGraphicsGLRegisterBuffer(&resource, name, flags));
 
     if(this->resource == 0)
       CUDA_ERROR("register buffer object failed");
@@ -237,9 +217,8 @@ private:
   /**
      Unbind the buffer object from the target specified in the constructor.
   */
-  inline void unbindObject()
+  inline void unbindObjectInternal()
   {
-    bound = false;
     CUDA_OPENGL_CHECK(glBindBuffer(this->target, 0));
   }
 
@@ -263,16 +242,16 @@ realloc()
   for(size_t i = Dim; i--;)
     p *= this->size[i];
 
-  CUDA_OPENGL_CHECK(glGenBuffers(1, &(this->bufname)));
+  CUDA_OPENGL_CHECK(glGenBuffers(1, &(this->name)));
 
-  if(this->bufname == 0)
+  if(this->name == 0)
     CUDA_ERROR("generate buffer object failed");
 
   // do an explicit bind/unbind since the state "INACTIVE" can only be entered
   // after data has been allocated with glBufferData:
-  bindObject();
+  bindObjectInternal();
   CUDA_OPENGL_CHECK(glBufferData(this->target, p * sizeof(Type), 0, this->usage));
-  unbindObject();
+  unbindObjectInternal();
 
   // prepare object for use with CUDA:
   setState(STATE_CUDA_MAPPED);
@@ -282,12 +261,12 @@ template <class Type, unsigned Dim>
 void Buffer<Type, Dim>::
 free()
 {
-  if(this->bufname == 0)
+  if(this->name == 0)
     return;
 
   setState(STATE_UNUSED);
-  glDeleteBuffers(1, &(this->bufname));
-  bufname = 0;
+  CUDA_OPENGL_CHECK(glDeleteBuffers(1, &(this->name)));
+  name = 0;
 }
 
 template <class Type, unsigned Dim>
