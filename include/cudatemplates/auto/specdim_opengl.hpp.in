@@ -137,59 +137,6 @@ public:
     @Name@<Type, @Dim@>(x, Size<@Dim@>(@OfsArgs@), Size<@Dim@>(@SizeArgs@))
   {
   }
-
-  /**
-     Allocate memory.
-  */
-  inline void alloc()
-  {
-    @Name@<Type, @Dim@>::alloc();
-  }
-
-  /**
-     Allocate memory.
-     @param _size size to be allocated
-  */
-  inline void alloc(const Size<@Dim@> &_size)
-  {
-    Storage<Type, @Dim@>::alloc(_size);
-  }
-
-  /**
-     Allocate memory.
-     @SizeArgs@ size to be allocated
-  */
-  inline void alloc(@SizeArgDecl@)
-  {
-    Storage<Type, @Dim@>::alloc(Size<@Dim@>(@SizeArgs@));
-  }
-
-  /**
-     Re-allocate memory.
-  */
-  inline void realloc()
-  {
-    @Name@<Type, @Dim@>::realloc();
-  }
-
-  /**
-     Re-allocate memory.
-     @param _size size to be allocated
-  */
-  inline void realloc(const Size<@Dim@> &_size)
-  {
-    Storage<Type, @Dim@>::realloc(_size);
-  }
-
-  /**
-     Re-allocate memory.
-     @SizeArgs@ size to be allocated
-  */
-  inline void realloc(@SizeArgDecl@)
-  {
-    Storage<Type, @Dim@>::realloc(Size<@Dim@>(@SizeArgs@));
-  }
-
 };
 
 }  // namespace OpenGL

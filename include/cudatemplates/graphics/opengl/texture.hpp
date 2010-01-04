@@ -82,7 +82,7 @@ public:
     Layout<Type, Dim>(_size),
     Image<Type, Dim>(_size, f)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -95,7 +95,7 @@ public:
     Layout<Type, Dim>(layout),
     Image<Type, Dim>(layout, f)
   {
-    realloc();
+    allocInternal();
   }
 
   ~Texture();
@@ -110,27 +110,6 @@ public:
   inline void bind(GLenum t)
   {
     CUDA_OPENGL_CHECK(glBindTexture(t, this->name));
-  }
-  */
-
-  /**
-     Free texture memory.
-  */
-  void free();
-
-  /**
-     Allocate texture memory.
-  */
-  void realloc();
-
-  /**
-     Allocate texture memory.
-     @_size size to be allocated
-  */
-  /*
-  inline void realloc(const Size<Dim> &_size)
-  {
-    DeviceMemoryStorage<Type, Dim>::realloc(_size);
   }
   */
 
@@ -150,12 +129,22 @@ public:
 
 private:
   /**
+     Allocate texture memory.
+  */
+  void allocInternal();
+
+  /**
      Bind the texture.
   */
   void bindObjectInternal()
   {
     CUDA_OPENGL_CHECK(glBindTexture(target(), this->name));
   }
+
+  /**
+     Free texture memory.
+  */
+  void freeInternal();
 
   /**
      Register OpenGL texture for use with CUDA.
@@ -179,7 +168,7 @@ private:
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
-realloc()
+allocInternal()
 {
   using namespace Cuda::OpenGL;
 
@@ -204,7 +193,6 @@ realloc()
       if((this->size[i] & (this->size[i] - 1)) != 0)
 	CUDA_ERROR("Texture size must be power of two");
 
-  this->free();
   CUDA_OPENGL_CHECK(glGenTextures(1, &(this->name)));
 
   if(this->name == 0)
@@ -247,11 +235,9 @@ realloc()
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->name == 0)
-    return;
-
+  assert(this->name != 0);
   this->setState(Graphics::Resource::STATE_UNUSED);
   CUDA_OPENGL_CHECK(glDeleteTextures(1, &(this->name)));
   this->name = 0;

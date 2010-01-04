@@ -56,7 +56,7 @@ public:
     Pointer<Type, Dim>(_size),
     HostMemoryStorage<Type, Dim>(_size)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -68,7 +68,7 @@ public:
     Pointer<Type, Dim>(layout),
     HostMemoryStorage<Type, Dim>(layout)
   {
-    realloc();
+    allocInternal();
   }
 
 #include "auto/copy_hostmemoryheap.hpp"
@@ -84,7 +84,7 @@ public:
     HostMemoryStorage<Type, Dim>(x.size)
   {
     this->init();
-    this->realloc();
+    this->allocInternal();
     copy(*this, x);
   }
 
@@ -96,29 +96,21 @@ public:
     free();
   }
 
+private:
   /**
      Allocate CPU memory.
   */
-  void realloc();
-
-  /**
-     Allocate CPU memory.
-     @param _size requested size
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    HostMemoryStorage<Type, Dim>::realloc(_size);
-  }
+  void allocInternal();
 
   /**
      Free CPU memory.
   */
-  void free();
+  void freeInternal();
 };
 
 template <class Type, unsigned Dim>
 void HostMemoryHeap<Type, Dim>::
-realloc()
+allocInternal()
 {
   this->setPitch(0);
   this->buffer = (Type *)malloc(this->getSize() * sizeof(Type));
@@ -133,11 +125,9 @@ realloc()
 
 template <class Type, unsigned Dim>
 void HostMemoryHeap<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->buffer == 0)
-    return;
-
+  assert(this->buffer != 0);
   ::free(this->buffer);
   this->buffer = 0;
 }

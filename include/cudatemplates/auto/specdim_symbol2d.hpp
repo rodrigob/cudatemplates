@@ -136,59 +136,6 @@ public:
     Symbol<Type, 2>(x, Size<2>(ofs0, ofs1), Size<2>(size0, size1))
   {
   }
-
-  /**
-     Allocate memory.
-  */
-  inline void alloc()
-  {
-    Symbol<Type, 2>::alloc();
-  }
-
-  /**
-     Allocate memory.
-     @param _size size to be allocated
-  */
-  inline void alloc(const Size<2> &_size)
-  {
-    Storage<Type, 2>::alloc(_size);
-  }
-
-  /**
-     Allocate memory.
-     size0, size1 size to be allocated
-  */
-  inline void alloc(size_t size0, size_t size1)
-  {
-    Storage<Type, 2>::alloc(Size<2>(size0, size1));
-  }
-
-  /**
-     Re-allocate memory.
-  */
-  inline void realloc()
-  {
-    Symbol<Type, 2>::realloc();
-  }
-
-  /**
-     Re-allocate memory.
-     @param _size size to be allocated
-  */
-  inline void realloc(const Size<2> &_size)
-  {
-    Storage<Type, 2>::realloc(_size);
-  }
-
-  /**
-     Re-allocate memory.
-     size0, size1 size to be allocated
-  */
-  inline void realloc(size_t size0, size_t size1)
-  {
-    Storage<Type, 2>::realloc(Size<2>(size0, size1));
-  }
-
 };
 
 }  // namespace Cuda

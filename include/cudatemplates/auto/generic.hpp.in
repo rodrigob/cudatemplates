@@ -52,21 +52,11 @@ public:
   {
   }
 
-  inline void realloc()
-  {
-    @Name@<Type, @Dim@>::realloc();
-  }
-
   inline @Name@@Dim@D(@SizeArgDecl@):
     Layout<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
     @Pointer@Pointer<Type, @Dim@>(Size<@Dim@>(@SizeArgs@)),
     @Name@<Type, @Dim@>(Size<@Dim@>(@SizeArgs@))
   {
-  }
-
-  inline void realloc(@SizeArgDecl@)
-  {
-    Storage<Type, @Dim@>::realloc(Size<@Dim@>(@SizeArgs@));
   }
 };
 

@@ -71,7 +71,7 @@ public:
     DeviceMemoryStorage<Type, Dim>(_size),
     bufname(0), target(t), usage(u), registered(false)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -87,26 +87,12 @@ public:
     bufname(0), target(t), usage(u),
     registered(false)
   {
-    realloc();
+    allocInteral();
   }
 
   ~BufferObject();
 
   // #include "auto/copy_opengl_bufferobject.hpp"
-
-  /**
-     Allocate buffer memory.
-  */
-  void realloc();
-
-  /**
-     Allocate buffer memory.
-     @_size size to be allocated
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    DeviceMemoryStorage<Type, Dim>::realloc(_size);
-  }
 
   /**
      Bind the buffer object to the target specified in the constructor.
@@ -161,11 +147,6 @@ public:
   */
   void unmapBuffer();
 
-  /**
-     Free buffer memory.
-  */
-  void free();
-
   inline GLuint getName() const { return this->bufname; }
 
   /**
@@ -201,6 +182,16 @@ private:
       Specifies whether a buffer is registered in Cuda
   */
   bool registered;
+
+  /**
+     Allocate buffer memory.
+  */
+  void allocInternal();
+
+  /**
+     Free buffer memory.
+  */
+  void freeInternal();
 };
 
 template <class Type, unsigned Dim>
@@ -286,9 +277,8 @@ unmapBuffer()
 
 template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
-realloc()
+allocInteral()
 {
-  this->free();
   this->setPitch(0);
   size_t p = 1;
 
@@ -308,11 +298,9 @@ realloc()
 
 template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->bufname == 0)
-    return;
-
+  assert(this->bufname != 0);
   disconnect();
   glBindBuffer(this->target, 0);
   glDeleteBuffers(1, &(this->bufname));

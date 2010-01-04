@@ -33,7 +33,7 @@ inline HostMemoryHeap(const HostMemoryHeap<Type, Dim> &x):
   HostMemoryStorage<Type, Dim>(x)
 {
   this->init();
-  this->realloc();
+  this->allocInternal();
   copy(*this, x);
 }
 
@@ -44,7 +44,7 @@ inline HostMemoryHeap(const Name &x):
   HostMemoryStorage<Type, Dim>(x)
 {
   this->init();
-  this->realloc();
+  this->allocInternal();
   copy(*this, x);
 }
 
@@ -55,7 +55,7 @@ inline HostMemoryHeap(const Name &x, const Size<Dim> &ofs, const Size<Dim> &size
   HostMemoryStorage<Type, Dim>(size)
 {
   this->init();
-  this->realloc();
+  this->allocInternal();
   copy(*this, x, Size<Dim>(), ofs, size);
 }
 

@@ -136,59 +136,6 @@ public:
     HostMemoryLocked<Type, 3>(x, Size<3>(ofs0, ofs1, ofs2), Size<3>(size0, size1, size2))
   {
   }
-
-  /**
-     Allocate memory.
-  */
-  inline void alloc()
-  {
-    HostMemoryLocked<Type, 3>::alloc();
-  }
-
-  /**
-     Allocate memory.
-     @param _size size to be allocated
-  */
-  inline void alloc(const Size<3> &_size)
-  {
-    Storage<Type, 3>::alloc(_size);
-  }
-
-  /**
-     Allocate memory.
-     size0, size1, size2 size to be allocated
-  */
-  inline void alloc(size_t size0, size_t size1, size_t size2)
-  {
-    Storage<Type, 3>::alloc(Size<3>(size0, size1, size2));
-  }
-
-  /**
-     Re-allocate memory.
-  */
-  inline void realloc()
-  {
-    HostMemoryLocked<Type, 3>::realloc();
-  }
-
-  /**
-     Re-allocate memory.
-     @param _size size to be allocated
-  */
-  inline void realloc(const Size<3> &_size)
-  {
-    Storage<Type, 3>::realloc(_size);
-  }
-
-  /**
-     Re-allocate memory.
-     size0, size1, size2 size to be allocated
-  */
-  inline void realloc(size_t size0, size_t size1, size_t size2)
-  {
-    Storage<Type, 3>::realloc(Size<3>(size0, size1, size2));
-  }
-
 };
 
 }  // namespace Cuda

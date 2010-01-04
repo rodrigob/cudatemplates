@@ -68,7 +68,7 @@ protected:
     Array<Type, Dim>(),
     Resource(f)
   {
-    // realloc();
+    // allocInternal();
   }
 
   /**
@@ -81,7 +81,7 @@ protected:
     Array<Type, Dim>(),
     Resource(f)
   {
-    // realloc();
+    // allocInternal();
   }
 
 private:

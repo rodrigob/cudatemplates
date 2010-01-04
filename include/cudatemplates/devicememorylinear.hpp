@@ -58,7 +58,7 @@ public:
     Pointer<Type, Dim>(_size),
     DeviceMemoryStorage<Type, Dim>(_size)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -70,31 +70,22 @@ public:
     Pointer<Type, Dim>(layout),
     DeviceMemoryStorage<Type, Dim>(layout)
   {
-    realloc();
+    allocInternal();
   }
 
 #include "auto/copy_devicememorylinear.hpp"
 
+private:
   /**
      Allocate GPU memory.
   */
-  void realloc();
-
-  /**
-     Allocate GPU memory.
-     @_size size to be allocated
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    DeviceMemoryStorage<Type, Dim>::realloc(_size);
-  }
+  void allocInternal();
 };
 
 template <class Type, unsigned Dim>
 void DeviceMemoryLinear<Type, Dim>::
-realloc()
+allocInternal()
 {
-  this->free();
   size_t p = 1;
 
   for(size_t i = Dim; i--;)

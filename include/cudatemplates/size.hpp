@@ -289,13 +289,25 @@ public:
 
     return s;
   }
+
+  /**
+     Determine if size is empty (i.e., zero in any dimension).
+  */
+  bool empty() const
+  {
+    for(size_t i = Dim; i--;)
+      if(this->data[i] == 0)
+	return true;
+
+    return false;
+  }
 };
 
 /**
    Generic spacing template
 */
 template<unsigned Dim>
-class Spacing : public VectorBase<float, Dim>
+class Spacing: public VectorBase<float, Dim>
 {
 };
 

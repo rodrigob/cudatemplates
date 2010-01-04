@@ -71,7 +71,7 @@ public:
     Storage<Type, Dim>(_size)
   {
     init();
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -83,7 +83,7 @@ public:
     Layout<Type, Dim>(layout),
     Storage<Type, Dim>(layout)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -96,31 +96,12 @@ public:
   }
 
   /**
-     Allocate texture memory.
-  */
-  void realloc();
-
-  /**
-     Allocate texture memory.
-     @_size size to be allocated
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    Storage<Type, Dim>::realloc(_size);
-  }
-
-  /**
      Bind OpenGL texture object.
   */
   inline void bind()
   {
     CUDA_OPENGL_CHECK(glBindTexture(target(), texname));
   }
-
-  /**
-     Free texture memory.
-  */
-  void free();
 
   inline GLuint getName() const { return texname; }
 
@@ -158,11 +139,21 @@ private:
      Buffer object name.
   */
   GLuint texname;
+
+  /**
+     Allocate texture memory.
+  */
+  void allocInternal();
+
+  /**
+     Free texture memory.
+  */
+  void freeInternal();
 };
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
-realloc()
+allocInternal()
 {
   // check for OpenGL extensions:
   static bool init_extensions = false;
@@ -247,11 +238,9 @@ glTexSubImage(const GLvoid *pixels)
 
 template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->texname == 0)
-    return;
-
+  assert(this->texname != 0);
   CUDA_OPENGL_CHECK(glDeleteTextures(1, &texname));
   init();
 }

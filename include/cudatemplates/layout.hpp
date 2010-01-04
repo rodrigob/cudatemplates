@@ -154,6 +154,14 @@ public:
   }
 
   /**
+     Determine if layout is empty.
+  */
+  inline bool empty() const
+  {
+    return size.empty();
+  }
+
+  /**
      Get execution configuration for Cuda.
      This method suggests an execution configuration suitable for accessing the
      given region within this layout.

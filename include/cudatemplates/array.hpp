@@ -69,7 +69,7 @@ public:
     Storage<Type, Dim>(_size),
     array(0)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -81,7 +81,7 @@ public:
     Storage<Type, Dim>(layout),
     array(0)
   {
-    realloc();
+    allocInternal();
   }
 
 #include "auto/copy_array.hpp"
@@ -92,20 +92,6 @@ public:
   ~Array()
   {
     free();
-  }
-
-  /**
-     Allocate GPU memory.
-  */
-  void realloc();
-
-  /**
-     Allocate GPU memory.
-     @_size size to be allocated
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    Storage<Type, Dim>::realloc(_size);
   }
 
 #ifdef __CUDACC__
@@ -123,11 +109,6 @@ public:
   }
 
 #endif
-
-  /**
-     Free GPU memory.
-  */
-  void free();
 
   /**
      Get pointer to CUDA array structure.
@@ -148,15 +129,24 @@ public:
 
 protected:
   cudaArray *array;
+
+private:
+  /**
+     Allocate GPU memory.
+  */
+  void allocInternal();
+
+  /**
+     Free GPU memory.
+  */
+  void freeInternal();
 };
 
 template <class Type, unsigned Dim>
 void Array<Type, Dim>::
-realloc()
+allocInternal()
 {
   CUDA_STATIC_ASSERT(Dim >= 1);
-  this->free();
-
   cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<Type>();
 
   if(Dim == 1) {
@@ -181,11 +171,9 @@ realloc()
 
 template <class Type, unsigned Dim>
 void Array<Type, Dim>::
-free()
+freeInternal()
 {
-  if(array == 0)
-    return;
-  
+  assert(array != 0);
   CUDA_CHECK(cudaFreeArray(array));
   array = 0;
 }

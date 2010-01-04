@@ -68,7 +68,7 @@ public:
     Resource(f),
     target(t), usage(u)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -84,7 +84,7 @@ public:
     Resource(f),
     target(t), usage(u)
   {
-    realloc();
+    allocInternal();
   }
 
   ~Buffer();
@@ -99,27 +99,6 @@ public:
   inline void bind(GLenum t)
   {
     CUDA_OPENGL_CHECK(glBindBuffer(t, this->name));
-  }
-  */
-
-  /**
-     Free buffer memory.
-  */
-  void free();
-
-  /**
-     Allocate buffer memory.
-  */
-  void realloc();
-
-  /**
-     Allocate buffer memory.
-     @_size size to be allocated
-  */
-  /*
-  inline void realloc(const Size<Dim> &_size)
-  {
-    DeviceMemoryStorage<Type, Dim>::realloc(_size);
   }
   */
 
@@ -172,12 +151,22 @@ private:
   GLenum usage;
 
   /**
+     Allocate buffer memory.
+  */
+  void allocInternal();
+
+  /**
      Bind the buffer object to the target specified in the constructor.
   */
   void bindObjectInternal()
   {
     CUDA_OPENGL_CHECK(glBindBuffer(this->target, this->name));
   }
+
+  /**
+     Free buffer memory.
+  */
+  void freeInternal();
 
   /**
      Check map status.
@@ -233,9 +222,8 @@ private:
 
 template <class Type, unsigned Dim>
 void Buffer<Type, Dim>::
-realloc()
+allocInternal()
 {
-  this->free();
   this->setPitch(0);
   size_t p = 1;
 
@@ -259,11 +247,9 @@ realloc()
 
 template <class Type, unsigned Dim>
 void Buffer<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->name == 0)
-    return;
-
+  assert(this->name != 0);
   setState(STATE_UNUSED);
   CUDA_OPENGL_CHECK(glDeleteBuffers(1, &(this->name)));
   name = 0;

@@ -54,24 +54,26 @@ public:
      Constructor.
      @param _size requested size of memory block
   */
-  inline HostMemoryLocked(const Size<Dim> &_size, unsigned flags = cudaHostAllocDefault):
+  inline HostMemoryLocked(const Size<Dim> &_size, unsigned f = cudaHostAllocDefault):
     Layout<Type, Dim>(_size),
     Pointer<Type, Dim>(_size),
-    HostMemoryStorage<Type, Dim>(_size)
+    HostMemoryStorage<Type, Dim>(_size),
+    flags(f)
   {
-    realloc(flags);
+    allocInternal();
   }
 
   /**
      Constructor.
      @param layout requested layout of memory block
   */
-  inline HostMemoryLocked(const Layout<Type, Dim> &layout, unsigned flags = cudaHostAllocDefault):
+  inline HostMemoryLocked(const Layout<Type, Dim> &layout, unsigned f = cudaHostAllocDefault):
     Layout<Type, Dim>(layout),
     Pointer<Type, Dim>(layout),
-    HostMemoryStorage<Type, Dim>(layout)
+    HostMemoryStorage<Type, Dim>(layout),
+    flags(f)
   {
-    realloc(flags);
+    allocInternal();
   }
 
 #include "auto/copy_hostmemorylocked.hpp"
@@ -84,33 +86,26 @@ public:
     free();
   }
 
+private:
   /**
-     Allocate page-locked CPU memory.
+     Memory allocation flags(see CUDA Programming Guide section 3.2.5).
   */
-  void realloc();
+  unsigned flags;
 
   /**
      Allocate page-locked CPU memory.
-     @param flags see CUDA Programming Guide section 3.2.5
   */
-  void realloc(unsigned flags);
+  void allocInternal();
 
   /**
      Free page-locked CPU memory.
   */
-  void free();
+  void freeInternal();
 };
 
 template <class Type, unsigned Dim>
 void HostMemoryLocked<Type, Dim>::
-realloc()
-{
-  realloc(cudaHostAllocDefault);
-}
-
-template <class Type, unsigned Dim>
-void HostMemoryLocked<Type, Dim>::
-realloc(unsigned flags)
+allocInternal()
 {
   this->setPitch(0);
   // CUDA_CHECK(cudaMallocHost((void **)&this->buffer, this->getSize() * sizeof(Type)));
@@ -124,11 +119,9 @@ realloc(unsigned flags)
 
 template <class Type, unsigned Dim>
 void HostMemoryLocked<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->buffer == 0)
-    return;
-
+  assert(this->buffer != 0);
   CUDA_CHECK(cudaFreeHost(this->buffer));
   this->buffer = 0;
 }

@@ -61,7 +61,7 @@ public:
     Pointer<Type, Dim>(_size),
     DeviceMemoryStorage<Type, Dim>(_size)
   {
-    realloc();
+    allocInternal();
   }
 
   /**
@@ -73,38 +73,29 @@ public:
     Pointer<Type, Dim>(layout),
     DeviceMemoryStorage<Type, Dim>(layout)
   {
-    realloc();
+    allocInternal();
   }
 
 #include "auto/copy_devicememorypitched.hpp"
-
-  /**
-     Allocate GPU memory.
-  */
-  void realloc();
-
-  /**
-     Allocate GPU memory.
-     @_size size to be allocated
-  */
-  inline void realloc(const Size<Dim> &_size)
-  {
-    DeviceMemoryStorage<Type, Dim>::realloc(_size);
-  }
 
   /**
      Initializes the GPU memory with the value \a val.
      Unfortunately only integer values are supported by the cudaMemset functions.
    */
   void initMem(int val, bool sync = true);
+
+private:
+  /**
+     Allocate GPU memory.
+  */
+  void allocInternal();
 };
 
 template <class Type, unsigned Dim>
 void DeviceMemoryPitched<Type, Dim>::
-realloc()
+allocInternal()
 {
   CUDA_STATIC_ASSERT(Dim >= 2);
-  this->free();
 
   if(Dim == 2) {
     // allocating empty data is not considered an error

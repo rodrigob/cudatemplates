@@ -76,11 +76,13 @@ public:
      Allocate memory.
      This method also initializes spacing and region.
   */
-  void alloc();
+  // void alloc();
 
   /**
      Allocate memory.
      This method also initializes spacing and region.
+     The object is required to be empty (use "free" or "realloc" if this is not
+     the case).
      @param _size requested size
   */
   void alloc(const Size<Dim> &_size);
@@ -88,15 +90,34 @@ public:
   /**
      Allocate memory.
      This method also initializes spacing and region.
+     The object is required to be empty (use "free" or "realloc" if this is not
+     the case).
      @param layout requested layout
   */
   void alloc(const Layout<Type, Dim> &layout);
 
   /**
-     Reallocate memory.
-     This method doesn't modify spacing and region.
+     Free memory.
   */
-  virtual void realloc() = 0;
+  void free();
+
+  /**
+     Get current layout.
+     @return layout
+  */
+  const Layout<Type, Dim> &getLayout() const { return *this; }
+
+  /**
+     Initialize data structure.
+     Subclasses should use this method to initialize their internal data
+     representation to a defined "empty" state.
+  */
+  virtual void init() = 0;
+
+  /**
+     Determine if memory is currently allocated.
+  */
+  inline bool isAllocated() const { return !empty(); }
 
   /**
      Reallocate memory.
@@ -115,43 +136,68 @@ public:
   */
   void realloc(const Layout<Type, Dim> &layout);
 
-  /**
-     Free memory.
-  */
-  virtual void free() = 0;
-
-  /**
-     Get current layout.
-     @return layout
-  */
-  const Layout<Type, Dim> &getLayout() const { return *this; }
-
-  /**
-     Initialize data structure.
-     Subclasses should use this method to initialize their internal data
-     representation to a defined "empty" state.
-  */
-  virtual void init() = 0;
-
 protected:
   /**
      Copy constructor.
   */
   Storage(const Storage &s): Layout<Type, Dim>(s) {}
+
+private:
+  void allocCheckSize() const;
+
+  /**
+     Allocate memory.
+     Subclasses must overload this method to do the actual work for memory
+     allocation. An implementation of this method can assume the following:
+     *) no memory is currently allocated
+     *) the members of the Layout base class are set according to the requested
+     allocation
+     *) the requested size differs from the previously allocated size (if any)
+  */
+  virtual void allocInternal() = 0;
+
+  /**
+     Free memory.
+     Subclasses must overload this method to do the actual work for memory
+     deallocation. An implementation of this method can assume the following:
+     *) memory is currently allocated
+  */
+  virtual void freeInternal() = 0;
+
+  static void reallocCheckSize(const Size<Dim> &_size);
 };
 
+  /*
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 alloc()
 {
+  if(size.empty())
+    CUDA_ERROR("trying to allocate empty object");
+
+  if(!empty())
+    freeInternal();
+
+  allocInternal();
+
   realloc();
   this->initSpacingRegion();
+}
+  */
+
+template <class Type, unsigned Dim>
+void Storage<Type, Dim>::
+allocCheckSize() const
+{
+  if(!size.empty())
+    CUDA_ERROR("\"alloc\" requires empty object (use \"free\" or \"realloc\" instead)");
 }
 
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 alloc(const Size<Dim> &_size)
 {
+  allocCheckSize();
   realloc(_size);
   this->initSpacingRegion();
 }
@@ -160,32 +206,62 @@ template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 alloc(const Layout<Type, Dim> &layout)
 {
+  allocCheckSize();
   realloc(layout);
   this->initSpacingRegion();
 }
 
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
+free()
+{
+  if(!isAllocated())
+    return;
+
+  freeInternal();
+
+  for(size_t i = Dim; i--;)
+    size[i] = 0;
+}
+
+template <class Type, unsigned Dim>
+void Storage<Type, Dim>::
+reallocCheckSize(const Size<Dim> &_size) const
+{
+  if(_size.empty())
+    CUDA_ERROR("trying to allocate empty object");
+}
+
+template <class Type, unsigned Dim>
+void Storage<Type, Dim>::
 realloc(const Size<Dim> &_size)
 {
+  reallocCheckSize(_size);
+
   if(_size == this->size)
     return;
 
-  free();
+  if(isAllocated())
+    freeInternal();
+
   this->setSize(_size);
-  realloc();
+  allocInternal();
 }
 
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 realloc(const Layout<Type, Dim> &layout)
 {
+  reallocCheckSize(layout.size);
+
   if(layout == *this)
     return;
 
-  free();
+  if(isAllocated())
+    freeInternal();
+
   this->setLayout(layout);
-  realloc();
+  allocInternal();
 }
 
 }  // namespace Cuda
