@@ -1,19 +1,19 @@
-/* 
+/*
   Cuda Templates.
 
   Copyright (C) 2008 Institute for Computer Graphics and Vision,
                      Graz University of Technology
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -53,7 +53,13 @@ template <class T> inline  GLenum getFormat() { CUDA_OPENGL_ERROR("unsupported t
 CUDA_OPENGL_FORMAT(unsigned char , GL_LUMINANCE)
 CUDA_OPENGL_FORMAT(struct uchar1 , GL_LUMINANCE)
 CUDA_OPENGL_FORMAT(struct uchar2 , GL_LUMINANCE_ALPHA)
+#ifndef GL_RGB_INTEGER
+#define GL_RGB_INTEGER 0x8D98
+#endif
 CUDA_OPENGL_FORMAT(struct uchar3 , GL_RGB_INTEGER)
+#ifndef GL_RGBA_INTEGER
+#define GL_RGBA_INTEGER 0x8D99
+#endif
 CUDA_OPENGL_FORMAT(struct uchar4 , GL_RGBA_INTEGER)
 
 CUDA_OPENGL_FORMAT(char          , GL_LUMINANCE_INTEGER_EXT)
@@ -108,13 +114,25 @@ template <class T> inline GLint getInternalFormat() { CUDA_OPENGL_ERROR("unsuppo
 CUDA_OPENGL_INTERNAL_FORMAT(unsigned char , GL_LUMINANCE8)
 CUDA_OPENGL_INTERNAL_FORMAT(struct uchar1 , GL_LUMINANCE8)
 CUDA_OPENGL_INTERNAL_FORMAT(struct uchar2 , GL_LUMINANCE8_ALPHA8)
+#ifndef GL_RGB8UI
+#define GL_RGB8UI 0x8D7D
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct uchar3 , GL_RGB8UI)
+#ifndef GL_RGBA8UI
+#define GL_RGBA8UI 0x8D7C
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct uchar4 , GL_RGBA8UI)
 
 CUDA_OPENGL_INTERNAL_FORMAT(char          , GL_LUMINANCE8I_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct char1  , GL_LUMINANCE8I_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct char2  , GL_LUMINANCE_ALPHA8I_EXT)
+#ifndef GL_RGB8I
+#define GL_RGB8I 0x8D8F
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct char3  , GL_RGB8I)
+#ifndef GL_RGBA8I
+#define GL_RGBA8I 0x8D8E
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct char4  , GL_RGBA8I)
 
 CUDA_OPENGL_INTERNAL_FORMAT(unsigned short, GL_LUMINANCE16)
@@ -126,25 +144,49 @@ CUDA_OPENGL_INTERNAL_FORMAT(struct ushort4, GL_RGBA16)
 CUDA_OPENGL_INTERNAL_FORMAT(short         , GL_LUMINANCE16I_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct short1 , GL_LUMINANCE16I_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct short2 , GL_LUMINANCE_ALPHA16I_EXT)
+#ifndef GL_RGB16I
+#define GL_RGB16I 0x8D89
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct short3 , GL_RGB16I)
+#ifndef GL_RGBA16I
+#define GL_RGBA16I 0x8D88
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct short4 , GL_RGBA16I)
 
 CUDA_OPENGL_INTERNAL_FORMAT(unsigned int  , GL_LUMINANCE32UI_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct uint1  , GL_LUMINANCE32UI_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct uint2  , GL_LUMINANCE_ALPHA32UI_EXT)
+#ifndef GL_RGB32UI
+#define GL_RGB32UI 0x8D71
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct uint3  , GL_RGB32UI)
+#ifndef GL_RGBS32UI
+#define GL_RGBA32UI 0x8D70
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct uint4  , GL_RGBA32UI)
 
 CUDA_OPENGL_INTERNAL_FORMAT(int           , GL_LUMINANCE32I_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct int1   , GL_LUMINANCE32I_EXT)
 CUDA_OPENGL_INTERNAL_FORMAT(struct int2   , GL_LUMINANCE_ALPHA32I_EXT)
+#ifndef GL_RGB32I
+#define GL_RGB32I 0x8D83
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct int3   , GL_RGB32I)
+#ifndef GL_RGBA32I
+#define GL_RGBA32I 0x8D82
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct int4   , GL_RGBA32I)
 
 CUDA_OPENGL_INTERNAL_FORMAT(float         , GL_LUMINANCE32F_ARB)
 CUDA_OPENGL_INTERNAL_FORMAT(struct float1 , GL_LUMINANCE32F_ARB)
 CUDA_OPENGL_INTERNAL_FORMAT(struct float2 , GL_LUMINANCE_ALPHA32F_ARB)
+#ifndef GL_RGB32F
+#define GL_RGB32F 0x8815
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct float3 , GL_RGB32F)
+#ifndef GL_RGBA32F
+#define GL_RGBA32F 0x8814
+#endif
 CUDA_OPENGL_INTERNAL_FORMAT(struct float4 , GL_RGBA32F)
 
 #undef CUDA_OPENGL_INTERNAL_FORMAT
