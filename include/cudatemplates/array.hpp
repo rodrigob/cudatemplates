@@ -91,7 +91,7 @@ public:
   */
   ~Array()
   {
-    free();
+    freeInternal();
   }
 
 #ifdef __CUDACC__

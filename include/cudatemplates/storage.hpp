@@ -117,7 +117,7 @@ public:
   /**
      Determine if memory is currently allocated.
   */
-  inline bool isAllocated() const { return !empty(); }
+  inline bool isAllocated() const { return !this->empty(); }
 
   /**
      Reallocate memory.
@@ -189,7 +189,7 @@ template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
 allocCheckSize() const
 {
-  if(!size.empty())
+  if(!this->size.empty())
     CUDA_ERROR("\"alloc\" requires empty object (use \"free\" or \"realloc\" instead)");
 }
 
@@ -221,12 +221,12 @@ free()
   freeInternal();
 
   for(size_t i = Dim; i--;)
-    size[i] = 0;
+    this->size[i] = 0;
 }
 
 template <class Type, unsigned Dim>
 void Storage<Type, Dim>::
-reallocCheckSize(const Size<Dim> &_size) const
+reallocCheckSize(const Size<Dim> &_size)
 {
   if(_size.empty())
     CUDA_ERROR("trying to allocate empty object");

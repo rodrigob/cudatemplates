@@ -87,7 +87,7 @@ public:
     bufname(0), target(t), usage(u),
     registered(false)
   {
-    allocInteral();
+    allocInternal();
   }
 
   ~BufferObject();
@@ -277,7 +277,7 @@ unmapBuffer()
 
 template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
-allocInteral()
+allocInternal()
 {
   this->setPitch(0);
   size_t p = 1;

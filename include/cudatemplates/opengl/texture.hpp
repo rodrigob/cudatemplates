@@ -92,7 +92,7 @@ public:
   */
   inline ~Texture()
   {
-    free();
+    freeInternal();
   }
 
   /**

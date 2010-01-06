@@ -261,7 +261,6 @@ public:
 
   ~DeviceMemoryStorage();
 
-  void free();
   inline void init() { this->buffer = 0; }
 
 protected:
@@ -272,15 +271,16 @@ protected:
     PointerStorage<Type, Dim>(x)
   {
   }
+
+private:
+  void freeInternal();
 };
 
 template <class Type, unsigned Dim>
 void DeviceMemoryStorage<Type, Dim>::
-free()
+freeInternal()
 {
-  if(this->buffer == 0)
-    return;
-
+  assert(this->buffer != 0);
   CUDA_CHECK(cudaFree(this->buffer));
   this->buffer = 0;
 }
@@ -289,7 +289,7 @@ template <class Type, unsigned Dim>
 DeviceMemoryStorage<Type, Dim>::
 ~DeviceMemoryStorage()
 {
-  this->free();
+  freeInternal();
 }
 
 }  // namespace Cuda

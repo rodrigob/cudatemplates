@@ -93,7 +93,7 @@ public:
   */
   ~HostMemoryHeap()
   {
-    free();
+    freeInternal();
   }
 
 private:

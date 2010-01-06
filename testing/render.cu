@@ -19,7 +19,7 @@
 */
 
 
-#define USE_CUDA30  1
+#define USE_CUDA30  0
 #define USE_TEXTURE 0
 
 
@@ -104,7 +104,7 @@ render()
   texobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
   Cuda::copy(*texobj, *mem);
 #else
-  bufobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
+  bufobj->connect();
   // Cuda::DeviceMemory<PixelType, 2> &dst(*bufobj);
   render_kernel<<<gridDim, blockDim>>>(*bufobj);
 #endif

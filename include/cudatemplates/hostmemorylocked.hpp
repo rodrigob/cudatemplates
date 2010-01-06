@@ -83,7 +83,7 @@ public:
   */
   ~HostMemoryLocked()
   {
-    free();
+    freeInternal();
   }
 
 private:
