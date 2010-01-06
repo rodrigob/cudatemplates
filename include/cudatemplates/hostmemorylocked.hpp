@@ -86,9 +86,15 @@ public:
     freeInternal();
   }
 
+  inline void init()
+  {
+    HostMemoryStorage<Type, Dim>::init();
+    flags = cudaHostAllocDefault;
+  }
+
 private:
   /**
-     Memory allocation flags(see CUDA Programming Guide section 3.2.5).
+     Memory allocation flags (see CUDA Programming Guide section 3.2.5).
   */
   unsigned flags;
 
