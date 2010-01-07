@@ -71,9 +71,9 @@ public:
   }
 
   /**
-     Initialize data structure.
+     Determine if memory is currently allocated.
   */
-  inline void init() { this->buffer = 0; }
+  bool isAllocated() const;
 
 protected:
   inline PointerStorage(const PointerStorage<Type, Dim> &x):
@@ -83,7 +83,25 @@ protected:
   {
   }
 
+  /**
+     Initialize data structure.
+  */
+  void init();
 };
+
+template <class Type, unsigned Dim>
+bool PointerStorage<Type, Dim>::
+isAllocated() const
+{
+  return this->buffer != 0;
+}
+
+template <class Type, unsigned Dim>
+void PointerStorage<Type, Dim>::
+init()
+{
+  this->buffer = 0;
+}
 
 }  // namespace Cuda
 

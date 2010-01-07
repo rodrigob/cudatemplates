@@ -88,11 +88,10 @@ public:
 
   /**
      Destructor.
-     @param layout requested size of memory block.
   */
-  inline ~Texture()
+  ~Texture()
   {
-    freeInternal();
+    this->free();
   }
 
   /**
@@ -106,9 +105,9 @@ public:
   inline GLuint getName() const { return texname; }
 
   /**
-     Initialize texture name.
+     Determine if memory is currently allocated.
   */
-  inline void init() { texname = 0; }
+  bool isAllocated() const;
 
   /**
      Get OpenGL texture target.
@@ -149,6 +148,11 @@ private:
      Free texture memory.
   */
   void freeInternal();
+
+  /**
+     Initialize texture name.
+  */
+  void init();
 };
 
 template <class Type, unsigned Dim>
@@ -240,9 +244,21 @@ template <class Type, unsigned Dim>
 void Texture<Type, Dim>::
 freeInternal()
 {
-  assert(this->texname != 0);
   CUDA_OPENGL_CHECK(glDeleteTextures(1, &texname));
-  init();
+}
+
+template <class Type, unsigned Dim>
+void Texture<Type, Dim>::
+init()
+{
+  texname = 0;
+}
+
+template <class Type, unsigned Dim>
+bool Texture<Type, Dim>::
+isAllocated() const
+{
+  return texname != 0;
 }
 
 }  // namespace OpenGL

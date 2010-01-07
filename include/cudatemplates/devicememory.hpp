@@ -259,9 +259,13 @@ public:
   {
   }
 
-  ~DeviceMemoryStorage();
-
-  inline void init() { this->buffer = 0; }
+  /**
+     Destructor.
+  */
+  ~DeviceMemoryStorage()
+  {
+    this->free();
+  }
 
 protected:
   inline DeviceMemoryStorage(const DeviceMemoryStorage<Type, Dim> &x):
@@ -280,16 +284,7 @@ template <class Type, unsigned Dim>
 void DeviceMemoryStorage<Type, Dim>::
 freeInternal()
 {
-  assert(this->buffer != 0);
   CUDA_CHECK(cudaFree(this->buffer));
-  this->buffer = 0;
-}
-
-template <class Type, unsigned Dim>
-DeviceMemoryStorage<Type, Dim>::
-~DeviceMemoryStorage()
-{
-  freeInternal();
 }
 
 }  // namespace Cuda

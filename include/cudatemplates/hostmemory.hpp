@@ -173,7 +173,7 @@ public:
   {
   }
 
-  inline void init() { this->buffer = 0; }
+  // inline void init() { this->buffer = 0; }
 
 protected:
   inline HostMemoryStorage(const HostMemoryStorage<Type, Dim> &x):

@@ -45,7 +45,8 @@ public:
   /**
      Default constructor.
   */
-  inline HostMemoryLocked()
+  inline HostMemoryLocked():
+    flags(cudaHostAllocDefault)
   {
   }
 #endif
@@ -83,14 +84,10 @@ public:
   */
   ~HostMemoryLocked()
   {
-    freeInternal();
+    this->free();
   }
 
-  inline void init()
-  {
-    HostMemoryStorage<Type, Dim>::init();
-    flags = cudaHostAllocDefault;
-  }
+  void init();
 
 private:
   /**
@@ -127,9 +124,15 @@ template <class Type, unsigned Dim>
 void HostMemoryLocked<Type, Dim>::
 freeInternal()
 {
-  assert(this->buffer != 0);
   CUDA_CHECK(cudaFreeHost(this->buffer));
-  this->buffer = 0;
+}
+
+template <class Type, unsigned Dim>
+void HostMemoryLocked<Type, Dim>::
+init()
+{
+  HostMemoryStorage<Type, Dim>::init();
+  flags = cudaHostAllocDefault;  // TODO: don't reset flags in a call to realloc()!
 }
 
 }  // namespace Cuda

@@ -83,8 +83,7 @@ public:
     Pointer<Type, Dim>(x.size),
     HostMemoryStorage<Type, Dim>(x.size)
   {
-    this->init();
-    this->allocInternal();
+    allocInternal();
     copy(*this, x);
   }
 
@@ -93,7 +92,7 @@ public:
   */
   ~HostMemoryHeap()
   {
-    freeInternal();
+    this->free();
   }
 
 private:
@@ -127,9 +126,7 @@ template <class Type, unsigned Dim>
 void HostMemoryHeap<Type, Dim>::
 freeInternal()
 {
-  assert(this->buffer != 0);
   ::free(this->buffer);
-  this->buffer = 0;
 }
 
 }  // namespace Cuda

@@ -91,7 +91,7 @@ public:
   */
   ~Array()
   {
-    freeInternal();
+    this->free();
   }
 
 #ifdef __CUDACC__
@@ -123,12 +123,17 @@ public:
   inline const cudaArray *getArray() const { return array; }
   
   /**
-     Initialize CUDA array pointer.
+     Determine if memory is currently allocated.
   */
-  inline void init() { array = 0; }
+  bool isAllocated() const { return array != 0; }
 
 protected:
   cudaArray *array;
+
+  /**
+     Initialize CUDA array pointer.
+  */
+  void init();
 
 private:
   /**
@@ -173,8 +178,13 @@ template <class Type, unsigned Dim>
 void Array<Type, Dim>::
 freeInternal()
 {
-  assert(array != 0);
   CUDA_CHECK(cudaFreeArray(array));
+}
+
+template <class Type, unsigned Dim>
+void Array<Type, Dim>::
+init()
+{
   array = 0;
 }
 

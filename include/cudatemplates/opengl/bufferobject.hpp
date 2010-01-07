@@ -90,7 +90,13 @@ public:
     allocInternal();
   }
 
-  ~BufferObject();
+  /**
+     Destructor.
+  */
+  ~BufferObject()
+  {
+    this->free();
+  }
 
   // #include "auto/copy_opengl_bufferobject.hpp"
 
@@ -118,6 +124,11 @@ public:
      copying the buffer data from or to a texture.
   */
   void disconnect();
+
+  /**
+     Determine if memory is currently allocated.
+  */
+  bool isAllocated() const;
 
   /**
      Register abuffer object.
@@ -192,6 +203,11 @@ private:
      Free buffer memory.
   */
   void freeInternal();
+
+  /**
+     Initialize buffer object.
+  */
+  void init();
 };
 
 template <class Type, unsigned Dim>
@@ -300,18 +316,24 @@ template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 freeInternal()
 {
-  assert(this->bufname != 0);
   disconnect();
   glBindBuffer(this->target, 0);
   glDeleteBuffers(1, &(this->bufname));
+}
+
+template <class Type, unsigned Dim>
+void BufferObject<Type, Dim>::
+init()
+{
+  DeviceMemoryStorage<Type, Dim>::init();
   bufname = 0;
 }
 
 template <class Type, unsigned Dim>
-BufferObject<Type, Dim>::
-~BufferObject()
+bool BufferObject<Type, Dim>::
+isAllocated() const
 {
-  this->free();
+  return bufname != 0;
 }
 
 }  // namespace OpenGL
