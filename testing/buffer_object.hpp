@@ -22,7 +22,7 @@
 #define BUFFER_OBJECT_H
 
 
-#define USE_CUDA30 1
+#define USE_CUDA30 0
 
 
 #if USE_CUDA30
