@@ -140,6 +140,8 @@ target_link_libraries(render ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
 
 cuda_add_executable(streams streams.cu)
 
+# cuda_add_executable(surface surface.cu)
+
 cuda_add_executable(symbol symbol.cu)
 
 cuda_add_executable(symbol_plain symbol_plain.cu)

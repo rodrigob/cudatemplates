@@ -104,6 +104,7 @@ render()
   texobj->setState(Cuda::Graphics::Resource::STATE_CUDA_MAPPED);
   Cuda::copy(*texobj, *mem);
 #else
+  bufobj->unbind();
   bufobj->connect();
   // Cuda::DeviceMemory<PixelType, 2> &dst(*bufobj);
   render_kernel<<<gridDim, blockDim>>>(*bufobj);
@@ -153,7 +154,6 @@ display()
 {
   // glClear(GL_COLOR_BUFFER_BIT);
 
-  // clear();
   render();
   
   // transfer pixels:
@@ -217,17 +217,17 @@ int
 main(int argc, char *argv[])
 {
   try {
-#if USE_CUDA30
-    CUDA_CHECK(cudaGLSetGLDevice(0));
-#endif
-
     // init GLUT:
     glutInit(&argc, argv);
     glutInitWindowSize(size0[0], size0[1]);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
     glutCreateWindow("CUDA render demo");
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+
+#if USE_CUDA30
+    CUDA_CHECK(cudaGLSetGLDevice(0));
+#endif
 
 #if USE_TEXTURE
 
@@ -242,9 +242,9 @@ main(int argc, char *argv[])
 #else  // USE_TEXTURE
 
 #if USE_CUDA30
-    bufobj = new BufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STATIC_DRAW, cudaGraphicsMapFlagsWriteDiscard);
+    bufobj = new BufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STREAM_DRAW, cudaGraphicsMapFlagsWriteDiscard);
 #else
-    bufobj = new BufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STATIC_DRAW);
+    bufobj = new BufferType(size0, GL_PIXEL_UNPACK_BUFFER, GL_STREAM_DRAW);
 #endif
 
 #endif  // USE_TEXTURE
