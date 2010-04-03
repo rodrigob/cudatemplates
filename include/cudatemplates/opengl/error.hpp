@@ -50,6 +50,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 
 #include <cuda_runtime.h>
 #include <driver_types.h>
@@ -82,6 +83,7 @@ public:
       s << comment << std::endl;
     
     message = s.str();
+	std::cout << s.str();
   }
 
   ~Error() throw()
