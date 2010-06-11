@@ -193,10 +193,24 @@ public:
   inline size_t getPitch() const { return stride[0] * sizeof(Type); }
 
   /**
-     Get total number of elements.
+     Get allocated number of elements.
      @return number of totally allocated elements (including any padding)
   */
   inline size_t getSize() const { return stride[Dim - 1]; }
+
+  /**
+     Get number of elements.
+     @return number of elements (without any padding)
+  */
+  inline size_t getNumElements() const 
+  { 
+    size_t num_elements = 1;
+    for(unsigned i=0; i<Dim; ++i)
+    {
+      num_elements *= size[i];
+    }
+    return num_elements;
+  }
 
   /**
      Set layout.
