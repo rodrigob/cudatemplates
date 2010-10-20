@@ -105,6 +105,7 @@ public:
     this->region_ofs = other.region_ofs;
     this->region_size = other.region_size;
     this->stride = other.stride;
+    this->spacing = other.spacing;
   }
 
   /**

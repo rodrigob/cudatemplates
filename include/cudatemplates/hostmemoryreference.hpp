@@ -95,6 +95,40 @@ public:
     }
   }
 
+ /**
+    Copy Constructor.
+    Ensures that the layout and pointer is correct when the copy constructor is invoked.
+    @param other existing device memory reference that is copied.
+ */
+  inline HostMemoryReference(const HostMemoryReference<Type, Dim> &other) :
+    Layout<Type, Dim>(other),
+    Pointer<Type, Dim>(other),
+    HostMemory<Type, Dim>(other)
+  {
+    this->buffer = other.buffer;
+    this->size = other.size;
+    this->region_ofs = other.region_ofs;
+    this->region_size = other.region_size;
+    this->stride = other.stride;
+    this->spacing = other.spacing;
+  }
+
+  /**
+     Asignment operator.
+     Ensures that the layout and pointer is correct when the asignment operator is invoked.
+     @param other existing device memory reference that is copied.
+  */
+  inline HostMemoryReference& operator= (const HostMemoryReference& other)
+  {
+    this->buffer = other.buffer;
+    this->size = other.size;
+    this->region_ofs = other.region_ofs;
+    this->region_size = other.region_size;
+    this->stride = other.stride;
+    this->spacing = other.spacing;
+    return *this;
+  }
+
 
 protected:
   /**
