@@ -110,7 +110,8 @@ public:
     this->region_ofs = other.region_ofs;
     this->region_size = other.region_size;
     this->stride = other.stride;
-    this->spacing = other.spacing;
+	for(int i = 0; i < Dim; i++)
+    this->spacing[i] = other.spacing[i];
   }
 
   /**
@@ -125,7 +126,8 @@ public:
     this->region_ofs = other.region_ofs;
     this->region_size = other.region_size;
     this->stride = other.stride;
-    this->spacing = other.spacing;
+	for(int i = 0; i < Dim; i++)
+      this->spacing[i] = other.spacing[i];
     return *this;
   }
 
