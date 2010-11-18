@@ -207,34 +207,17 @@ template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 connect()
 {
-  if(this->buffer != 0)
-    return;
-
-  if (!registered) 
-    {
-      CUDA_CHECK(cudaGLRegisterBufferObject(bufname));
-      registered = true;
-    }
-  CUDA_CHECK(cudaGLMapBufferObject((void **)&this->buffer, this->bufname));
-
-  if(this->buffer == 0)
-    CUDA_ERROR("map buffer object failed");
+  registerObject();
+  mapBuffer();
 }
 
 template <class Type, unsigned Dim>
 void BufferObject<Type, Dim>::
 disconnect()
 {
-  if(this->buffer == 0)
-    return;
-
-  CUDA_CHECK(cudaGLUnmapBufferObject(this->bufname));
-  if (registered) 
-    {
-      CUDA_CHECK(cudaGLUnregisterBufferObject(this->bufname));
-      registered = false;
-    }
-  this->buffer = 0;
+  if(registered)
+    unmapBuffer();
+  unregisterObject();
 }
 
 template <class Type, unsigned Dim>
